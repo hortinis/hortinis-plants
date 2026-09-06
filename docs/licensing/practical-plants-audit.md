@@ -9,7 +9,7 @@ Required treatment:
 - restore the source block's licence class during extraction;
 - exclude all NC prose from commercial profiles;
 - retain only independently cleared structured facts;
-- quarantine ShareAlike-derived content until the release policy accepts it;
+- admit ShareAlike-derived content only after block-level verification and application of the target artifact's ShareAlike policy;
 - preserve page, section and field locators;
 - generate an audit report showing excluded records and reasons.
 

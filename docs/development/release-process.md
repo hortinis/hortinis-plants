@@ -10,3 +10,5 @@
 8. Record the release URL, checksums, source versions and known limitations.
 
 The initial process has no automatic deployment. A Hortinis operator chooses when and how an artifact becomes active.
+
+Publish stable releases quarterly when accepted changes exist; do not create empty cadence releases. Publish an additional immutable correction release for an urgent factual, provenance or rights issue.

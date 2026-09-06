@@ -19,3 +19,5 @@ The manifest includes:
 Entries use stable opaque identifiers and retain source-release references. Additive fields are compatible when unknown fields can be ignored. Breaking changes require a schema-major version and explicit consumer approval.
 
 Builds must be deterministic: stable ordering, normalized newlines, fixed serialization and reproducible gzip output.
+
+Compressed chunks target approximately 1 MiB and must not exceed 2 MiB. The first release is unsigned: authenticity relies on explicit operator selection or authenticated HTTPS, and manifest hashes provide integrity relative to that trusted source.

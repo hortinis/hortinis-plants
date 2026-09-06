@@ -9,6 +9,8 @@ Each release must produce a coverage report showing:
 - plants scoped to each supported production system;
 - plants with unresolved or contradictory assertions;
 - excluded records and licence reasons;
+- preferred-name coverage by BCP 47 language tag, initially French and English;
+- generic plant concepts with only cultivar-scoped evidence;
 - source and geographic coverage.
 
 Coverage percentages must state the denominator. A missing field means missing knowledge, not a negative recommendation.

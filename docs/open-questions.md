@@ -1,26 +1,14 @@
 # Open questions
 
-## Release blockers
+No unresolved decision currently blocks foundation work. The former release and coordination questions are resolved by ADR-0004 through ADR-0006.
 
-- Pipeline and original-assertion licences.
-- Whether any profile accepts ShareAlike sources.
-- Exact plants and cultivar groups in `fr-mvp`.
-- Whether the initial territory is metropolitan France only.
-- Authority for accepting horticultural assertions.
-
-## Coordination decisions
-
-- Repository authoritative for the language-neutral schema.
-- Chunk size, signing, key distribution and update cadence (open in Hortinis ADR-0014).
-- Whether static climate cells ship with the catalog or a separate artifact.
-- Locales required by the first consumer release.
-- Whether images are excluded from the first release (recommended: yes).
-
-## Deferred content
+## Deferred choices
 
 - Cultivar-level timing at scale.
 - Pest and disease recommendations.
 - Companion planting, rotation and succession.
 - Perennial and tree lifecycle data.
 - Community contribution and public editorial workflow.
-- Optional image packs.
+- Exact scope, source policy and delivery contract for optional image packs.
+- Climate-cell resolution, sources, reference period and contract in the planned separate `hortinis-climate` repository.
+- Artifact signing and key rotation if a future threat model requires authenticity beyond trusted local selection or authenticated HTTPS.

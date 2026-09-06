@@ -9,9 +9,9 @@ Provide versioned, explainable plant reference data for offline applications. It
 
 ## Initial product scope
 
-The first profile covers common vegetables and herbs grown outdoors or in unheated shelters in metropolitan France. It supports cold-risk and sowing/planting-window recommendations for crops already selected by the gardener.
+The first profile covers the 33 vegetables and herbs selected in ADR-0005, grown outdoors or in unheated shelters in metropolitan France, including Corsica. It supports cold-risk and sowing/planting-window recommendations for crops already selected by the gardener.
 
-It does not promise complete cultivar coverage, live weather, disease diagnosis, crop discovery, companion planting, rotations, images or medicinal advice.
+It includes `Marmande` and `Montfavet H 63-5 F1` as initial cultivar exemplars but does not promise complete cultivar coverage. It does not include live weather, disease diagnosis, crop discovery, companion planting, rotations, images or medicinal advice.
 
 ## Ownership boundary
 
@@ -23,3 +23,5 @@ The catalog owns plant identity, cultivation parameters, applicability, evidence
 - `fr-rich`: broader France coverage and additional reviewed relationships;
 - `global-core`: global taxonomy and generally reusable traits;
 - optional regional or image packs, each with its own licence manifest.
+
+The first release implements localized names in French and English with explicit language tags and deterministic fallback. Neither language is a completeness claim about every source record.
