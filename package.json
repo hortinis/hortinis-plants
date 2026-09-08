@@ -1,0 +1,20 @@
+{
+  "name": "@hortinis/plants",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Versioned plant reference catalog and release tooling for Hortinis.",
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "packageManager": "pnpm@12.3.4",
+  "engines": {
+    "node": ">=24 <25",
+    "pnpm": "12.3.4"
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json",
+    "typecheck": "tsc --project tsconfig.json"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2"
+  }
+}
