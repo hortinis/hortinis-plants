@@ -25,7 +25,7 @@ Each step is intended to be implemented and validated independently. Every compl
 
 ### C1.1 — Project bootstrap (`validated`)
 
-- Pin Node.js 24 and pnpm.
+- Pin Node.js 24 and pnpm 11.26.0; stay on pnpm 11 while the pnpm 12 native CLI transition settles.
 - Create an ESM `package.json` and commit the pnpm lockfile.
 - Add strict TypeScript configuration.
 - Create minimal source and test directories.
@@ -33,7 +33,7 @@ Each step is intended to be implemented and validated independently. Every compl
 
 Acceptance: a clean checkout can install dependencies, type-check and build.
 
-### C1.2 — Linting and formatting (`in progress`)
+### C1.2 — Linting and formatting (`validated`)
 
 #### C1.2a — Deterministic formatting (`validated`)
 
@@ -43,12 +43,14 @@ Acceptance: a clean checkout can install dependencies, type-check and build.
 
 Acceptance: the formatting check passes without changing files.
 
-#### C1.2b — ESLint (`planned`)
+#### C1.2b — ESLint (`validated`)
 
 - Add ESLint with flat configuration and TypeScript support.
-- Resolve the TypeScript compiler API bridge and initial lint-depth questions in
-  [the open questions register](../open-questions.md).
-- Ignore downloaded inputs and generated release artifacts after their repository paths are defined.
+- Keep the TypeScript 7 native compiler for builds while exposing the TypeScript 6 compatibility API
+  to typescript-eslint through the `typescript` package name.
+- Start with the stable recommended type-checked rules and the TypeScript project service.
+- Reserve `.cache/source-inputs/` for downloaded inputs and `artifacts/releases/` for generated
+  release artifacts; ignore both paths consistently in Git, ESLint and Prettier.
 - Provide lint check and automatic-fix commands.
 
 Acceptance: lint and formatting checks pass without changing files.
