@@ -7,7 +7,7 @@ Every factual value is represented as an assertion before it becomes a released 
   "id": "assertion_01",
   "subjectId": "plant_tomato",
   "predicate": "transplant_window",
-  "value": {"startOffsetDays": 7, "endOffsetDays": 21},
+  "value": { "startOffsetDays": 7, "endOffsetDays": 21 },
   "context": {
     "geography": "europe-atlantic",
     "growingSystem": "outdoor",
@@ -18,8 +18,8 @@ Every factual value is represented as an assertion before it becomes a released 
     "sourceRecordId": "tomato",
     "sourceLocator": "PlantingCalendar.xlsx!Tomato"
   },
-  "rights": {"license": "CC-BY-4.0", "commercialUse": "allowed"},
-  "quality": {"status": "accepted", "confidence": 0.84}
+  "rights": { "license": "CC-BY-4.0", "commercialUse": "allowed" },
+  "quality": { "status": "accepted", "confidence": 0.84 }
 }
 ```
 

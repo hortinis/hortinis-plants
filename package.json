@@ -12,9 +12,12 @@
   },
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "typecheck": "tsc --project tsconfig.json"
   },
   "devDependencies": {
+    "prettier": "3.9.6",
     "typescript": "7.0.2"
   }
 }

@@ -33,12 +33,23 @@ Each step is intended to be implemented and validated independently. Every compl
 
 Acceptance: a clean checkout can install dependencies, type-check and build.
 
-### C1.2 — Linting and formatting
+### C1.2 — Linting and formatting (`in progress`)
+
+#### C1.2a — Deterministic formatting (`validated`)
+
+- Pin Prettier and its configuration.
+- Provide `format:check` and automatic-formatting commands.
+- Ignore dependency and generated build directories.
+
+Acceptance: the formatting check passes without changing files.
+
+#### C1.2b — ESLint (`planned`)
 
 - Add ESLint with flat configuration and TypeScript support.
-- Add deterministic formatting checks.
-- Ignore downloaded inputs and generated release artifacts.
-- Provide check and automatic-fix commands.
+- Resolve the TypeScript compiler API bridge and initial lint-depth questions in
+  [the open questions register](../open-questions.md).
+- Ignore downloaded inputs and generated release artifacts after their repository paths are defined.
+- Provide lint check and automatic-fix commands.
 
 Acceptance: lint and formatting checks pass without changing files.
 
@@ -77,8 +88,7 @@ Create a small repository-owned API between callers and Ajv. Callers provide a s
 
 ```ts
 type ValidationResult =
-  | { valid: true }
-  | { valid: false; errors: ValidationError[] };
+  { valid: true } | { valid: false; errors: ValidationError[] };
 
 interface ValidationError {
   instancePath: string;
