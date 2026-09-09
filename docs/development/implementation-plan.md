@@ -55,7 +55,7 @@ Acceptance: the formatting check passes without changing files.
 
 Acceptance: lint and formatting checks pass without changing files.
 
-### C1.3 — Testing foundation
+### C1.3 — Testing foundation (`validated`)
 
 - Configure Vitest for TypeScript on Node.js.
 - Add test and coverage commands.

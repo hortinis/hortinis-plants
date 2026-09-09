@@ -4,7 +4,7 @@ import tseslint from "typescript-eslint";
 
 export default defineConfig([
   globalIgnores(
-    ["dist/", ".cache/source-inputs/", "artifacts/releases/"],
+    ["dist/", ".cache/source-inputs/", "artifacts/releases/", "coverage/"],
     "Generated and downloaded content",
   ),
   {

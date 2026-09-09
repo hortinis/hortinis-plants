@@ -16,14 +16,19 @@
     "format:check": "prettier --check .",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix --max-warnings 0",
-    "typecheck": "tsc --project tsconfig.json"
+    "typecheck": "tsc --project tsconfig.json",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@typescript/native": "npm:typescript@7.0.2",
+    "@types/node": "24.13.3",
+    "@vitest/coverage-v8": "4.1.11",
     "eslint": "10.9.1",
     "prettier": "3.9.6",
     "typescript": "npm:@typescript/typescript6@6.0.2",
-    "typescript-eslint": "8.69.0"
+    "typescript-eslint": "8.69.0",
+    "vitest": "4.1.11"
   }
 }
