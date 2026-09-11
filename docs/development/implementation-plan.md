@@ -177,7 +177,7 @@ It produces a real ADR-0014-shaped artifact, but not a publishable `fr-mvp` rele
 
 ### V1 — Local validation artifact (`planned`)
 
-V1 requires only the following C1 capabilities:
+V1 uses only the following C1 capabilities:
 
 - C1.5 schema compilation;
 - C1.6 validation API;
@@ -186,10 +186,8 @@ V1 requires only the following C1 capabilities:
 - the essential C1.10 gzip, SHA-256, byte-size and entry-count behavior; and
 - a minimal C1.11 source-manifest contract.
 
-The artifact builder may use a small curated input set and may process it in memory. It must emit a
-consumer-facing local release directory containing `manifest.json`, versioned schemas, JSONL.gz chunks,
-source metadata and licence/attribution metadata. Every assertion still retains its source release,
-record identifier, locator, original value where relevant, rights decision and review state.
+V1 also requires the minimum catalog-specific contracts and curated data described by its increments
+below. It is not complete merely because the reduced C1 primitives exist.
 
 The following remain outside the V1 gate and are required later for a production release:
 
@@ -203,6 +201,48 @@ The following remain outside the V1 gate and are required later for a production
 
 V1 output is labelled `dev-validation`, stays out of ordinary Git history, and must not be represented as
 the first `fr-mvp` release.
+
+#### V1.1 — Minimum consumer contracts (`planned`)
+
+- Depends on: C1.5, C1.6 and the critical C1.7 fixture capability.
+- Scope: define the release-manifest, artifact descriptor, taxon, plant-concept, localized-name,
+  cultivation-context, cultivation-rule, evidence-reference, source, licence and review schemas required
+  by the first Hortinis test.
+- Excludes: broad cultivar coverage, rich relationship contracts, threats, images and complete schema
+  compatibility evolution.
+- Acceptance: Hortinis can pin the language-neutral schemas and validate positive, negative, missing-field,
+  unknown-schema and incompatible-version fixtures without importing catalog implementation code.
+
+#### V1.2 — Curated validation dataset (`planned`)
+
+- Depends on: V1.1 and the accepted `dev-validation` scope from Hortinis P0.7a.
+- Scope: author the selected plant identities, French and English names, contexts and reviewed sowing or
+  planting-window rules needed by the first product test.
+- Acceptance: every assertion has a stable opaque identifier, source release, source record identifier,
+  locator, original value where normalization occurred, rights decision and review state; unresolved or
+  contradictory values remain explicit.
+
+#### V1.3 — Local artifact builder (`planned`)
+
+- Depends on: V1.2, C1.8 and the essential C1.10 behavior.
+- Scope: validate the curated inputs, compile consumer projections in memory, serialize canonical JSONL,
+  produce deterministic gzip output, calculate SHA-256, byte size and entry count, and emit a flat local
+  artifact containing `manifest.json`, versioned schemas, chunks, source metadata and licence/attribution
+  metadata.
+- Excludes: streaming, source download adapters, generic importer orchestration, GitHub Releases and
+  production publication gates.
+- Acceptance: two local builds from identical inputs produce identical entry and chunk bytes; every
+  manifest reference resolves within the artifact; the artifact validates against V1.1.
+
+#### V1.4 — Hortinis conformance handoff (`planned`)
+
+- Depends on: V1.3.
+- Scope: provide the generated local artifact for explicit selection, the versioned schemas Hortinis must
+  pin, and small tracked valid, corrupt-hash, incomplete-artifact, invalid-entry and unsupported-version
+  fixtures.
+- Acceptance: the full generated artifact remains outside ordinary Git history; Hortinis commits only the
+  pinned contracts and small conformance fixtures; both repositories identify the same catalog schema and
+  fixture versions.
 
 ## Catalog-specific sequence
 
