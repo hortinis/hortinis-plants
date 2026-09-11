@@ -84,7 +84,7 @@ Acceptance: pushes and pull requests run the same checks available locally.
 
 Acceptance: an example schema can be compiled and loaded by its identifier.
 
-### C1.6 — Validation API
+### C1.6 — Validation API (`validated`)
 
 Create a small repository-owned API between callers and Ajv. Callers provide a schema identifier and an unknown value. Ordinary data failures return a structured result instead of throwing:
 
