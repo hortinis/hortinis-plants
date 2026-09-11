@@ -11,7 +11,7 @@
     "pnpm": "11.26.0"
   },
   "scripts": {
-    "build": "tsc --project tsconfig.build.json",
+    "build": "tsc --project tsconfig.build.json && node dist/schema/compile-schema-registry.js",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint . --max-warnings 0",
@@ -19,6 +19,9 @@
     "typecheck": "tsc --project tsconfig.json",
     "test": "vitest run",
     "coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "ajv": "8.20.0"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

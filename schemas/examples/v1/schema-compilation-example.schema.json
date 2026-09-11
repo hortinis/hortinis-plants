@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:schema-compilation-example",
+  "title": "Schema compilation example",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["value"],
+  "properties": {
+    "value": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

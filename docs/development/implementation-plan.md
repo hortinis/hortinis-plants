@@ -74,7 +74,7 @@ Acceptance: tests and coverage run successfully from a clean checkout.
 
 Acceptance: pushes and pull requests run the same checks available locally.
 
-### C1.5 — Schema compilation infrastructure
+### C1.5 — Schema compilation infrastructure (`validated`)
 
 - Add Ajv with JSON Schema 2020-12 support.
 - Define locations for authored schemas and generated compilation output.
