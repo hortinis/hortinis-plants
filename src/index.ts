@@ -10,3 +10,9 @@ export type {
   ValidationResult,
   ValidatorRegistry,
 } from "./schema/validation-api.js";
+export {
+  CanonicalJsonError,
+  parseJsonStrict,
+  serializeCanonicalJson,
+} from "./serialization/canonical-json.js";
+export type { CanonicalJsonErrorCode } from "./serialization/canonical-json.js";

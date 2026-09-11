@@ -128,7 +128,7 @@ open until the catalog contracts are defined.
 
 Acceptance: the example schemas and validation API have complete passing and failing fixture coverage.
 
-### C1.8 — Canonical JSON
+### C1.8 — Canonical JSON (`validated`)
 
 - Serialize object keys in a stable order while preserving array order.
 - Reject unsupported values, including `undefined`, functions and non-finite numbers.
