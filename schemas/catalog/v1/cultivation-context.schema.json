@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:cultivation-context",
+  "title": "Hortinis catalog cultivation context",
+  "type": "object",
+  "required": ["id", "geographicContextIds", "growingSystem", "propagation"],
+  "properties": {
+    "id": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "geographicContextIds": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/identifierList"
+    },
+    "growingSystem": {
+      "type": "string",
+      "enum": [
+        "outdoor",
+        "unheated_shelter",
+        "heated_greenhouse",
+        "indoor",
+        "unknown"
+      ]
+    },
+    "propagation": {
+      "type": "string",
+      "enum": ["direct_sowing", "transplant", "vegetative", "unknown"]
+    }
+  }
+}

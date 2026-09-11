@@ -221,12 +221,12 @@ The following remain outside the V1 gate and are required later for a production
 V1 output is labelled `dev-validation`, stays out of ordinary Git history, and must not be represented as
 the first `fr-mvp` release.
 
-#### V1.1 — Minimum consumer contracts (`planned`)
+#### V1.1 — Minimum consumer contracts (`validated`)
 
 - Depends on: C1.5, C1.6 and the critical C1.7 fixture capability.
 - Scope: define the release-manifest, artifact descriptor, taxon, plant-concept, localized-name,
-  cultivation-context, cultivation-rule, evidence-reference, source, licence and review schemas required
-  by the first Hortinis test.
+  cultivation-context, cultivation-rule, evidence-reference, source, licence, attribution and review
+  schemas required by the first Hortinis test.
 - Excludes: broad cultivar coverage, rich relationship contracts, threats, images and complete schema
   compatibility evolution.
 - Acceptance: Hortinis can pin the language-neutral schemas and validate positive, negative, missing-field,

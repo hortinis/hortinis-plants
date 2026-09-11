@@ -1,0 +1,15 @@
+{
+  "id": "evidence_tomato_transplant",
+  "sourceId": "source_grow",
+  "sourceManifestId": "source_manifest_grow_2020",
+  "sourceReleaseId": "grow-epd-2020",
+  "sourceRecordId": "tomato",
+  "locator": "PlantingCalendar.xlsx!Tomato",
+  "rights": {
+    "licenceId": "licence_cc_by_4_0",
+    "decision": "eligible",
+    "reason": "Permitted for the dev-validation profile.",
+    "assumedFromFileLicence": true
+  },
+  "reviewId": "review_tomato_transplant"
+}

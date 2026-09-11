@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:cultivation-rule",
+  "title": "Hortinis catalog cultivation rule",
+  "type": "object",
+  "required": [
+    "id",
+    "status",
+    "plantConceptId",
+    "contextId",
+    "action",
+    "timing",
+    "evidenceReferenceIds"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "status": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/catalogStatus"
+    },
+    "plantConceptId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "contextId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "action": {
+      "type": "string",
+      "enum": ["start_indoors", "direct_sow", "transplant", "plant_now"]
+    },
+    "timing": {
+      "oneOf": [
+        { "$ref": "#/$defs/calendarDateWindow" },
+        { "$ref": "#/$defs/relativeDayWindow" }
+      ]
+    },
+    "evidenceReferenceIds": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/identifierList"
+    }
+  },
+  "$defs": {
+    "monthDay": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["month", "day"],
+      "properties": {
+        "month": { "type": "integer", "minimum": 1, "maximum": 12 },
+        "day": { "type": "integer", "minimum": 1, "maximum": 31 }
+      }
+    },
+    "calendarDateWindow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "start", "end", "precision"],
+      "properties": {
+        "type": { "const": "calendar-date-window" },
+        "start": { "$ref": "#/$defs/monthDay" },
+        "end": { "$ref": "#/$defs/monthDay" },
+        "precision": { "type": "string", "enum": ["day", "month"] }
+      }
+    },
+    "relativeDayWindow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "anchor", "startOffsetDays", "endOffsetDays"],
+      "properties": {
+        "type": { "const": "relative-day-window" },
+        "anchor": {
+          "type": "string",
+          "enum": [
+            "last_spring_frost",
+            "first_autumn_frost",
+            "previous_crop_harvest"
+          ]
+        },
+        "startOffsetDays": { "type": "integer" },
+        "endOffsetDays": { "type": "integer" }
+      }
+    }
+  }
+}

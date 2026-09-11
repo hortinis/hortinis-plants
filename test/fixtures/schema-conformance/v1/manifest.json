@@ -115,6 +115,230 @@
           { "instancePath": "/sourceManifestId", "keyword": "pattern" }
         ]
       }
+    },
+    {
+      "id": "catalog-artifact-descriptor-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:artifact-descriptor",
+      "fixture": "catalog-artifact-descriptor-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "catalog-artifact-descriptor-missing-sha256",
+      "schemaId": "urn:hortinis:plants:schema:v1:artifact-descriptor",
+      "fixture": "catalog-artifact-descriptor-missing-sha256.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "", "keyword": "required" }]
+      }
+    },
+    {
+      "id": "catalog-artifact-descriptor-unsafe-path",
+      "schemaId": "urn:hortinis:plants:schema:v1:artifact-descriptor",
+      "fixture": "catalog-artifact-descriptor-unsafe-path.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/path", "keyword": "pattern" }]
+      }
+    },
+    {
+      "id": "catalog-release-manifest-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:release-manifest",
+      "fixture": "catalog-release-manifest-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "catalog-release-manifest-missing-generated-at",
+      "schemaId": "urn:hortinis:plants:schema:v1:release-manifest",
+      "fixture": "catalog-release-manifest-missing-generated-at.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "", "keyword": "required" }]
+      }
+    },
+    {
+      "id": "catalog-release-manifest-incompatible-version",
+      "schemaId": "urn:hortinis:plants:schema:v1:release-manifest",
+      "fixture": "catalog-release-manifest-incompatible-version.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/schemaVersion", "keyword": "pattern" }]
+      }
+    },
+    {
+      "id": "catalog-source-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:source",
+      "fixture": "catalog-source-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "catalog-source-missing-id",
+      "schemaId": "urn:hortinis:plants:schema:v1:source",
+      "fixture": "catalog-source-missing-id.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "", "keyword": "required" }]
+      }
+    },
+    {
+      "id": "catalog-licence-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:licence",
+      "fixture": "catalog-licence-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "catalog-licence-missing-expression",
+      "schemaId": "urn:hortinis:plants:schema:v1:licence",
+      "fixture": "catalog-licence-missing-expression.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "", "keyword": "required" }]
+      }
+    },
+    {
+      "id": "catalog-review-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:review",
+      "fixture": "catalog-review-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "catalog-review-missing-reviewed-at",
+      "schemaId": "urn:hortinis:plants:schema:v1:review",
+      "fixture": "catalog-review-missing-reviewed-at.json",
+      "expected": {
+        "valid": false,
+        "errors": [
+          { "instancePath": "", "keyword": "if" },
+          { "instancePath": "", "keyword": "required" }
+        ]
+      }
+    },
+    {
+      "id": "catalog-evidence-reference-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:evidence-reference",
+      "fixture": "catalog-evidence-reference-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "catalog-evidence-reference-missing-locator",
+      "schemaId": "urn:hortinis:plants:schema:v1:evidence-reference",
+      "fixture": "catalog-evidence-reference-missing-locator.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "", "keyword": "required" }]
+      }
+    },
+    {
+      "id": "catalog-evidence-reference-invalid-rights-member",
+      "schemaId": "urn:hortinis:plants:schema:v1:evidence-reference",
+      "fixture": "catalog-evidence-reference-invalid-rights-member.json",
+      "expected": {
+        "valid": false,
+        "errors": [
+          { "instancePath": "/rights", "keyword": "additionalProperties" }
+        ]
+      }
+    },
+    {
+      "id": "catalog-attribution-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:attribution",
+      "fixture": "catalog-attribution-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "catalog-attribution-missing-record-scope",
+      "schemaId": "urn:hortinis:plants:schema:v1:attribution",
+      "fixture": "catalog-attribution-missing-record-scope.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "", "keyword": "required" }]
+      }
+    },
+    {
+      "id": "catalog-taxon-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:taxon",
+      "fixture": "catalog-taxon-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "catalog-taxon-missing-scientific-name",
+      "schemaId": "urn:hortinis:plants:schema:v1:taxon",
+      "fixture": "catalog-taxon-missing-scientific-name.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "", "keyword": "required" }]
+      }
+    },
+    {
+      "id": "catalog-plant-concept-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:plant-concept",
+      "fixture": "catalog-plant-concept-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "catalog-plant-concept-additive-property",
+      "schemaId": "urn:hortinis:plants:schema:v1:plant-concept",
+      "fixture": "catalog-plant-concept-additive-property.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "catalog-plant-concept-missing-taxon",
+      "schemaId": "urn:hortinis:plants:schema:v1:plant-concept",
+      "fixture": "catalog-plant-concept-missing-taxon.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "", "keyword": "required" }]
+      }
+    },
+    {
+      "id": "catalog-localized-name-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:localized-name",
+      "fixture": "catalog-localized-name-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "catalog-localized-name-missing-language",
+      "schemaId": "urn:hortinis:plants:schema:v1:localized-name",
+      "fixture": "catalog-localized-name-missing-language.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "", "keyword": "required" }]
+      }
+    },
+    {
+      "id": "catalog-cultivation-context-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:cultivation-context",
+      "fixture": "catalog-cultivation-context-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "catalog-cultivation-context-invalid-system",
+      "schemaId": "urn:hortinis:plants:schema:v1:cultivation-context",
+      "fixture": "catalog-cultivation-context-invalid-system.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/growingSystem", "keyword": "enum" }]
+      }
+    },
+    {
+      "id": "catalog-cultivation-rule-calendar-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:cultivation-rule",
+      "fixture": "catalog-cultivation-rule-calendar-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "catalog-cultivation-rule-relative-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:cultivation-rule",
+      "fixture": "catalog-cultivation-rule-relative-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "catalog-cultivation-rule-missing-action",
+      "schemaId": "urn:hortinis:plants:schema:v1:cultivation-rule",
+      "fixture": "catalog-cultivation-rule-missing-action.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "", "keyword": "required" }]
+      }
     }
   ]
 }

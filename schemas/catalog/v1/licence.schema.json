@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:licence",
+  "title": "Hortinis catalog licence",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "expression",
+    "referenceLocator",
+    "commercialUse",
+    "attributionRequired"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "name": { "type": "string", "minLength": 1 },
+    "expression": { "type": "string", "minLength": 1 },
+    "referenceLocator": { "type": "string", "minLength": 1 },
+    "commercialUse": {
+      "type": "string",
+      "enum": ["allowed", "forbidden", "unknown"]
+    },
+    "attributionRequired": { "type": "boolean" },
+    "requiredNotice": { "type": "string", "minLength": 1 }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "attributionRequired": { "const": true } },
+        "required": ["attributionRequired"]
+      },
+      "then": {
+        "properties": { "requiredNotice": true },
+        "required": ["requiredNotice"]
+      }
+    }
+  ]
+}

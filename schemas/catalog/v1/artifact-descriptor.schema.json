@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:artifact-descriptor",
+  "title": "Hortinis catalog artifact descriptor",
+  "type": "object",
+  "required": ["path", "kind", "mediaType", "schemaId", "byteSize", "sha256"],
+  "properties": {
+    "path": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/safeRelativePath"
+    },
+    "kind": {
+      "type": "string",
+      "enum": ["json-document", "jsonl-gzip", "schema"]
+    },
+    "mediaType": { "type": "string", "minLength": 1 },
+    "schemaId": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:"
+    },
+    "contentEncoding": { "type": "string", "const": "gzip" },
+    "byteSize": { "type": "integer", "minimum": 0 },
+    "entryCount": { "type": "integer", "minimum": 0 },
+    "sha256": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/sha256"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "kind": { "const": "jsonl-gzip" } },
+        "required": ["kind"]
+      },
+      "then": {
+        "properties": {
+          "contentEncoding": true,
+          "entryCount": true
+        },
+        "required": ["contentEncoding", "entryCount"]
+      }
+    }
+  ]
+}

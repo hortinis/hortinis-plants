@@ -1,0 +1,9 @@
+{
+  "id": "attribution_grow_2020",
+  "sourceId": "source_grow",
+  "sourceReleaseId": "grow-epd-2020",
+  "sourceLocator": "https://growobservatory.org/",
+  "licenceId": "licence_cc_by_4_0",
+  "requiredNotice": "GROW Observatory, European Planting and Harvest Calendar.",
+  "profile": "dev-validation"
+}

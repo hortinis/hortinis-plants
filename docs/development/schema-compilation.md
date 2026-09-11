@@ -10,5 +10,6 @@ Ajv mutation options are disabled: compilation does not coerce values, apply def
 
 The build emits a CommonJS standalone validator registry at `dist/generated/schema-registry.cjs`.
 `dist/` is generated and ignored by Git. The registry exposes `validatorsBySchemaId` for the C1.6
-validation API; consumers should not configure Ajv directly. The current example schema exists only to
-prove the compilation boundary. Domain schemas belong to V1.1.
+validation API; consumers should not configure Ajv directly. The example schema remains a foundation
+fixture. The V1 consumer schemas live together under `schemas/catalog/v1/` and cross-reference each
+other by stable identifier rather than file path.

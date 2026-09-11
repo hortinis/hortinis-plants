@@ -10,6 +10,7 @@ Use the charter for scope, the model and provenance pages for data rules, the co
 - [Source field matrix](sources/source-field-matrix.md)
 - [Licence policy](licensing/licensing-policy.md)
 - [Artifact format](contracts/artifact-format.md)
+- [Catalog V1 consumer contracts](contracts/catalog-v1.md)
 - [Validation and release](quality/validation-and-release.md)
 - [Implementation plan](development/implementation-plan.md)
 - [Schema compilation](development/schema-compilation.md)

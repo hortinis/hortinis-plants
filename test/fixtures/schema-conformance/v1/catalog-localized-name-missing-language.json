@@ -1,0 +1,9 @@
+{
+  "id": "name_tomato_fr",
+  "subjectType": "plant-concept",
+  "subjectId": "plant_tomato",
+  "value": "Tomate",
+  "kind": "common",
+  "preferred": true,
+  "evidenceReferenceIds": ["evidence_tomato_name_fr"]
+}

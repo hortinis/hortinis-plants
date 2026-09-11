@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:evidence-reference",
+  "title": "Hortinis catalog evidence reference",
+  "type": "object",
+  "required": [
+    "id",
+    "sourceId",
+    "sourceManifestId",
+    "sourceReleaseId",
+    "sourceRecordId",
+    "locator",
+    "rights",
+    "reviewId"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "sourceId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "sourceManifestId": {
+      "$ref": "urn:hortinis:plants:schema:v1:source-manifest#/$defs/sourceManifestId"
+    },
+    "sourceReleaseId": { "type": "string", "minLength": 1 },
+    "sourceRecordId": { "type": "string", "minLength": 1 },
+    "locator": { "type": "string", "minLength": 1 },
+    "normalization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["originalValue"],
+      "properties": {
+        "originalValue": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/jsonValue"
+        },
+        "method": { "type": "string", "minLength": 1 }
+      }
+    },
+    "rights": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["licenceId", "decision", "reason"],
+      "properties": {
+        "licenceId": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+        },
+        "decision": {
+          "type": "string",
+          "enum": ["eligible", "ineligible", "pending-review"]
+        },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    },
+    "reviewId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "id": "plant_tomato",
+  "status": "active",
+  "taxonId": "taxon_tomato",
+  "evidenceReferenceIds": ["evidence_tomato_identity"],
+  "futureCompatibleField": "ignored by a V1 consumer"
+}

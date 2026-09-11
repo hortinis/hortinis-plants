@@ -1,0 +1,5 @@
+{
+  "id": "taxon_tomato",
+  "status": "active",
+  "evidenceReferenceIds": ["evidence_tomato_identity"]
+}

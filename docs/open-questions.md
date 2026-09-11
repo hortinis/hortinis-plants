@@ -5,6 +5,7 @@ foundation tooling choices are resolved in [the implementation plan](development
 
 ## Deferred choices
 
+- V1.2's curated assertion authoring contract and its exact boundary from the V1 consumer projections.
 - Cultivar-level timing at scale.
 - Pest and disease recommendations.
 - Companion planting, rotation and succession.

@@ -1,0 +1,6 @@
+{
+  "id": "taxon_tomato",
+  "status": "active",
+  "scientificName": "Solanum lycopersicum L.",
+  "evidenceReferenceIds": ["evidence_tomato_identity"]
+}

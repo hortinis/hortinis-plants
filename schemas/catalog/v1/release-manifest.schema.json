@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:release-manifest",
+  "title": "Hortinis catalog release manifest",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "catalogVersion",
+    "minimumConsumerVersion",
+    "profile",
+    "generatedAt",
+    "requiredArtifacts",
+    "optionalArtifacts"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/schemaVersionV1"
+    },
+    "catalogVersion": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/semanticVersion"
+    },
+    "minimumConsumerVersion": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/semanticVersion"
+    },
+    "profile": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "generatedAt": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/utcTimestamp"
+    },
+    "requiredArtifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "urn:hortinis:plants:schema:v1:artifact-descriptor"
+      }
+    },
+    "optionalArtifacts": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:hortinis:plants:schema:v1:artifact-descriptor"
+      }
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:localized-name",
+  "title": "Hortinis catalog localized name",
+  "type": "object",
+  "required": [
+    "id",
+    "subjectType",
+    "subjectId",
+    "languageTag",
+    "value",
+    "kind",
+    "preferred",
+    "evidenceReferenceIds"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "subjectType": {
+      "type": "string",
+      "enum": ["taxon", "plant-concept"]
+    },
+    "subjectId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "languageTag": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/languageTag"
+    },
+    "value": { "type": "string", "minLength": 1 },
+    "kind": { "type": "string", "enum": ["common", "alias"] },
+    "preferred": { "type": "boolean" },
+    "evidenceReferenceIds": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/identifierList"
+    }
+  }
+}

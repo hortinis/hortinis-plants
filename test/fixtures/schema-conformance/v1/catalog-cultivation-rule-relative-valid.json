@@ -1,0 +1,14 @@
+{
+  "id": "rule_tomato_transplant",
+  "status": "active",
+  "plantConceptId": "plant_tomato",
+  "contextId": "context_fr_atlantic_outdoor_transplant",
+  "action": "transplant",
+  "timing": {
+    "type": "relative-day-window",
+    "anchor": "last_spring_frost",
+    "startOffsetDays": 7,
+    "endOffsetDays": 21
+  },
+  "evidenceReferenceIds": ["evidence_tomato_transplant"]
+}

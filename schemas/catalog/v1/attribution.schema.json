@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:attribution",
+  "title": "Hortinis catalog attribution",
+  "type": "object",
+  "required": [
+    "id",
+    "sourceId",
+    "sourceReleaseId",
+    "sourceLocator",
+    "licenceId",
+    "requiredNotice",
+    "profile",
+    "includedRecordIds"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "sourceId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "sourceReleaseId": { "type": "string", "minLength": 1 },
+    "sourceLocator": { "type": "string", "minLength": 1 },
+    "licenceId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "requiredNotice": { "type": "string", "minLength": 1 },
+    "profile": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "includedRecordIds": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/identifierList"
+    }
+  }
+}

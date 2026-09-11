@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "1.0.0",
+  "catalogVersion": "0.1.0-dev.1",
+  "minimumConsumerVersion": "0.1.0",
+  "profile": "dev-validation",
+  "requiredArtifacts": [
+    {
+      "path": "chunks/plant-concepts-0001.jsonl.gz",
+      "kind": "jsonl-gzip",
+      "mediaType": "application/x-ndjson",
+      "schemaId": "urn:hortinis:plants:schema:v1:plant-concept",
+      "contentEncoding": "gzip",
+      "byteSize": 128,
+      "entryCount": 1,
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ],
+  "optionalArtifacts": []
+}
