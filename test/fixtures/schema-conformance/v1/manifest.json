@@ -51,6 +51,70 @@
       "schemaId": "urn:hortinis:plants:schema:v1:missing",
       "fixture": "unknown-schema.json",
       "expected": { "pipelineError": "UNKNOWN_SCHEMA_ID" }
+    },
+    {
+      "id": "source-manifest-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:source-manifest",
+      "fixture": "source-manifest-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "source-manifest-missing-id",
+      "schemaId": "urn:hortinis:plants:schema:v1:source-manifest",
+      "fixture": "source-manifest-missing-id.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "", "keyword": "required" }]
+      }
+    },
+    {
+      "id": "source-manifest-empty-resources",
+      "schemaId": "urn:hortinis:plants:schema:v1:source-manifest",
+      "fixture": "source-manifest-empty-resources.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/resources", "keyword": "minItems" }]
+      }
+    },
+    {
+      "id": "source-manifest-invalid-checksum",
+      "schemaId": "urn:hortinis:plants:schema:v1:source-manifest",
+      "fixture": "source-manifest-invalid-checksum.json",
+      "expected": {
+        "valid": false,
+        "errors": [
+          {
+            "instancePath": "/resources/0/checksum/value",
+            "keyword": "pattern"
+          }
+        ]
+      }
+    },
+    {
+      "id": "source-manifest-contains-assertions",
+      "schemaId": "urn:hortinis:plants:schema:v1:source-manifest",
+      "fixture": "source-manifest-contains-assertions.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "", "keyword": "additionalProperties" }]
+      }
+    },
+    {
+      "id": "source-manifest-reference-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:source-manifest-reference",
+      "fixture": "source-manifest-reference-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "source-manifest-reference-invalid-id",
+      "schemaId": "urn:hortinis:plants:schema:v1:source-manifest-reference",
+      "fixture": "source-manifest-reference-invalid-id.json",
+      "expected": {
+        "valid": false,
+        "errors": [
+          { "instancePath": "/sourceManifestId", "keyword": "pattern" }
+        ]
+      }
     }
   ]
 }

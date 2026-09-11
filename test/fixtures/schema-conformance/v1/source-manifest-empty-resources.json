@@ -1,0 +1,14 @@
+{
+  "id": "grow-epd-2020",
+  "provider": { "id": "grow", "name": "GROW Edible Plant Database" },
+  "release": { "identifier": "2020" },
+  "resources": [],
+  "licenceReview": {
+    "status": "accepted",
+    "declaredLicence": "CC-BY-4.0",
+    "evidenceLocator": "https://example.test/grow/2020/licence"
+  },
+  "profileEligibility": [
+    { "profile": "dev-validation", "decision": "eligible", "reason": "test" }
+  ]
+}

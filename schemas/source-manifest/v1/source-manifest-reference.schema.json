@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:source-manifest-reference",
+  "title": "Hortinis source-manifest reference",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["sourceManifestId"],
+  "properties": {
+    "sourceManifestId": {
+      "$ref": "urn:hortinis:plants:schema:v1:source-manifest#/$defs/sourceManifestId"
+    }
+  }
+}

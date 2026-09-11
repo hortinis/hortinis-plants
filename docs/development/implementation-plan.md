@@ -165,7 +165,7 @@ Acceptance: two runs over identical inputs produce identical compressed bytes, s
 
 Acceptance: large inputs are compressed and hashed with bounded memory and deterministic output.
 
-### C1.11 — Source-manifest boundary
+### C1.11 — Source-manifest boundary (`validated`)
 
 Define the technical contract for describing one pinned upstream release. A source manifest identifies exactly what was acquired and records its provider, release identifier, locator, checksum, licence review state and profile eligibility. It does not contain normalized plant assertions.
 

@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:source-manifest",
+  "title": "Hortinis source manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "provider",
+    "release",
+    "resources",
+    "licenceReview",
+    "profileEligibility"
+  ],
+  "properties": {
+    "id": { "$ref": "#/$defs/sourceManifestId" },
+    "provider": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableIdentifier" },
+        "name": { "type": "string", "minLength": 1 }
+      }
+    },
+    "release": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["identifier"],
+      "properties": {
+        "identifier": { "type": "string", "minLength": 1 },
+        "publishedAt": { "type": "string", "minLength": 1 }
+      }
+    },
+    "resources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["locator", "checksum"],
+        "properties": {
+          "locator": { "type": "string", "minLength": 1 },
+          "checksum": { "$ref": "#/$defs/sha256Checksum" },
+          "byteSize": { "type": "integer", "minimum": 0 },
+          "mediaType": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "licenceReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "declaredLicence", "evidenceLocator"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["unreviewed", "accepted", "rejected"]
+        },
+        "declaredLicence": { "type": "string", "minLength": 1 },
+        "evidenceLocator": { "type": "string", "minLength": 1 },
+        "notes": { "type": "string", "minLength": 1 }
+      }
+    },
+    "profileEligibility": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["profile", "decision", "reason"],
+        "properties": {
+          "profile": { "type": "string", "minLength": 1 },
+          "decision": {
+            "type": "string",
+            "enum": ["eligible", "ineligible", "pending-review"]
+          },
+          "reason": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "stableIdentifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "sourceManifestId": {
+      "$ref": "#/$defs/stableIdentifier"
+    },
+    "sha256Checksum": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "value"],
+      "properties": {
+        "algorithm": { "const": "sha256" },
+        "value": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    }
+  }
+}

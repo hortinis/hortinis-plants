@@ -1,0 +1,40 @@
+{
+  "id": "grow-epd-2020",
+  "provider": { "id": "grow", "name": "GROW Edible Plant Database" },
+  "release": { "identifier": "2020" },
+  "resources": [
+    {
+      "locator": "https://example.test/grow/2020/planting-calendar.xlsx",
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+      },
+      "byteSize": 1234,
+      "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    },
+    {
+      "locator": "https://example.test/grow/2020/README.txt",
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789"
+      }
+    }
+  ],
+  "licenceReview": {
+    "status": "accepted",
+    "declaredLicence": "CC-BY-4.0",
+    "evidenceLocator": "https://example.test/grow/2020/licence"
+  },
+  "profileEligibility": [
+    {
+      "profile": "dev-validation",
+      "decision": "eligible",
+      "reason": "The release licence is accepted for validation data."
+    },
+    {
+      "profile": "fr-mvp",
+      "decision": "eligible",
+      "reason": "The release may provide reviewed cultivation assertions."
+    }
+  ]
+}

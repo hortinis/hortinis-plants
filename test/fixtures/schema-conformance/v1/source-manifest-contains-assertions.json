@@ -1,0 +1,23 @@
+{
+  "id": "grow-epd-2020",
+  "provider": { "id": "grow", "name": "GROW Edible Plant Database" },
+  "release": { "identifier": "2020" },
+  "resources": [
+    {
+      "locator": "https://example.test/grow/2020/data",
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+      }
+    }
+  ],
+  "licenceReview": {
+    "status": "accepted",
+    "declaredLicence": "CC-BY-4.0",
+    "evidenceLocator": "https://example.test/grow/2020/licence"
+  },
+  "profileEligibility": [
+    { "profile": "dev-validation", "decision": "eligible", "reason": "test" }
+  ],
+  "assertions": []
+}
