@@ -108,7 +108,17 @@ interface ValidationError {
 
 Acceptance: consumers can validate data without importing or configuring Ajv directly.
 
-### C1.7 — Schema conformance testing
+### C1.7 — Schema conformance testing (`in progress`)
+
+#### C1.7a — Critical conformance fixtures (`validated`)
+
+- Define a reviewable JSON fixture manifest and raw fixture convention.
+- Run positive, negative and unknown-schema cases through the compiled registry and validation API.
+- Assert stable negative error keywords and instance paths.
+- Prove both successful and unresolved cross-schema references and deterministic compilation.
+
+The C1.7a capability is the reduced conformance gate required by V1. Full schema coverage remains
+open until the catalog contracts are defined.
 
 - Require positive and negative fixtures for schemas.
 - Verify expected failure keywords and instance paths.

@@ -1,0 +1,56 @@
+{
+  "schemaId": "urn:hortinis:plants:schema:v1:schema-compilation-example",
+  "cases": [
+    {
+      "id": "minimal-valid",
+      "fixture": "minimal-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "missing-required-value",
+      "fixture": "missing-required-value.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "", "keyword": "required" }]
+      }
+    },
+    {
+      "id": "wrong-root-type",
+      "fixture": "wrong-root-type.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "", "keyword": "type" }]
+      }
+    },
+    {
+      "id": "wrong-value-type",
+      "fixture": "wrong-value-type.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/value", "keyword": "type" }]
+      }
+    },
+    {
+      "id": "empty-value",
+      "fixture": "empty-value.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/value", "keyword": "minLength" }]
+      }
+    },
+    {
+      "id": "additional-property",
+      "fixture": "additional-property.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "", "keyword": "additionalProperties" }]
+      }
+    },
+    {
+      "id": "unknown-schema",
+      "schemaId": "urn:hortinis:plants:schema:v1:missing",
+      "fixture": "unknown-schema.json",
+      "expected": { "pipelineError": "UNKNOWN_SCHEMA_ID" }
+    }
+  ]
+}

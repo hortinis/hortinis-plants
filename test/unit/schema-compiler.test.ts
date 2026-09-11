@@ -66,6 +66,43 @@ describe("schema compilation", () => {
     ).rejects.toThrow("urn:test:missing");
   });
 
+  it("resolves references between registered schemas", async () => {
+    const schemasDirectory = await mkdtemp(
+      join(process.cwd(), "dist/schema-reference-"),
+    );
+    await writeFile(
+      join(schemasDirectory, "base.schema.json"),
+      JSON.stringify({
+        $schema: "https://json-schema.org/draft/2020-12/schema",
+        $id: "urn:test:reference-base",
+        type: "string",
+        minLength: 1,
+      }),
+    );
+    await writeFile(
+      join(schemasDirectory, "wrapper.schema.json"),
+      JSON.stringify({
+        $schema: "https://json-schema.org/draft/2020-12/schema",
+        $id: "urn:test:reference-wrapper",
+        type: "object",
+        required: ["value"],
+        properties: { value: { $ref: "urn:test:reference-base" } },
+      }),
+    );
+    const outputFile = join(schemasDirectory, "registry.cjs");
+    await compileSchemas({ schemasDirectory, outputFile });
+    const imported = (await import(pathToFileURL(outputFile).href)) as {
+      default: {
+        validatorsBySchemaId: Record<string, (value: unknown) => boolean>;
+      };
+    };
+    const validator =
+      imported.default.validatorsBySchemaId["urn:test:reference-wrapper"];
+
+    expect(validator?.({ value: "ok" })).toBe(true);
+    expect(validator?.({ value: "" })).toBe(false);
+  });
+
   it("produces deterministic output", async () => {
     const firstDirectory = await mkdtemp(join(tmpdir(), "hortinis-schema-"));
     const secondDirectory = await mkdtemp(join(tmpdir(), "hortinis-schema-"));
