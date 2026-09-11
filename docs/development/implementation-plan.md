@@ -147,14 +147,23 @@ Acceptance: logically identical objects produce identical bytes and SHA-256 hash
 
 Acceptance: a large generated fixture is processed with bounded memory and deterministic output.
 
-### C1.10 — Hashing and deterministic gzip
+### C1.10 — Hashing and deterministic gzip (`in progress`)
 
-- Calculate SHA-256 while streaming.
-- Fix gzip settings and remove variable gzip metadata.
-- Record compressed byte size and entry count.
-- Test byte-for-byte reproducibility.
+#### C1.10a — V1 in-memory deterministic gzip metadata (`validated`)
+
+- Compress already-framed bytes with fixed gzip settings and normalized metadata.
+- Calculate a lowercase hexadecimal SHA-256 digest over the compressed bytes.
+- Record compressed byte size and the caller-supplied entry count.
+- Test byte-for-byte reproducibility, header normalization and decompression.
 
 Acceptance: two runs over identical inputs produce identical compressed bytes, sizes and hashes.
+
+#### C1.10b — Streaming hashing and compression (`planned`)
+
+- Calculate SHA-256 while streaming.
+- Integrate with C1.9 bounded-memory JSON Lines processing.
+
+Acceptance: large inputs are compressed and hashed with bounded memory and deterministic output.
 
 ### C1.11 — Source-manifest boundary
 
@@ -193,7 +202,7 @@ V1 uses only the following C1 capabilities:
 - C1.6 validation API;
 - critical positive and negative C1.7 fixtures;
 - C1.8 canonical JSON;
-- the essential C1.10 gzip, SHA-256, byte-size and entry-count behavior; and
+- the essential C1.10a gzip, SHA-256, byte-size and entry-count behavior; and
 - a minimal C1.11 source-manifest contract.
 
 V1 also requires the minimum catalog-specific contracts and curated data described by its increments
@@ -234,7 +243,7 @@ the first `fr-mvp` release.
 
 #### V1.3 — Local artifact builder (`planned`)
 
-- Depends on: V1.2, C1.8 and the essential C1.10 behavior.
+- Depends on: V1.2, C1.8 and the essential C1.10a behavior.
 - Scope: validate the curated inputs, compile consumer projections in memory, serialize canonical JSONL,
   produce deterministic gzip output, calculate SHA-256, byte size and entry count, and emit a flat local
   artifact containing `manifest.json`, versioned schemas, chunks, source metadata and licence/attribution

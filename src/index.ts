@@ -16,3 +16,5 @@ export {
   serializeCanonicalJson,
 } from "./serialization/canonical-json.js";
 export type { CanonicalJsonErrorCode } from "./serialization/canonical-json.js";
+export { compressDeterministicGzip } from "./artifact/deterministic-gzip.js";
+export type { CompressedArtifact } from "./artifact/deterministic-gzip.js";
