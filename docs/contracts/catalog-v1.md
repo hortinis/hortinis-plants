@@ -57,8 +57,9 @@ meaning.
 
 ## Cultivation rules
 
-V1 rules publish plant-specific parameters, not recommendations. A rule references a plant concept, a
-reusable cultivation context and evidence. The minimum timing variants are a calendar-date window and a
+V1 rules publish plant-specific parameters, not recommendations. A rule references a plant concept or
+cultivar, a reusable cultivation context and evidence. Cultivar-scoped rules remain cultivar-scoped and are
+never widened to the parent plant concept. The minimum timing variants are a calendar-date window and a
 day-offset window relative to the last spring frost, first autumn frost or previous crop harvest.
 
 The catalog does not translate rule actions into prose or combine them with the current date, garden,
@@ -79,5 +80,7 @@ included record scope to a source release, licence, profile and notice. Their in
 upstream material.
 
 V1.1 schemas describe compiled consumer projections. They do not define the generic assertion authoring
-contract used before projection. That input boundary must be selected explicitly for V1.2 rather than
-being inferred from these consumer records.
+contract used before projection. V1.2 defines that boundary with the assertion, cultivar and curation-issue
+schemas. The tracked `dev-validation` input contains generic tomato, two explicitly scoped tomato cultivars
+(`Marmande` and `Montfavet H 63-5 F1`) and lettuce. This authoring dataset is compiled into consumer records
+in V1.3; it is not itself a release artifact.

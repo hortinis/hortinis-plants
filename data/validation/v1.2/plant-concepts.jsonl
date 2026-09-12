@@ -1,0 +1,2 @@
+{"id":"plant_tomato","status":"active","taxonId":"taxon_tomato","evidenceReferenceIds":["evidence_tomato_identity"]}
+{"id":"plant_lettuce","status":"active","taxonId":"taxon_lettuce","evidenceReferenceIds":["evidence_lettuce_identity"]}

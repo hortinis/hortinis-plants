@@ -1,0 +1,6 @@
+{"id":"name_tomato_fr","subjectType":"plant-concept","subjectId":"plant_tomato","languageTag":"fr","value":"tomate","kind":"common","preferred":true,"evidenceReferenceIds":["evidence_tomato_name"]}
+{"id":"name_tomato_en","subjectType":"plant-concept","subjectId":"plant_tomato","languageTag":"en","value":"tomato","kind":"common","preferred":true,"evidenceReferenceIds":["evidence_tomato_name"]}
+{"id":"name_marmande_fr","subjectType":"cultivar","subjectId":"cultivar_marmande","languageTag":"fr","value":"Marmande","kind":"common","preferred":true,"evidenceReferenceIds":["evidence_marmande"]}
+{"id":"name_montfavet_fr","subjectType":"cultivar","subjectId":"cultivar_montfavet_h63_5_f1","languageTag":"fr","value":"Montfavet H 63-5 F1","kind":"common","preferred":true,"evidenceReferenceIds":["evidence_montfavet"]}
+{"id":"name_lettuce_fr","subjectType":"plant-concept","subjectId":"plant_lettuce","languageTag":"fr","value":"laitue","kind":"common","preferred":true,"evidenceReferenceIds":["evidence_lettuce_name"]}
+{"id":"name_lettuce_en","subjectType":"plant-concept","subjectId":"plant_lettuce","languageTag":"en","value":"lettuce","kind":"common","preferred":true,"evidenceReferenceIds":["evidence_lettuce_name"]}

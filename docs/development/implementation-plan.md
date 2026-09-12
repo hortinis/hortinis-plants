@@ -232,14 +232,17 @@ the first `fr-mvp` release.
 - Acceptance: Hortinis can pin the language-neutral schemas and validate positive, negative, missing-field,
   unknown-schema and incompatible-version fixtures without importing catalog implementation code.
 
-#### V1.2 — Curated validation dataset (`planned`)
+#### V1.2 — Curated validation dataset (`in progress`)
 
 - Depends on: V1.1 and the accepted `dev-validation` scope from Hortinis P0.7a.
-- Scope: author the selected plant identities, French and English names, contexts and reviewed sowing or
-  planting-window rules needed by the first product test.
+- Scope: author the P0.7a `dev-validation` scenario dataset: a generic tomato, the `Marmande` and
+  `Montfavet H 63-5 F1` cultivars, and lettuce as a cool-season/direct-sowing representative. Add the
+  assertion and cultivar authoring contracts, evidence-backed identities and names, reusable contexts,
+  and reviewed generic and cultivar-scoped sowing or planting-window rules.
 - Acceptance: every assertion has a stable opaque identifier, source release, source record identifier,
-  locator, original value where normalization occurred, rights decision and review state; unresolved or
-  contradictory values remain explicit.
+  locator, original value where normalization occurred, rights decision and review state; cultivar facts
+  never widen to the generic plant concept; unresolved mappings and contradictory values remain explicit;
+  the tracked dataset validates against the authoring contracts and its cross-record references resolve.
 
 #### V1.3 — Local artifact builder (`planned`)
 

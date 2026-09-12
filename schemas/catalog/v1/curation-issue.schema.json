@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:curation-issue",
+  "title": "Hortinis catalog curation issue",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "kind", "status", "affectedRecordIds", "reason"],
+  "properties": {
+    "id": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "kind": {
+      "type": "string",
+      "enum": ["unresolved-mapping", "contradiction", "missing-evidence"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["open", "resolved", "accepted-limitation"]
+    },
+    "affectedRecordIds": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/identifierList"
+    },
+    "reason": { "type": "string", "minLength": 1 }
+  }
+}

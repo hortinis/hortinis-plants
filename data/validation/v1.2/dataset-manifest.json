@@ -1,0 +1,21 @@
+{
+  "datasetVersion": "1.2.0",
+  "profile": "dev-validation",
+  "scope": "P0.7a tomato and lettuce validation scenarios",
+  "catalogVersion": "0.1.0-dev.1",
+  "schemaVersion": "1.0.0",
+  "files": [
+    "taxa.jsonl",
+    "plant-concepts.jsonl",
+    "cultivars.jsonl",
+    "localized-names.jsonl",
+    "cultivation-contexts.jsonl",
+    "cultivation-rules.jsonl",
+    "assertions.jsonl",
+    "evidence-references.jsonl",
+    "sources.jsonl",
+    "licences.jsonl",
+    "reviews.jsonl",
+    "curation-issues.jsonl"
+  ]
+}

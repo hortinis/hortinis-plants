@@ -18,3 +18,9 @@ export {
 export type { CanonicalJsonErrorCode } from "./serialization/canonical-json.js";
 export { compressDeterministicGzip } from "./artifact/deterministic-gzip.js";
 export type { CompressedArtifact } from "./artifact/deterministic-gzip.js";
+export { validateValidationDataset } from "./curation/validation-dataset.js";
+export type {
+  DatasetRecord,
+  DatasetValidationIssue,
+  ValidationDataset,
+} from "./curation/validation-dataset.js";

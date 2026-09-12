@@ -1,0 +1,28 @@
+{
+  "id": "source_manifest_dev_validation",
+  "provider": { "id": "hortinis", "name": "Hortinis" },
+  "release": { "identifier": "dev-validation-1" },
+  "resources": [
+    {
+      "locator": "fixture://catalog-validation-v1.2",
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "mediaType": "application/jsonl"
+    }
+  ],
+  "licenceReview": {
+    "status": "accepted",
+    "declaredLicence": "CC-BY-4.0",
+    "evidenceLocator": "fixture://catalog-validation-v1.2/licence",
+    "notes": "Non-publishable validation fixture."
+  },
+  "profileEligibility": [
+    {
+      "profile": "dev-validation",
+      "decision": "eligible",
+      "reason": "Scenario fixture only; not a production release."
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "id": "rule_marmande_transplant",
+  "status": "active",
+  "cultivarId": "cultivar_marmande",
+  "contextId": "context_fr_atlantic_outdoor_transplant",
+  "action": "transplant",
+  "timing": {
+    "type": "relative-day-window",
+    "anchor": "last_spring_frost",
+    "startOffsetDays": 21,
+    "endOffsetDays": 49
+  },
+  "evidenceReferenceIds": ["evidence_marmande_transplant"]
+}

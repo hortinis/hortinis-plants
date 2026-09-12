@@ -1,0 +1,4 @@
+{"id":"review_tomato","status":"accepted","reviewedAt":"2026-09-11T00:00:00Z","reviewerId":"hortinis-maintainer","confidence":0.8,"notes":"Scenario fixture; values require source review before publication."}
+{"id":"review_marmande","status":"accepted","reviewedAt":"2026-09-11T00:00:00Z","reviewerId":"hortinis-maintainer","confidence":0.8,"notes":"Scenario fixture; cultivar-specific scope retained."}
+{"id":"review_montfavet","status":"accepted","reviewedAt":"2026-09-11T00:00:00Z","reviewerId":"hortinis-maintainer","confidence":0.8,"notes":"Scenario fixture; cultivar-specific scope retained."}
+{"id":"review_lettuce","status":"accepted","reviewedAt":"2026-09-11T00:00:00Z","reviewerId":"hortinis-maintainer","confidence":0.8,"notes":"Scenario fixture; values require source review before publication."}

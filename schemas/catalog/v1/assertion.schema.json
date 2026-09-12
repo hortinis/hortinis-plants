@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:assertion",
+  "title": "Hortinis catalog authored assertion",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "subjectType",
+    "subjectId",
+    "predicate",
+    "value",
+    "context",
+    "evidenceReferenceIds",
+    "reviewId"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "subjectType": {
+      "type": "string",
+      "enum": ["plant-concept", "cultivar-group", "cultivar"]
+    },
+    "subjectId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "predicate": { "type": "string", "minLength": 1 },
+    "value": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/jsonValue"
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["geographicContextIds", "growingSystem", "propagation"],
+      "properties": {
+        "geographicContextIds": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/identifierList"
+        },
+        "growingSystem": {
+          "type": "string",
+          "enum": [
+            "outdoor",
+            "unheated_shelter",
+            "heated_greenhouse",
+            "indoor",
+            "unknown"
+          ]
+        },
+        "propagation": {
+          "type": "string",
+          "enum": ["direct_sowing", "transplant", "vegetative", "unknown"]
+        }
+      }
+    },
+    "normalization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["originalValue"],
+      "properties": {
+        "originalValue": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/jsonValue"
+        },
+        "method": { "type": "string", "minLength": 1 },
+        "unit": { "type": "string", "minLength": 1 }
+      }
+    },
+    "evidenceReferenceIds": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/identifierList"
+    },
+    "reviewId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    }
+  }
+}

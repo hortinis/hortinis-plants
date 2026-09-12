@@ -6,7 +6,6 @@
   "required": [
     "id",
     "status",
-    "plantConceptId",
     "contextId",
     "action",
     "timing",
@@ -20,6 +19,9 @@
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/catalogStatus"
     },
     "plantConceptId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "cultivarId": {
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
     },
     "contextId": {
@@ -39,6 +41,24 @@
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/identifierList"
     }
   },
+  "oneOf": [
+    {
+      "properties": { "plantConceptId": true, "cultivarId": true },
+      "required": ["plantConceptId"],
+      "not": {
+        "required": ["cultivarId"],
+        "properties": { "cultivarId": true }
+      }
+    },
+    {
+      "properties": { "plantConceptId": true, "cultivarId": true },
+      "required": ["cultivarId"],
+      "not": {
+        "required": ["plantConceptId"],
+        "properties": { "plantConceptId": true }
+      }
+    }
+  ],
   "$defs": {
     "monthDay": {
       "type": "object",
