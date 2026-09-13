@@ -174,7 +174,7 @@ Define the technical contract for describing one pinned upstream release. A sour
 
 Acceptance: source manifests can be validated and referenced by stable identifiers without implementing a real source adapter.
 
-### C1.12 — Importer boundary and run manifest
+### C1.12 — Importer boundary and run manifest (`validated`)
 
 Define the interface for deterministic importers without implementing source-specific transformations. An importer converts a pinned source release into normalized assertions while preserving original record identifiers, locators, values, rights and unresolved mappings.
 
@@ -189,7 +189,16 @@ An importer run manifest records:
 
 The source manifest describes the input. The importer run manifest describes one transformation of that input.
 
-Acceptance: a fixture importer can run through the boundary and produce a validated, deterministic run manifest.
+The shared runner validates the source manifest, verifies upstream and derived inputs, validates each
+declared output record, and streams canonical JSONL while calculating hashes, byte sizes and counts. A
+completed run manifest is schema-validated and includes semantic configuration, input provenance, tool
+versions and output descriptors. Detailed warnings, rejected records and unresolved mappings are stored
+in a diagnostics JSONL output and summarized in the manifest. Fatal runs return an error trace and publish
+no failed-run manifest. The GROW adapter uses this runner; its staging candidates remain unreviewed and
+unmapped records are not converted to assertions.
+
+Acceptance: a fixture importer and GROW run through the shared boundary; manifests and outputs validate,
+two identical runs produce identical bytes, and fatal runs do not publish partial outputs or manifests.
 
 ## Local-validation track
 

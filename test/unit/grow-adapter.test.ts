@@ -18,6 +18,7 @@ import {
 } from "../../src/adapters/grow/parse-values.js";
 import { readCalendar } from "../../src/adapters/grow/read-calendar.js";
 import { readPlantCsv } from "../../src/adapters/grow/read-plant-csv.js";
+import { getCompiledValidationApi } from "../support/compiled-validation-api.js";
 
 describe("GROW value normalization", () => {
   it("converts scalar optima and ranges to Celsius profiles without inventing values", () => {
@@ -160,6 +161,7 @@ describe("pinned GROW source package", () => {
       const result = await importGrowSource({
         inputDirectory,
         outputDirectory: directory,
+        validationApi: await getCompiledValidationApi(),
       });
       expect(result.extraction.plants).toHaveLength(140);
       expect(result.extraction.locations).toHaveLength(12);
@@ -189,6 +191,28 @@ describe("pinned GROW source package", () => {
         join(directory, "importer-run-manifest.json"),
         "utf8",
       );
+      const runManifest = JSON.parse(manifestBefore) as {
+        inputs: { locator: string; role: string; preparation?: unknown }[];
+        counts: {
+          warnings: number;
+          rejectedRecords: number;
+          unresolvedMappings: number;
+        };
+      };
+      expect(runManifest.inputs).toHaveLength(5);
+      expect(
+        runManifest.inputs.find((input) => input.role === "derived"),
+      ).toMatchObject({
+        locator: "export/edible-plants.csv",
+        preparation: {
+          tool: "mdbtools",
+          version: "1.0.1",
+          command: "mdb-export plant1.accdb 'Edible plants'",
+        },
+      });
+      expect(runManifest.counts.warnings).toBeGreaterThan(0);
+      expect(runManifest.counts.rejectedRecords).toBe(0);
+      expect(runManifest.counts.unresolvedMappings).toBeGreaterThan(0);
       const outputHashes = { ...result.outputHashes };
       for (const [filename, expectedHash] of Object.entries(outputHashes)) {
         expect(
@@ -202,6 +226,7 @@ describe("pinned GROW source package", () => {
       const second = await importGrowSource({
         inputDirectory,
         outputDirectory: secondDirectory,
+        validationApi: await getCompiledValidationApi(),
       });
       expect(second.outputHashes).toEqual(outputHashes);
       expect(

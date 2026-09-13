@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:import-diagnostic",
+  "title": "Hortinis importer diagnostic",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["kind", "code", "message"],
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": ["warning", "rejected-record", "unresolved-mapping"]
+    },
+    "code": { "type": "string", "minLength": 1 },
+    "message": { "type": "string", "minLength": 1 },
+    "sourceRecordId": { "type": "string", "minLength": 1 },
+    "sourceLocator": { "type": "string", "minLength": 1 },
+    "originalValue": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/jsonValue"
+    },
+    "details": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/jsonValue"
+      }
+    }
+  }
+}

@@ -17,11 +17,8 @@ console.log(
     calendarWindows: result.extraction.calendarWindows.length,
     candidates: result.extraction.candidates.length,
     diagnostics: result.extraction.diagnostics.length,
-    errors: result.extraction.diagnostics.filter(
-      (item) => item.severity === "error",
-    ).length,
+    warnings: result.counts.warnings,
+    rejectedRecords: result.counts.rejectedRecords,
+    unresolvedMappings: result.counts.unresolvedMappings,
   }),
 );
-if (result.extraction.diagnostics.some((item) => item.severity === "error")) {
-  process.exitCode = 1;
-}

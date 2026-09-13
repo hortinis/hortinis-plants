@@ -1,9 +1,5 @@
 import { createHash } from "node:crypto";
-import { createWriteStream } from "node:fs";
-import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
-import { join, resolve } from "node:path";
-import { Readable, Transform, type TransformCallback } from "node:stream";
-import { pipeline } from "node:stream/promises";
+import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   GROW_LICENCE_ID,
@@ -28,19 +24,26 @@ import type {
   GrowPlantRecord,
   GrowSourceResource,
 } from "./types.js";
-import { serializeCanonicalJson } from "../../serialization/canonical-json.js";
-import { writeJsonLines } from "../../serialization/json-lines.js";
+import { runImporter } from "../../importer/runner.js";
+import type { ImportEvent, ImporterDefinition } from "../../importer/types.js";
+import type { ValidationApi } from "../../schema/validation-api.js";
 
 export interface GrowImportOptions {
   readonly inputDirectory: string;
   readonly outputDirectory: string;
-  readonly verifyChecksums?: boolean;
+  readonly validationApi?: ValidationApi;
 }
 
 export interface GrowImportResult {
   readonly extraction: GrowExtraction;
   readonly resources: readonly GrowSourceResource[];
   readonly outputHashes: Readonly<Record<string, string>>;
+  readonly counts: {
+    readonly assertions: number;
+    readonly warnings: number;
+    readonly rejectedRecords: number;
+    readonly unresolvedMappings: number;
+  };
 }
 
 const sourceManifestId = GROW_SOURCE_MANIFEST_ID;
@@ -54,101 +57,246 @@ export async function importGrowSource(
   const sourceManifestPath = fileURLToPath(
     new URL("../../../data/sources/grow/source-manifest.json", import.meta.url),
   );
-  const sourceManifestBytes = await readFile(sourceManifestPath);
-  const sourceManifest = JSON.parse(sourceManifestBytes.toString("utf8")) as {
-    id?: unknown;
-    release?: { identifier?: unknown };
-    licenceReview?: { declaredLicence?: unknown; status?: unknown };
+  let extraction: GrowExtraction | undefined;
+  const importer: ImporterDefinition = {
+    name: "grow-edible-plant-database",
+    version: "0.2.0",
+    configuration: {
+      expectedPlantCount: 140,
+      expectedCalendarSheetCount: 12,
+      temperatureUnit: "Cel",
+      temperaturePolicy: "grow-temperature-celsius-v1",
+      calendarCarrierYear: 2017,
+      calendarDateTimezone: "UTC",
+      imageFieldsExcluded: ["Image_product", "image_plant"],
+    },
+    inputs: EXPECTED_PACKAGE_RESOURCES.map((resource) => ({
+      locator: resource.path,
+      path: resource.path,
+      role: resource.role,
+      ...(resource.role === "derived"
+        ? {
+            sha256: resource.sha256,
+            derivedFrom: "plant1.accdb",
+            preparation: {
+              tool: "mdbtools",
+              version: "1.0.1",
+              command: "mdb-export plant1.accdb 'Edible plants'",
+            },
+          }
+        : {}),
+    })),
+    outputs: [
+      {
+        name: "source-records",
+        path: "source-records.jsonl",
+        role: "auxiliary",
+        mediaType: "application/jsonl",
+      },
+      {
+        name: "locations",
+        path: "locations.jsonl",
+        role: "auxiliary",
+        mediaType: "application/jsonl",
+      },
+      {
+        name: "calendar-windows",
+        path: "calendar-windows.jsonl",
+        role: "auxiliary",
+        mediaType: "application/jsonl",
+      },
+      {
+        name: "candidates",
+        path: "candidates.jsonl",
+        role: "auxiliary",
+        mediaType: "application/jsonl",
+      },
+      {
+        name: "diagnostics",
+        path: "diagnostics.jsonl",
+        role: "diagnostics",
+        mediaType: "application/jsonl",
+        schemaId: "urn:hortinis:plants:schema:v1:import-diagnostic",
+      },
+      {
+        name: "attribution-candidate",
+        path: "attribution-candidate.jsonl",
+        role: "auxiliary",
+        mediaType: "application/jsonl",
+      },
+    ],
+    tools: { csvParse: "6.2.1", exceljs: "4.4.0", mdbtools: "1.0.1" },
+    async *run(context): AsyncIterable<ImportEvent> {
+      const source = context.sourceManifest as {
+        id?: unknown;
+        release?: { identifier?: unknown };
+        licenceReview?: { declaredLicence?: unknown; status?: unknown };
+        profileEligibility?: readonly {
+          profile?: unknown;
+          decision?: unknown;
+        }[];
+      };
+      if (
+        source.id !== GROW_SOURCE_MANIFEST_ID ||
+        source.release?.identifier !== sourceReleaseId ||
+        source.licenceReview?.declaredLicence !== "CC-BY-4.0" ||
+        source.licenceReview.status !== "accepted" ||
+        !source.profileEligibility?.some(
+          (item) =>
+            item.profile === "commercial" && item.decision === "eligible",
+        )
+      ) {
+        throw new Error(
+          "GROW source manifest identity or commercial licence eligibility does not match the adapter contract",
+        );
+      }
+      const plantCsv = await readPlantCsv(
+        context.resourcePath("export/edible-plants.csv"),
+      );
+      const calendar = await readCalendar(
+        context.resourcePath("PlantingCalendar.xlsx"),
+      );
+      const diagnostics: GrowDiagnostic[] = [
+        ...plantCsv.diagnostics,
+        ...calendar.diagnostics,
+      ];
+      for (const plant of plantCsv.plants) {
+        diagnostics.push({
+          code: "UNMAPPED_SUBJECT",
+          severity: "warning",
+          message:
+            "No reviewed GROW source ID to catalog subject mapping is configured; this record remains a source record and candidate only.",
+          sourceRecordId: plant.sourceRecordId,
+          sourceLocator: plant.sourceLocator,
+        });
+      }
+      for (const location of calendar.locations) {
+        diagnostics.push({
+          code: "UNMAPPED_GEOGRAPHIC_CONTEXT",
+          severity: "warning",
+          message:
+            "GROW location and strata are retained as source applicability; no Hortinis geographic context mapping is configured.",
+          sourceLocator: `PlantingCalendar.xlsx!${location.sheetCode}`,
+          originalValue: location,
+        });
+      }
+      validatePlantFingerprint(plantCsv.plants, diagnostics);
+      validateCalendarIds(plantCsv.plants, calendar.idsBySheet, diagnostics);
+      compareSourceNames(plantCsv.plants, calendar.plantNamesById, diagnostics);
+      const candidates = buildCandidates(
+        plantCsv.plants,
+        calendar.windows,
+        diagnostics,
+      );
+      extraction = {
+        plants: plantCsv.plants,
+        locations: calendar.locations,
+        calendarWindows: calendar.windows,
+        candidates,
+        diagnostics: sortDiagnostics(diagnostics),
+      };
+      const fatalCodes = new Set([
+        "SOURCE_RECORD_COUNT_CHANGED",
+        "SOURCE_ID_FINGERPRINT_CHANGED",
+        "CALENDAR_ID_SET_MISMATCH",
+      ]);
+      const fatal = extraction.diagnostics.find((diagnostic) =>
+        fatalCodes.has(diagnostic.code),
+      );
+      if (fatal !== undefined)
+        throw new Error(
+          `GROW source invariant failed (${fatal.code}): ${fatal.message}`,
+        );
+
+      for (const value of extraction.plants)
+        yield { output: "source-records", value };
+      for (const value of extraction.locations)
+        yield { output: "locations", value };
+      for (const value of extraction.calendarWindows)
+        yield { output: "calendar-windows", value };
+      for (const value of extraction.candidates)
+        yield { output: "candidates", value };
+      for (const diagnostic of extraction.diagnostics) {
+        yield { output: "diagnostics", value: toImportDiagnostic(diagnostic) };
+      }
+      yield {
+        output: "attribution-candidate",
+        value: {
+          stage: "import-candidates",
+          sourceId: GROW_SOURCE_ID,
+          sourceReleaseId,
+          sourceLocator:
+            "https://discovery.dundee.ac.uk/en/datasets/edible-plant-database/",
+          licenceExpression: "CC-BY-4.0",
+          requiredNotice:
+            "Edible Plant Database, University of Dundee, DOI 10.15132/10000157, licensed under CC BY 4.0. Adapted by Hortinis. Images excluded.",
+          candidateRecordIds: extraction.candidates
+            .map((candidate) => candidate.id)
+            .sort(),
+        },
+      };
+    },
   };
-  if (
-    sourceManifest.id !== sourceManifestId ||
-    sourceManifest.release?.identifier !== sourceReleaseId ||
-    sourceManifest.licenceReview?.declaredLicence !== "CC-BY-4.0" ||
-    sourceManifest.licenceReview?.status !== "accepted"
-  ) {
-    throw new Error(
-      "GROW source manifest identity or accepted licence does not match the adapter contract",
-    );
-  }
-  const sourceManifestSha256 = createHash("sha256")
-    .update(sourceManifestBytes)
-    .digest("hex");
-  const resources = await verifyResources(
-    inputDirectory,
-    options.verifyChecksums !== false,
-  );
-  const plantCsv = await readPlantCsv(
-    join(inputDirectory, "export/edible-plants.csv"),
-  );
-  const calendar = await readCalendar(
-    join(inputDirectory, "PlantingCalendar.xlsx"),
-  );
-  const diagnostics: GrowDiagnostic[] = [
-    ...plantCsv.diagnostics,
-    ...calendar.diagnostics,
-  ];
-  for (const plant of plantCsv.plants) {
-    diagnostics.push({
-      code: "UNMAPPED_SUBJECT",
-      severity: "warning",
-      message:
-        "No reviewed GROW source ID to catalog subject mapping is configured; this record remains a source record and candidate only.",
-      sourceRecordId: plant.sourceRecordId,
-      sourceLocator: plant.sourceLocator,
-    });
-  }
-  for (const location of calendar.locations) {
-    diagnostics.push({
-      code: "UNMAPPED_GEOGRAPHIC_CONTEXT",
-      severity: "warning",
-      message:
-        "GROW location and strata are retained as source applicability; no Hortinis geographic context mapping is configured.",
-      sourceLocator: `PlantingCalendar.xlsx!${location.sheetCode}`,
-      originalValue: location,
-    });
-  }
-  validatePlantFingerprint(plantCsv.plants, diagnostics);
-  validateCalendarIds(plantCsv.plants, calendar.idsBySheet, diagnostics);
-  compareSourceNames(plantCsv.plants, calendar.plantNamesById, diagnostics);
-  const candidates = buildCandidates(
-    plantCsv.plants,
-    calendar.windows,
-    diagnostics,
-  );
-  const extraction: GrowExtraction = {
-    plants: plantCsv.plants,
-    locations: calendar.locations,
-    calendarWindows: calendar.windows,
-    candidates,
-    diagnostics: sortDiagnostics(diagnostics),
-  };
-  const outputHashes = await writeOutputs(
+  const run = await runImporter({
+    importer,
+    sourceManifestPath,
+    resourceDirectory: inputDirectory,
     outputDirectory,
-    extraction,
-    resources,
-    sourceManifestSha256,
-    options.verifyChecksums !== false,
+    ...(options.validationApi === undefined
+      ? {}
+      : { validationApi: options.validationApi }),
+  });
+  if (extraction === undefined)
+    throw new Error("GROW importer completed without extraction");
+  const manifest = run.manifest as {
+    inputs: readonly Record<string, unknown>[];
+    outputs: readonly { path: string; sha256: string }[];
+    counts: GrowImportResult["counts"];
+  };
+  const resources = manifest.inputs.map((input) => ({
+    path: String(input.locator),
+    sha256: String(input.sha256),
+    mediaType:
+      EXPECTED_PACKAGE_RESOURCES.find(
+        (resource) => resource.path === input.locator,
+      )?.mediaType ?? "application/octet-stream",
+    role: input.role as "upstream" | "derived",
+  }));
+  const outputHashes = Object.fromEntries(
+    manifest.outputs.map((output) => [output.path, output.sha256]),
   );
-  return { extraction, resources, outputHashes };
+  outputHashes["importer-run-manifest.json"] = run.manifestSha256;
+  return { extraction, resources, outputHashes, counts: manifest.counts };
 }
 
-async function verifyResources(
-  inputDirectory: string,
-  verifyChecksums: boolean,
-): Promise<GrowSourceResource[]> {
-  const resources: GrowSourceResource[] = [];
-  for (const resource of EXPECTED_PACKAGE_RESOURCES) {
-    const path = join(inputDirectory, resource.path);
-    const bytes = await readFile(path);
-    const sha256 = createHash("sha256").update(bytes).digest("hex");
-    if (verifyChecksums && sha256 !== resource.sha256) {
-      throw new Error(
-        `SHA-256 mismatch for GROW source resource ${resource.path}`,
-      );
-    }
-    resources.push({ ...resource, sha256 });
-  }
-  return resources;
+function toImportDiagnostic(
+  diagnostic: GrowDiagnostic,
+): Record<string, unknown> {
+  const kind =
+    diagnostic.code.startsWith("UNMAPPED_") ||
+    diagnostic.code === "AMBIGUOUS_OUTDOOR_OPERATION" ||
+    diagnostic.code === "UNRESOLVED_HARVEST_DURATION_ANCHOR"
+      ? "unresolved-mapping"
+      : diagnostic.severity === "error"
+        ? "rejected-record"
+        : "warning";
+  return {
+    kind,
+    code: diagnostic.code,
+    message: diagnostic.message,
+    ...(diagnostic.sourceRecordId === undefined
+      ? {}
+      : { sourceRecordId: diagnostic.sourceRecordId }),
+    ...(diagnostic.sourceLocator === undefined
+      ? {}
+      : { sourceLocator: diagnostic.sourceLocator }),
+    ...(diagnostic.originalValue === undefined
+      ? {}
+      : { originalValue: diagnostic.originalValue }),
+    ...(diagnostic.field === undefined
+      ? {}
+      : { details: { field: diagnostic.field } }),
+  };
 }
 
 function validatePlantFingerprint(
@@ -561,187 +709,4 @@ function sortDiagnostics(
         ].join("\u0000"),
       ),
   );
-}
-
-async function writeOutputs(
-  outputDirectory: string,
-  extraction: GrowExtraction,
-  resources: readonly GrowSourceResource[],
-  sourceManifestSha256: string,
-  verifyChecksums: boolean,
-): Promise<Record<string, string>> {
-  await mkdir(outputDirectory, { recursive: true });
-  const generatedFiles = [
-    "source-records.jsonl",
-    "locations.jsonl",
-    "calendar-windows.jsonl",
-    "candidates.jsonl",
-    "diagnostics.jsonl",
-    "attribution-candidate.json",
-    "importer-run-manifest.json",
-    "attributions.json",
-  ];
-  await Promise.all(
-    generatedFiles.map(async (filename) => {
-      try {
-        await unlink(join(outputDirectory, filename));
-      } catch (error) {
-        if (!isNodeError(error) || error.code !== "ENOENT") throw error;
-      }
-    }),
-  );
-  const diagnosticsByCode = Object.fromEntries(
-    [...new Set(extraction.diagnostics.map((item) => item.code))]
-      .sort()
-      .map((code) => [
-        code,
-        extraction.diagnostics.filter((item) => item.code === code).length,
-      ]),
-  );
-  const manifestResources = resources;
-  const outputs: Record<string, unknown[]> = {
-    "source-records.jsonl": [...extraction.plants],
-    "locations.jsonl": [...extraction.locations],
-    "calendar-windows.jsonl": [...extraction.calendarWindows],
-    "candidates.jsonl": [...extraction.candidates],
-    "diagnostics.jsonl": [...extraction.diagnostics],
-  };
-  const outputHashes: Record<string, string> = {};
-  const outputEntries: { path: string; sha256: string; entryCount: number }[] =
-    [];
-  for (const [filename, rows] of Object.entries(outputs)) {
-    const sha256 = await writeJsonlFile(join(outputDirectory, filename), rows);
-    outputHashes[filename] = sha256;
-    outputEntries.push({ path: filename, sha256, entryCount: rows.length });
-  }
-  const attributionCandidate = {
-    stage: "import-candidates",
-    sourceId: GROW_SOURCE_ID,
-    sourceReleaseId,
-    sourceLocator:
-      "https://discovery.dundee.ac.uk/en/datasets/edible-plant-database/",
-    licenceExpression: "CC-BY-4.0",
-    requiredNotice:
-      "Edible Plant Database, University of Dundee, DOI 10.15132/10000157, licensed under CC BY 4.0. Adapted by Hortinis. Images excluded.",
-    candidateRecordIds: extraction.candidates
-      .map((candidate) => candidate.id)
-      .sort(),
-  };
-  const attributionBytes = Buffer.concat([
-    Buffer.from(serializeCanonicalJson(attributionCandidate)),
-    Buffer.from("\n"),
-  ]);
-  await writeFile(
-    join(outputDirectory, "attribution-candidate.json"),
-    attributionBytes,
-  );
-  const attributionHash = createHash("sha256")
-    .update(attributionBytes)
-    .digest("hex");
-  outputHashes["attribution-candidate.json"] = attributionHash;
-  outputEntries.push({
-    path: "attribution-candidate.json",
-    sha256: attributionHash,
-    entryCount: 1,
-  });
-  const configuration = {
-    expectedPlantCount: 140,
-    expectedCalendarSheetCount: 12,
-    verifyChecksums,
-    temperatureUnit: "Cel",
-    temperaturePolicy: "grow-temperature-celsius-v1",
-    calendarCarrierYear: 2017,
-    calendarDateTimezone: "UTC",
-    imageFieldsExcluded: ["Image_product", "image_plant"],
-  };
-  const configurationBytes = serializeCanonicalJson(configuration);
-  const manifest = {
-    schemaVersion: "1.0.0",
-    importer: { name: "grow-edible-plant-database", version: "0.1.0" },
-    sourceManifest: {
-      id: sourceManifestId,
-      sha256: sourceManifestSha256,
-    },
-    sourceReleaseId,
-    configuration,
-    configurationSha256: createHash("sha256")
-      .update(configurationBytes)
-      .digest("hex"),
-    tools: {
-      node: process.version,
-      csvParse: "6.2.1",
-      exceljs: "4.4.0",
-      mdbtools: "1.0.1 (CSV prepared before importer run)",
-    },
-    sourceResources: manifestResources,
-    outputs: outputEntries,
-    counts: {
-      plantRecords: extraction.plants.length,
-      locations: extraction.locations.length,
-      validCalendarWindows: extraction.calendarWindows.length,
-      candidates: extraction.candidates.length,
-      diagnostics: extraction.diagnostics.length,
-      excludedFields: ["Image_product", "image_plant"],
-    },
-    preparation: {
-      derivedResource: "export/edible-plants.csv",
-      tool: "mdbtools v1.0.1",
-      command: "mdb-export plant1.accdb 'Edible plants'",
-      sourceTable: "Edible plants",
-    },
-    diagnosticCounts: diagnosticsByCode,
-    diagnosticSummary: {
-      errors: extraction.diagnostics.filter((item) => item.severity === "error")
-        .length,
-      warnings: extraction.diagnostics.filter(
-        (item) => item.severity === "warning",
-      ).length,
-      info: extraction.diagnostics.filter((item) => item.severity === "info")
-        .length,
-    },
-    normalization: {
-      temperatureUnit: "Cel",
-      temperaturePolicy: "grow-temperature-celsius-v1",
-      calendarCarrierYear: 2017,
-    },
-  };
-  const manifestBytes = Buffer.concat([
-    Buffer.from(serializeCanonicalJson(manifest)),
-    Buffer.from("\n"),
-  ]);
-  await writeFile(
-    join(outputDirectory, "importer-run-manifest.json"),
-    manifestBytes,
-  );
-  outputHashes["importer-run-manifest.json"] = createHash("sha256")
-    .update(manifestBytes)
-    .digest("hex");
-  return outputHashes;
-}
-
-function isNodeError(value: unknown): value is NodeJS.ErrnoException {
-  return value instanceof Error && "code" in value;
-}
-
-async function writeJsonlFile(
-  path: string,
-  rows: readonly unknown[],
-): Promise<string> {
-  const hash = createHash("sha256");
-  const meter = new Transform({
-    transform(
-      chunk: Buffer,
-      _encoding: BufferEncoding,
-      callback: TransformCallback,
-    ) {
-      hash.update(chunk);
-      callback(null, chunk);
-    },
-  });
-  await pipeline(
-    Readable.from(writeJsonLines(rows)),
-    meter,
-    createWriteStream(path),
-  );
-  return hash.digest("hex");
 }

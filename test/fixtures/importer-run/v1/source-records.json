@@ -1,0 +1,11 @@
+{
+  "records": [
+    {
+      "id": "tomato-1",
+      "subjectId": "plant_tomato",
+      "value": "Solanum lycopersicum"
+    },
+    { "id": "unmapped-1", "subjectId": null, "value": "Unknown plant" },
+    { "id": "rejected-1", "subjectId": "plant_tomato", "value": null }
+  ]
+}

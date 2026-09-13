@@ -42,6 +42,20 @@ export type {
   DatasetValidationIssue,
   ValidationDataset,
 } from "./curation/validation-dataset.js";
+export { runImporter } from "./importer/runner.js";
+export { ImporterRunError } from "./importer/errors.js";
+export type {
+  ImportContext,
+  ImportEvent,
+  ImportInputResource,
+  ImportOutputDefinition,
+  ImportOutputResult,
+  ImportOutputRole,
+  ImporterDefinition,
+  ImporterRunOptions,
+  ImporterRunResult,
+} from "./importer/types.js";
+export type { ImporterRunErrorCode } from "./importer/errors.js";
 export { importGrowSource } from "./adapters/grow/adapter.js";
 export type {
   GrowImportOptions,

@@ -1,0 +1,9 @@
+{
+  "kind": "unresolved-mapping",
+  "code": "UNMAPPED_SUBJECT",
+  "message": "No reviewed subject mapping exists.",
+  "sourceRecordId": "record-1",
+  "sourceLocator": "fixture://release/records#record-1",
+  "originalValue": { "name": "Unknown plant" },
+  "details": { "candidateCount": 0 }
+}

@@ -370,6 +370,36 @@
       "schemaId": "urn:hortinis:plants:schema:v1:assertion",
       "fixture": "catalog-assertion-valid.json",
       "expected": { "valid": true }
+    },
+    {
+      "id": "importer-run-manifest-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:importer-run-manifest",
+      "fixture": "importer-run-manifest-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "importer-run-manifest-missing-count",
+      "schemaId": "urn:hortinis:plants:schema:v1:importer-run-manifest",
+      "fixture": "importer-run-manifest-missing-count.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/counts", "keyword": "required" }]
+      }
+    },
+    {
+      "id": "import-diagnostic-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:import-diagnostic",
+      "fixture": "import-diagnostic-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "import-diagnostic-invalid-kind",
+      "schemaId": "urn:hortinis:plants:schema:v1:import-diagnostic",
+      "fixture": "import-diagnostic-invalid-kind.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/kind", "keyword": "enum" }]
+      }
     }
   ]
 }

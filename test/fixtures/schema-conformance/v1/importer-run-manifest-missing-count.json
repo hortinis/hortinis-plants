@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "1.0.0",
+  "importer": { "name": "fixture-importer", "version": "1.0.0" },
+  "sourceManifest": {
+    "id": "source_manifest_fixture",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "inputs": [],
+  "configuration": {},
+  "configurationSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "tools": { "node": "v24.0.0" },
+  "outputs": [],
+  "counts": { "assertions": 0, "warnings": 0, "rejectedRecords": 0 }
+}

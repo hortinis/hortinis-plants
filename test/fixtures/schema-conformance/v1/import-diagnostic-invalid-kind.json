@@ -1,0 +1,5 @@
+{
+  "kind": "fatal",
+  "code": "INVALID",
+  "message": "Invalid diagnostic kind."
+}

@@ -28,3 +28,20 @@ transformation from this pinned input.
 
 The schema deliberately validates identifier shape and references, but does not resolve an identifier to
 an on-disk manifest. Artifact-level reference resolution belongs to the V1.3 builder.
+
+## Importer run manifest
+
+The importer run manifest is a separate record of one transformation. Its schema is
+`urn:hortinis:plants:schema:v1:importer-run-manifest`; diagnostic JSONL records use
+`urn:hortinis:plants:schema:v1:import-diagnostic`.
+
+The manifest hashes the exact source-manifest bytes and every effective input, including derived inputs.
+Derived inputs record their upstream locator and preparation tool, version and command. Configuration is
+canonicalized before hashing. Outputs record safe relative paths, media types, roles, optional schema IDs,
+checksums, byte sizes and record counts. The manifest also identifies the importer and its tools and
+summarizes emitted assertions, warnings, rejected records and unresolved mappings.
+
+Detailed warnings, rejected records and unresolved mappings are written to the declared diagnostics JSONL
+output. A fatal run fails with an error trace and does not publish a run manifest or replace the previous
+completed output directory. The run manifest does not hash itself; callers receive its checksum separately.
+Execution timestamps, absolute paths and durations are excluded from the manifest.

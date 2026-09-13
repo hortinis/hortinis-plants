@@ -1,0 +1,26 @@
+{
+  "id": "source_manifest_importer_fixture_v1",
+  "provider": { "id": "provider_fixture", "name": "Importer fixture" },
+  "release": { "identifier": "fixture-1" },
+  "resources": [
+    {
+      "locator": "fixture://release/source-records.json",
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "5d6c3ec1fdb0b30192ae1235dd3b5af3d8b5537184ab97d2351e723b5faec1fa"
+      }
+    }
+  ],
+  "licenceReview": {
+    "status": "accepted",
+    "declaredLicence": "CC-BY-4.0",
+    "evidenceLocator": "fixture://release/licence"
+  },
+  "profileEligibility": [
+    {
+      "profile": "dev-validation",
+      "decision": "eligible",
+      "reason": "Test fixture only."
+    }
+  ]
+}

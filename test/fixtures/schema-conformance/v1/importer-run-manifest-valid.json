@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "1.0.0",
+  "importer": { "name": "fixture-importer", "version": "1.0.0" },
+  "sourceManifest": {
+    "id": "source_manifest_fixture",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "inputs": [],
+  "configuration": { "mode": "fixture" },
+  "configurationSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "tools": { "node": "v24.0.0" },
+  "outputs": [
+    {
+      "path": "diagnostics.jsonl",
+      "role": "diagnostics",
+      "mediaType": "application/jsonl",
+      "schemaId": "urn:hortinis:plants:schema:v1:import-diagnostic",
+      "sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "byteSize": 0,
+      "recordCount": 0
+    }
+  ],
+  "counts": {
+    "assertions": 0,
+    "warnings": 0,
+    "rejectedRecords": 0,
+    "unresolvedMappings": 0
+  }
+}
