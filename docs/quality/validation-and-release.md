@@ -16,13 +16,13 @@
 ## Acceptance criteria
 
 - No forbidden or unknown rights enter a commercial profile.
-- Every released assertion has a source release and locator.
+- Every released factual record resolves to evidence carrying a source release, source record and locator.
 - Retired records remain resolvable.
 - Two clean builds produce identical chunk hashes.
 - A corrupted or incomplete artifact cannot become active in Hortinis.
 - French MVP fixtures cover representative maritime, continental and Mediterranean contexts.
 - French MVP fixtures also cover a mountain context and explicitly represent Corsica within metropolitan-France scope.
-- Generic tomato remains usable without a cultivar; cultivar-scoped facts for `Marmande` and `Montfavet H 63-5 F1` never leak into the generic projection.
+- Generic tomato remains usable without a cultivar; a selected cultivar inherits eligible parent facts and rules, and cultivar-scoped facts for `Marmande` and `Montfavet H 63-5 F1` never leak into the generic projection.
 - French and English preferred-name coverage is reported, and missing translations fall back without inventing or relabeling a name.
 - Missing context produces an explicit limitation or abstention rather than an invented recommendation.
 

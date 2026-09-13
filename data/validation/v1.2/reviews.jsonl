@@ -1,4 +1,5 @@
-{"id":"review_tomato","status":"accepted","reviewedAt":"2026-09-11T00:00:00Z","reviewerId":"hortinis-maintainer","confidence":0.8,"notes":"Scenario fixture; values require source review before publication."}
-{"id":"review_marmande","status":"accepted","reviewedAt":"2026-09-11T00:00:00Z","reviewerId":"hortinis-maintainer","confidence":0.8,"notes":"Scenario fixture; cultivar-specific scope retained."}
-{"id":"review_montfavet","status":"accepted","reviewedAt":"2026-09-11T00:00:00Z","reviewerId":"hortinis-maintainer","confidence":0.8,"notes":"Scenario fixture; cultivar-specific scope retained."}
-{"id":"review_lettuce","status":"accepted","reviewedAt":"2026-09-11T00:00:00Z","reviewerId":"hortinis-maintainer","confidence":0.8,"notes":"Scenario fixture; values require source review before publication."}
+{"id":"review_tomato","purpose":"content","status":"accepted","reviewedAt":"2026-09-11T00:00:00Z","reviewerId":"hortinis-maintainer","confidence":0.8,"notes":"Scenario fixture; values require source review before publication."}
+{"id":"review_marmande","purpose":"content","status":"accepted","reviewedAt":"2026-09-11T00:00:00Z","reviewerId":"hortinis-maintainer","confidence":0.8,"notes":"Scenario fixture; cultivar-specific scope retained."}
+{"id":"review_montfavet","purpose":"content","status":"accepted","reviewedAt":"2026-09-11T00:00:00Z","reviewerId":"hortinis-maintainer","confidence":0.8,"notes":"Scenario fixture; cultivar-specific scope retained."}
+{"id":"review_lettuce","purpose":"content","status":"accepted","reviewedAt":"2026-09-11T00:00:00Z","reviewerId":"hortinis-maintainer","confidence":0.8,"notes":"Scenario fixture; values require source review before publication."}
+{"id":"review_rights_fixture","purpose":"rights","status":"accepted","reviewedAt":"2026-09-11T00:00:00Z","reviewerId":"hortinis-maintainer","notes":"Synthetic dev-validation provenance only; not a production source-rights determination."}

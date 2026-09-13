@@ -1,0 +1,14 @@
+{
+  "id": "rule_tomato_month_window",
+  "status": "active",
+  "subject": { "type": "plant-concept", "id": "plant_tomato" },
+  "contextId": "context_fr_outdoor_transplant",
+  "action": "transplant",
+  "timing": {
+    "type": "calendar-month-window",
+    "startMonth": 11,
+    "endMonth": 2
+  },
+  "evidenceReferenceIds": ["evidence_tomato_window"],
+  "reviewId": "review_tomato_window"
+}

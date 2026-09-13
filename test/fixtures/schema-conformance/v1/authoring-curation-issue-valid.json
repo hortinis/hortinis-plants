@@ -1,0 +1,7 @@
+{
+  "id": "issue_unmapped_grow_tomato",
+  "kind": "unresolved-mapping",
+  "status": "open",
+  "affectedRecordIds": ["grow_record_1"],
+  "reason": "No reviewed mapping has been selected."
+}

@@ -7,7 +7,7 @@
 
 - **C0 — Decisions (`validated`):** code/data licences, ShareAlike treatment, the metropolitan-France MVP, cultivar depth, schema ownership, release coordination and sole-maintainer review authority are accepted in ADR-0004 through ADR-0006.
 - **C1 — Foundation (`in progress`):** add schemas, source manifests, importer boundaries, contributor workflow, deterministic build rules and CI checks.
-- **C2 — Contracts:** implement taxon, plant concept, cultivar group, cultivar, localized name, source, assertion, context, licence, review, cultivation-rule, relationship, manifest, chunk and compatibility schemas; add conformance fixtures.
+- **C2 — Contracts (`validated`):** implement separate authoring and consumer schemas for taxon, plant concept, cultivar group, cultivar, localized name, plant fact, source, assertion, context, licence, review, cultivation rule, relationship, geography, manifest and homogeneous JSONL chunks; add complete schema conformance fixtures. Compatibility policy is deferred for Hortinis coordination.
 - **C3 — Sources:** pin WFO, TAXREF and GROW; preserve GROW image exclusions; retain Practical Plants block licences; audit CropGraph citations and geography; implement immutable-locator adapters.
 - **C4 — Curation:** reconcile identities; separate plant concepts from taxa; normalize names, units, contexts and calendar anchors; report unresolved mappings and contradictions; curate the MVP.
 - **C5 — Release:** compile accepted projections into deterministic JSONL.gz chunks; generate manifests, hashes, source manifests and attribution; enforce size, determinism and licence gates; publish manual GitHub Release assets.
@@ -108,7 +108,7 @@ interface ValidationError {
 
 Acceptance: consumers can validate data without importing or configuring Ajv directly.
 
-### C1.7 — Schema conformance testing (`in progress`)
+### C1.7 — Schema conformance testing (`validated`)
 
 #### C1.7a — Critical conformance fixtures (`validated`)
 
@@ -117,8 +117,9 @@ Acceptance: consumers can validate data without importing or configuring Ajv dir
 - Assert stable negative error keywords and instance paths.
 - Prove both successful and unresolved cross-schema references and deterministic compilation.
 
-The C1.7a capability is the reduced conformance gate required by V1. Full schema coverage remains
-open until the catalog contracts are defined.
+The initial C1.7a capability established the critical conformance gate required by V1. The completed
+suite now also requires positive and negative fixture coverage for every non-definition schema in the
+compiled registry; reusable `common` definitions are exercised through the records that reference them.
 
 - Require positive and negative fixtures for schemas.
 - Verify expected failure keywords and instance paths.
@@ -242,7 +243,7 @@ the first `fr-mvp` release.
 - Excludes: broad cultivar coverage, rich relationship contracts, threats, images and complete schema
   compatibility evolution.
 - Acceptance: Hortinis can pin the language-neutral schemas and validate positive, negative, missing-field,
-  unknown-schema and incompatible-version fixtures without importing catalog implementation code.
+  unknown-schema and unsupported-schema-major fixtures without importing catalog implementation code.
 
 #### V1.2 — Curated validation dataset (`in progress`)
 
@@ -266,7 +267,8 @@ the first `fr-mvp` release.
 - Excludes: streaming, source download adapters, generic importer orchestration, GitHub Releases and
   production publication gates.
 - Acceptance: two local builds from identical inputs produce identical entry and chunk bytes; every
-  manifest reference resolves within the artifact; the artifact validates against V1.1.
+  manifest reference resolves within the artifact; the artifact validates against the finalized C2 consumer
+  contracts.
 
 #### V1.4 — Hortinis conformance handoff (`planned`)
 
@@ -283,9 +285,22 @@ the first `fr-mvp` release.
 Production catalog-specific implementation begins after the generic C1 primitives and boundaries are
 validated. The V1 local-validation track may begin after its reduced gate above.
 
-1. **C2 — Domain contracts:** define the taxon, plant concept, cultivar group, cultivar, localized name, source, assertion, context, licence, review, cultivation-rule, relationship, release-manifest, chunk and compatibility schemas with conformance fixtures.
+1. **C2 — Domain contracts:** define separate authoring and consumer contracts for taxonomy, plant concepts, cultivar groups and cultivars; localized names; plant facts; contexts and geography; cultivation rules; relationships; provenance, rights and review; release manifests and homogeneous JSONL chunks. Add positive and negative conformance fixtures. Defer compatibility policy and migration fixtures until they are agreed with Hortinis.
 2. **C3 — Concrete sources:** create pinned source manifests and source-specific importers for WFO, TAXREF, GROW and later approved sources.
 3. **C4 — Curation:** reconcile identities, normalize values and contexts, review rights, and report contradictions and unresolved mappings.
 4. **C5 — Release construction and publishing:** compile accepted data into deterministic JSONL.gz chunks, produce release, source, licence and attribution manifests, run build and licence gates, compare two builds, and publish immutable GitHub Release assets.
 
-The release manifest is the consumer-facing acquisition entry point. It records catalog and schema versions, profile, minimum consumer version, required and optional chunks, counts, sizes, hashes and references to source, licence and attribution manifests. Its schema belongs to C2; producing and publishing populated release manifests belongs to C5. Publishing is deliberately excluded from basic CI.
+The release manifest is the consumer-facing acquisition entry point. It records catalog and schema versions, profile, minimum consumer version, required and optional artifacts, counts, sizes, hashes and references to metadata. Its schema belongs to C2; producing populated manifests and applying profile, rights, supersession and inheritance gates belongs to C5. Publishing is deliberately excluded from basic CI.
+
+## C2 contract acceptance
+
+C2 is validated when each authored input and consumer record family has an identified JSON Schema; consumer
+JSONL chunks declare exactly one record schema; provenance and rights reviews remain resolvable; and cultivar
+inheritance can be represented without changing record scope or inferring supersession. Calendar, frost-
+relative, soil-temperature and GDD timings have explicit shapes and units. Every non-definition schema has
+positive and negative compiled-registry fixtures, and the tracked validation dataset passes schema plus
+cross-record semantic checks.
+
+The compatibility policy and populated catalog artifact are deliberately outside C2. Version negotiation
+and migration fixtures await Hortinis coordination; consumer projection/build behavior is implemented in
+V1.3/C5.

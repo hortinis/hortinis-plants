@@ -1,7 +1,6 @@
 {
   "id": "name_tomato_fr",
-  "subjectType": "plant-concept",
-  "subjectId": "plant_tomato",
+  "subject": { "type": "plant-concept", "id": "plant_tomato" },
   "value": "Tomate",
   "kind": "common",
   "preferred": true,

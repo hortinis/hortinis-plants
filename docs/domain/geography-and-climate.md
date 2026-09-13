@@ -1,9 +1,15 @@
 # Geography and climate
 
-The initial catalog targets metropolitan France, including Corsica and excluding overseas territories. Validation represents Atlantic, continental, Mediterranean and mountain contexts. Retain GROW European zones as source applicability only; do not treat them as Hortinis zones automatically.
+The initial catalog targets metropolitan France, including Corsica and excluding overseas territories.
+The catalog uses stable semantic geographic-context records with explicit kind, name, parent IDs and
+evidence. A cultivation context refers to one or more of those IDs or explicitly declares geographic
+scope unknown.
 
-The catalog may carry static applicability and climate requirements. Hortinis owns dynamic weather, forecasts, garden microclimate and current frost observations.
+Semantic hierarchy does not imply coordinates, borders, polygon containment, climate classification or
+source applicability. Store a parent relationship only when supported. Retain source-specific locations
+and strata as source provenance rather than automatically converting them to a Hortinis region.
 
-Static climate cells do not ship in this catalog. Plan them as an independently versioned artifact in a separate `hortinis-climate` repository. This catalog may reference stable semantic climate contexts but must remain usable without that artifact.
-
-Any future geographic grid must document resolution, source period, uncertainty, coordinate reference, update process and storage budget. It is recommendation input, not a plant trait.
+This catalog contract carries no polygons, climate cells, forecast, garden microclimate or current frost
+observations. Static climate-grid data is planned as an independently versioned artifact in a separate
+`hortinis-climate` repository. Hortinis owns dynamic weather and garden observations; catalog rules may
+refer only to explicit semantic contexts and source-backed static requirements.

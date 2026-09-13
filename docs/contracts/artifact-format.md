@@ -14,9 +14,11 @@ The manifest includes:
 - compressed byte size;
 - entry count;
 - SHA-256 digest;
-- source and licence manifest references.
+- metadata artifact references (including source, licence, review and attribution records).
 
-Entries use stable opaque identifiers and retain source-release references. Additive fields are compatible when unknown fields can be ignored. Breaking changes require a schema-major version and explicit consumer approval.
+Entries use stable opaque identifiers and retain evidence references to source releases. Every JSONL.gz
+chunk contains records of one schema and declares that schema identifier in the chunk descriptor.
+Compatibility policy and the treatment of breaking changes are deferred until coordinated with Hortinis.
 
 Builds must be deterministic: stable ordering, normalized newlines, fixed serialization and reproducible gzip output.
 

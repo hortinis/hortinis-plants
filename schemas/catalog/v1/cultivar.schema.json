@@ -3,8 +3,13 @@
   "$id": "urn:hortinis:plants:schema:v1:cultivar",
   "title": "Hortinis catalog cultivar",
   "type": "object",
-  "additionalProperties": false,
-  "required": ["id", "status", "plantConceptId", "evidenceReferenceIds"],
+  "required": [
+    "id",
+    "status",
+    "plantConceptId",
+    "denomination",
+    "evidenceReferenceIds"
+  ],
   "properties": {
     "id": {
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
@@ -13,6 +18,13 @@
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/catalogStatus"
     },
     "plantConceptId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "cultivarGroupIds": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/optionalIdentifierList"
+    },
+    "denomination": { "type": "string", "minLength": 1 },
+    "replacementCultivarId": {
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
     },
     "evidenceReferenceIds": {

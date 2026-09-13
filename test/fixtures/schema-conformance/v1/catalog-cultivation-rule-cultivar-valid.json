@@ -1,7 +1,7 @@
 {
   "id": "rule_marmande_transplant",
   "status": "active",
-  "cultivarId": "cultivar_marmande",
+  "subject": { "type": "cultivar", "id": "cultivar_marmande" },
   "contextId": "context_fr_atlantic_outdoor_transplant",
   "action": "transplant",
   "timing": {
@@ -10,5 +10,6 @@
     "startOffsetDays": 21,
     "endOffsetDays": 49
   },
-  "evidenceReferenceIds": ["evidence_marmande_transplant"]
+  "evidenceReferenceIds": ["evidence_marmande_transplant"],
+  "reviewId": "review_marmande_transplant"
 }

@@ -1,0 +1,14 @@
+{
+  "id": "rule_tomato_soil_temperature",
+  "status": "active",
+  "subject": { "type": "plant-concept", "id": "plant_tomato" },
+  "contextId": "context_fr_outdoor_direct_sowing",
+  "action": "direct_sow",
+  "timing": {
+    "type": "soil-temperature-threshold",
+    "operator": "at-least",
+    "temperature": { "value": 10, "unit": "Cel" }
+  },
+  "evidenceReferenceIds": ["evidence_tomato_soil"],
+  "reviewId": "review_tomato_soil"
+}

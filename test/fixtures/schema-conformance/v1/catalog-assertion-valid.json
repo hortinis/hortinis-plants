@@ -1,22 +1,14 @@
 {
   "id": "assertion_marmande_window",
-  "subjectType": "cultivar",
-  "subjectId": "cultivar_marmande",
+  "subject": { "type": "cultivar", "id": "cultivar_marmande" },
   "predicate": "transplant_window",
   "value": {
+    "type": "relative-day-window",
+    "anchor": "last_spring_frost",
     "startOffsetDays": 21,
-    "endOffsetDays": 49,
-    "anchor": "last_spring_frost"
+    "endOffsetDays": 49
   },
-  "context": {
-    "geographicContextIds": ["geography_metropolitan_france"],
-    "growingSystem": "outdoor",
-    "propagation": "transplant"
-  },
-  "normalization": {
-    "originalValue": "three to seven weeks after last frost",
-    "method": "converted source window to frost-relative days"
-  },
+  "contextId": "context_fr_outdoor_transplant",
   "evidenceReferenceIds": ["evidence_marmande_rule"],
   "reviewId": "review_marmande"
 }

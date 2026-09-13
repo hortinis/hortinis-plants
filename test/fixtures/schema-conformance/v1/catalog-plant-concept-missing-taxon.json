@@ -1,5 +1,5 @@
 {
   "id": "plant_tomato",
   "status": "active",
-  "evidenceReferenceIds": ["evidence_tomato_identity"]
+  "taxonId": "taxon_tomato"
 }

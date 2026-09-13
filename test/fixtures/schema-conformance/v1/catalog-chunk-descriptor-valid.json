@@ -1,0 +1,10 @@
+{
+  "path": "chunks/plant-facts-0001.jsonl.gz",
+  "kind": "jsonl-gzip",
+  "mediaType": "application/x-ndjson",
+  "schemaId": "urn:hortinis:plants:schema:v1:plant-fact",
+  "contentEncoding": "gzip",
+  "byteSize": 256,
+  "entryCount": 1,
+  "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+}

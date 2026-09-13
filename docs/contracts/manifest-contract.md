@@ -1,11 +1,23 @@
 # Manifest contract
 
-The manifest is the acquisition entry point. It contains catalog and schema versions, generation timestamp, minimum consumer version, profile and separate lists of required and optional artifacts.
+The release manifest is the consumer's acquisition entry point. It declares schema and catalog
+versions, minimum consumer version, profile, generation timestamp, and separate required and optional
+artifact lists.
 
-Each listed artifact has a safe relative path, kind, schema identifier, byte size, SHA-256 digest and media type. A compressed JSON Lines chunk also has a gzip content encoding and entry count. Source, licence, attribution and versioned schema files are themselves listed artifacts. The manifest does not list itself because hashing it would be recursive.
+Each artifact has a safe relative path, byte size and SHA-256 digest. A metadata artifact descriptor
+identifies a JSON document or schema. A chunk descriptor additionally identifies its single record
+schema, JSON Lines media type, gzip encoding and entry count. A JSONL chunk must not mix record schemas.
+The manifest does not list itself because its self-checksum would be recursive.
 
-Schema, catalog and minimum-consumer versions use semantic-version strings. The V1 manifest schema accepts compatible `1.x` schema versions and rejects another schema major. The consumer separately compares the declared minimum consumer version with its own version.
+Consumers first acquire the manifest from an operator-selected local import or authenticated HTTPS
+channel, as specified by ADR-0014, then verify all referenced bytes before activation. Hashes establish
+integrity relative to that trusted manifest; they do not establish authenticity. Required-artifact
+presence, optional-artifact handling, digest/size/count checks and record/reference validation are
+semantic consumer checks in addition to JSON Schema validation.
 
-Trust the manifest only when acquired through the operator-selected local import or authenticated HTTPS channel, as required by ADR-0014. Hashes provide integrity relative to that trusted source.
+Schema identifiers and schema version values identify the V1 contract. The release also carries a
+minimum consumer version, but version comparison and compatibility policy are deferred for coordination
+with Hortinis. The manifest schema does not contain a compatibility table or migration declaration.
 
-The initial contract has no signature or key-distribution field. Add signing only through a compatible contract revision backed by a defined threat model, trust root and rotation procedure.
+The initial contract has no signature or key-distribution field. Add signing only through a contract
+revision backed by an agreed threat model, trust root and rotation procedure.

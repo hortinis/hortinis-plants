@@ -1,0 +1,12 @@
+{
+  "id": "relationship_tomato_bee",
+  "status": "active",
+  "subject": { "type": "plant-concept", "id": "plant_tomato" },
+  "target": { "type": "plant-concept", "id": "plant_pollinator" },
+  "relation": "attracts",
+  "effect": "beneficial",
+  "mechanism": "Evidence describes pollinator visitation.",
+  "contextId": "context_outdoor_unknown_geography",
+  "evidenceReferenceIds": ["evidence_tomato_pollinator"],
+  "reviewId": "review_tomato_pollinator"
+}

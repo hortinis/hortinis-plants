@@ -156,7 +156,7 @@ function fixtureImporter(): ImporterDefinition {
         path: "assertions.jsonl",
         role: "assertions",
         mediaType: "application/jsonl",
-        schemaId: "urn:hortinis:plants:schema:v1:assertion",
+        schemaId: "urn:hortinis:plants:schema:authoring:v1:assertion",
       },
       {
         name: "evidence",
@@ -200,23 +200,18 @@ function fixtureImporter(): ImporterDefinition {
                 licenceId: "licence_fixture",
                 decision: "eligible",
                 reason: "Fixture rights review",
+                reviewId: "review_fixture_rights",
               },
-              reviewId: "review_fixture",
             },
           };
           yield {
             output: "assertions",
             value: {
               id: "assertion_fixture_tomato_name",
-              subjectType: "plant-concept",
-              subjectId: record.subjectId,
-              predicate: "scientific_name",
-              value: record.value,
-              context: {
-                geographicContextIds: ["geography_metropolitan_france"],
-                growingSystem: "unknown",
-                propagation: "unknown",
-              },
+              subject: { type: "plant-concept", id: record.subjectId },
+              predicate: "frost_sensitivity",
+              value: "sensitive",
+              contextId: "context_validation_unknown",
               evidenceReferenceIds: ["evidence_fixture_tomato"],
               reviewId: "review_fixture",
             },

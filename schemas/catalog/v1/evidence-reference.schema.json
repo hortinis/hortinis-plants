@@ -3,6 +3,7 @@
   "$id": "urn:hortinis:plants:schema:v1:evidence-reference",
   "title": "Hortinis catalog evidence reference",
   "type": "object",
+  "additionalProperties": false,
   "required": [
     "id",
     "sourceId",
@@ -10,8 +11,7 @@
     "sourceReleaseId",
     "sourceRecordId",
     "locator",
-    "rights",
-    "reviewId"
+    "rights"
   ],
   "properties": {
     "id": {
@@ -34,26 +34,24 @@
         "originalValue": {
           "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/jsonValue"
         },
-        "method": { "type": "string", "minLength": 1 }
+        "method": { "type": "string", "minLength": 1 },
+        "unit": { "type": "string", "minLength": 1 }
       }
     },
     "rights": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["licenceId", "decision", "reason"],
+      "required": ["licenceId", "decision", "reason", "reviewId"],
       "properties": {
         "licenceId": {
           "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
         },
-        "decision": {
-          "type": "string",
-          "enum": ["eligible", "ineligible", "pending-review"]
-        },
-        "reason": { "type": "string", "minLength": 1 }
+        "decision": { "enum": ["eligible", "ineligible", "pending-review"] },
+        "reason": { "type": "string", "minLength": 1 },
+        "reviewId": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+        }
       }
-    },
-    "reviewId": {
-      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
     }
   }
 }

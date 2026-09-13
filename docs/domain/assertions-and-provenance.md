@@ -1,36 +1,31 @@
 # Assertions and provenance
 
-Every factual value is represented as an assertion before it becomes a released projection.
+An authored assertion is one claim about one subject in one context. It has a stable ID, fixed predicate,
+explicit value, context ID, evidence-reference IDs and a content-review ID. Assertions belong to
+`schemas/authoring/v1`; they are curation inputs, not the consumer projection schema.
+
+Each evidence reference preserves its source ID, pinned source-manifest ID, source release, source record,
+locator, rights decision, licence reference and separate rights-review reference. If a value was normalized,
+the original source value and normalization method are retained. The authored assertion's review ID points
+to a content review. Rights review and content review must not be conflated.
 
 ```json
 {
-  "id": "assertion_01",
-  "subjectId": "plant_tomato",
-  "predicate": "transplant_window",
-  "value": { "startOffsetDays": 7, "endOffsetDays": 21 },
-  "context": {
-    "geography": "europe-atlantic",
-    "growingSystem": "outdoor",
-    "propagation": "transplant"
-  },
-  "provenance": {
-    "sourceReleaseId": "grow-epd-2020",
-    "sourceRecordId": "tomato",
-    "sourceLocator": "PlantingCalendar.xlsx!Tomato"
-  },
-  "rights": { "license": "CC-BY-4.0", "commercialUse": "allowed" },
-  "quality": { "status": "accepted", "confidence": 0.84 }
+  "id": "assertion_tomato_frost",
+  "subject": { "type": "plant-concept", "id": "plant_tomato" },
+  "predicate": "frost_sensitivity",
+  "value": "sensitive",
+  "contextId": "context_fr_outdoor",
+  "evidenceReferenceIds": ["evidence_tomato_rule"],
+  "reviewId": "review_tomato"
 }
 ```
 
-Assertions retain source-specific values and contexts. Normalization may convert units and controlled terms, but it must retain the original value and locator.
+The authoring dataset may retain open, unreviewed, rejected or contradictory claims and explicit curation
+issues. A consumer release includes only accepted records with evidence and a rights decision eligible for
+the selected profile. A source's file-level licence is not, by itself, proof of rights in upstream material.
 
-The V1.2 validation dataset authors assertions separately from consumer projections. An assertion subject may
-be a plant concept, cultivar group or cultivar. Cultivar-scoped assertions retain the cultivar identifier and
-must not be widened to the parent plant concept during projection. The validation subset includes generic
-tomato, `Marmande`, `Montfavet H 63-5 F1` and lettuce; their values are scenario fixtures and require the same
-source and rights review as any future release assertion.
-
-Quality states are `unreviewed`, `accepted`, `rejected` and `superseded`. A conflict is preserved until a review decision resolves it; it is never silently overwritten.
-
-The projection compiler may include only accepted assertions whose licence decision permits the selected release profile.
+The V1.2 tomato, Marmande, Montfavet and lettuce records are synthetic scenario fixtures. Their accepted
+review state validates the workflow shape only; it is not a production content or rights determination.
+Unknown values remain absent or explicitly unknown. Importers and projection tooling must not infer a value,
+context, scope, translation or source interpretation.

@@ -27,11 +27,36 @@ describe("schema conformance fixtures", () => {
       join(process.cwd(), "dist/schema-conformance-"),
     );
     const outputFile = join(outputDirectory, "registry.cjs");
-    await compileSchemas({ schemasDirectory: "schemas", outputFile });
+    const schemas = await compileSchemas({
+      schemasDirectory: "schemas",
+      outputFile,
+    });
     const imported = (await import(pathToFileURL(outputFile).href)) as {
       default: { validatorsBySchemaId: unknown };
     };
     const api = createValidationApi(imported.default.validatorsBySchemaId);
+
+    for (const schema of schemas) {
+      if (schema.schema.$id === "urn:hortinis:plants:schema:v1:common") {
+        continue;
+      }
+      const schemaFixtures = fixtures.filter(
+        (fixture) => fixture.schemaId === schema.schema.$id,
+      );
+      expect(
+        schemaFixtures.some(
+          (fixture) =>
+            "valid" in fixture.expected && fixture.expected.valid === true,
+        ),
+        `${schema.schema.$id} needs a positive fixture`,
+      ).toBe(true);
+      expect(
+        schemaFixtures.some(
+          (fixture) => "valid" in fixture.expected && !fixture.expected.valid,
+        ),
+        `${schema.schema.$id} needs a negative fixture`,
+      ).toBe(true);
+    }
 
     for (const fixture of fixtures) {
       assertFixture(api, fixture, await readFixture(fixture.fixturePath));

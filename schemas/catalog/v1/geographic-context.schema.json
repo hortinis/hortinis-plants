@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:geographic-context",
+  "title": "Hortinis catalog geographic context",
+  "type": "object",
+  "required": ["id", "status", "kind", "name", "evidenceReferenceIds"],
+  "properties": {
+    "id": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "status": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/catalogStatus"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "catalog-scope",
+        "administrative-area",
+        "climate-region",
+        "source-location"
+      ]
+    },
+    "name": { "type": "string", "minLength": 1 },
+    "parentGeographicContextIds": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/optionalIdentifierList"
+    },
+    "evidenceReferenceIds": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/identifierList"
+    }
+  }
+}

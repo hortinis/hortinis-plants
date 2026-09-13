@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:relationship",
+  "title": "Hortinis catalog relationship",
+  "type": "object",
+  "required": [
+    "id",
+    "status",
+    "subject",
+    "target",
+    "relation",
+    "effect",
+    "contextId",
+    "evidenceReferenceIds",
+    "reviewId"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "status": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/catalogStatus"
+    },
+    "subject": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/subjectReference"
+    },
+    "target": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/subjectReference"
+    },
+    "relation": {
+      "enum": [
+        "supports",
+        "inhibits",
+        "attracts",
+        "repels",
+        "competes_with",
+        "facilitates",
+        "unknown"
+      ]
+    },
+    "effect": {
+      "enum": ["beneficial", "adverse", "mixed", "neutral", "unknown"]
+    },
+    "mechanism": { "type": "string", "minLength": 1 },
+    "contextId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "supersedesRelationshipIds": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/optionalIdentifierList"
+    },
+    "evidenceReferenceIds": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/identifierList"
+    },
+    "reviewId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    }
+  }
+}

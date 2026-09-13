@@ -1,15 +1,17 @@
 # Schema compatibility
 
-Optional additive fields are compatible when older consumers can ignore them. Removing fields, changing meaning or units, or changing identifier semantics is a schema-major change.
+- Status: planned
 
-V1 public consumer records therefore permit additive top-level properties. Nested structures whose
-members jointly define semantics, including artifact checksums, rights decisions and timing variants,
-remain closed. A schema version is a semantic version, while its schema identifier contains the supported
-major version. A V1 validator rejects manifests declaring another schema major.
+Compatibility policy is intentionally deferred until coordinated with Hortinis. C2 establishes stable V1
+schema identifiers and a `minimumConsumerVersion` manifest field, but does not claim a compatibility
+guarantee, define how versions are compared, or ship compatibility tables and migration fixtures.
 
-New assertion predicates and cultivation-rule actions may be added within V1 when existing record
-semantics remain unchanged. A release using a new value shape or action must declare a minimum consumer
-version that understands it. Temperature-profile predicates use the structured `Cel` object contract;
-harvest rules use the `harvest` action.
+The present structural rules are limited to schema validation: consumer schemas use identifiers under
+`urn:hortinis:plants:schema:v1:`, and the V1 release-manifest schema accepts schema-version strings in the
+`1.x` family. A consumer must not interpret that syntax check as proof that it can safely consume a
+release.
 
-Releases declare a minimum consumer version. Hortinis must retain retired references when records leave an active profile; retirement or renaming must not invalidate personal history.
+When Hortinis and the catalog agree on policy, this document should define additive versus breaking
+changes, minimum consumer enforcement, retained identifiers for user history, migration behavior and
+positive/negative cross-version fixtures. Until then, contract changes that affect consumers require
+explicit coordination rather than an assumed compatibility rule.

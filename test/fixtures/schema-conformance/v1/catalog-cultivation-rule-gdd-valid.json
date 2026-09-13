@@ -1,0 +1,17 @@
+{
+  "id": "rule_tomato_gdd",
+  "status": "active",
+  "subject": { "type": "plant-concept", "id": "plant_tomato" },
+  "contextId": "context_fr_outdoor_transplant",
+  "action": "harvest",
+  "timing": {
+    "type": "growing-degree-day-threshold",
+    "threshold": { "value": 250, "unit": "Cel.d" },
+    "baseTemperature": { "value": 10, "unit": "Cel" },
+    "method": "daily-mean",
+    "accumulationAnchor": "calendar-date",
+    "start": { "month": 1, "day": 1 }
+  },
+  "evidenceReferenceIds": ["evidence_tomato_gdd"],
+  "reviewId": "review_tomato_gdd"
+}

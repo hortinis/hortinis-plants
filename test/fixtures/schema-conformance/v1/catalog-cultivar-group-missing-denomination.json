@@ -1,0 +1,6 @@
+{
+  "id": "cultivar_group_cherry_tomato",
+  "status": "active",
+  "plantConceptId": "plant_tomato",
+  "evidenceReferenceIds": ["evidence_cultivar_group"]
+}

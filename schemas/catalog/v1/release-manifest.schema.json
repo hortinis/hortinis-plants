@@ -31,15 +31,19 @@
     "requiredArtifacts": {
       "type": "array",
       "minItems": 1,
-      "items": {
-        "$ref": "urn:hortinis:plants:schema:v1:artifact-descriptor"
-      }
+      "items": { "$ref": "#/$defs/artifact" }
     },
     "optionalArtifacts": {
       "type": "array",
-      "items": {
-        "$ref": "urn:hortinis:plants:schema:v1:artifact-descriptor"
-      }
+      "items": { "$ref": "#/$defs/artifact" }
+    }
+  },
+  "$defs": {
+    "artifact": {
+      "oneOf": [
+        { "$ref": "urn:hortinis:plants:schema:v1:artifact-descriptor" },
+        { "$ref": "urn:hortinis:plants:schema:v1:chunk-descriptor" }
+      ]
     }
   }
 }

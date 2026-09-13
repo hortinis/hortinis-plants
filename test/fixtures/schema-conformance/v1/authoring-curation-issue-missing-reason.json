@@ -1,0 +1,6 @@
+{
+  "id": "issue_unmapped_grow_tomato",
+  "kind": "unresolved-mapping",
+  "status": "open",
+  "affectedRecordIds": ["grow_record_1"]
+}

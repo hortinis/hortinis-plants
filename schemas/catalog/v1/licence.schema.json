@@ -18,12 +18,11 @@
     "name": { "type": "string", "minLength": 1 },
     "expression": { "type": "string", "minLength": 1 },
     "referenceLocator": { "type": "string", "minLength": 1 },
-    "commercialUse": {
-      "type": "string",
-      "enum": ["allowed", "forbidden", "unknown"]
-    },
+    "commercialUse": { "enum": ["allowed", "forbidden", "unknown"] },
     "attributionRequired": { "type": "boolean" },
-    "requiredNotice": { "type": "string", "minLength": 1 }
+    "requiredNotice": { "type": "string", "minLength": 1 },
+    "shareAlikeRequired": { "type": "boolean" },
+    "compatibleLicenceExpression": { "type": "string", "minLength": 1 }
   },
   "allOf": [
     {
@@ -32,8 +31,18 @@
         "required": ["attributionRequired"]
       },
       "then": {
-        "properties": { "requiredNotice": true },
-        "required": ["requiredNotice"]
+        "required": ["requiredNotice"],
+        "properties": { "requiredNotice": true }
+      }
+    },
+    {
+      "if": {
+        "properties": { "shareAlikeRequired": { "const": true } },
+        "required": ["shareAlikeRequired"]
+      },
+      "then": {
+        "required": ["compatibleLicenceExpression"],
+        "properties": { "compatibleLicenceExpression": true }
       }
     }
   ]

@@ -1,7 +1,7 @@
 {
   "id": "rule_tomato_transplant",
   "status": "active",
-  "plantConceptId": "plant_tomato",
+  "subject": { "type": "plant-concept", "id": "plant_tomato" },
   "contextId": "context_fr_atlantic_outdoor_transplant",
   "action": "transplant",
   "timing": {
@@ -10,5 +10,6 @@
     "startOffsetDays": 7,
     "endOffsetDays": 21
   },
-  "evidenceReferenceIds": ["evidence_tomato_transplant"]
+  "evidenceReferenceIds": ["evidence_tomato_transplant"],
+  "reviewId": "review_tomato_transplant"
 }

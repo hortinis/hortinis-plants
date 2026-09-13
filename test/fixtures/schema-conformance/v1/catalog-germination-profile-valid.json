@@ -1,0 +1,4 @@
+{
+  "temperature": { "unit": "Cel", "optimum": 24 },
+  "duration": { "unit": "d", "minimum": 4, "maximum": 10 }
+}

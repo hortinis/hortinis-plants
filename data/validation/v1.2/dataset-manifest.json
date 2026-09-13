@@ -9,6 +9,7 @@
     "plant-concepts.jsonl",
     "cultivars.jsonl",
     "localized-names.jsonl",
+    "geographic-contexts.jsonl",
     "cultivation-contexts.jsonl",
     "cultivation-rules.jsonl",
     "assertions.jsonl",

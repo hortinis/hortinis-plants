@@ -1,0 +1,7 @@
+{
+  "id": "geography_metropolitan_france",
+  "status": "active",
+  "kind": "catalog-scope",
+  "name": "Metropolitan France, including Corsica",
+  "evidenceReferenceIds": ["evidence_geography_scope"]
+}

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:hortinis:plants:schema:v1:common",
-  "title": "Hortinis catalog common definitions",
+  "title": "Hortinis catalog shared definitions",
   "$defs": {
     "stableIdentifier": {
       "type": "string",
@@ -43,20 +43,57 @@
       "uniqueItems": true,
       "items": { "$ref": "#/$defs/stableIdentifier" }
     },
+    "optionalIdentifierList": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/stableIdentifier" }
+    },
+    "subjectReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["plant-concept", "cultivar-group", "cultivar"]
+        },
+        "id": { "$ref": "#/$defs/stableIdentifier" }
+      }
+    },
     "jsonValue": {
       "oneOf": [
         { "type": "null" },
         { "type": "boolean" },
         { "type": "number" },
         { "type": "string" },
-        {
-          "type": "array",
-          "items": { "$ref": "#/$defs/jsonValue" }
-        },
+        { "type": "array", "items": { "$ref": "#/$defs/jsonValue" } },
         {
           "type": "object",
           "additionalProperties": { "$ref": "#/$defs/jsonValue" }
         }
+      ]
+    },
+    "quantity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "unit"],
+      "properties": {
+        "value": { "type": "number" },
+        "unit": { "type": "string", "minLength": 1 }
+      }
+    },
+    "quantityRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unit"],
+      "properties": {
+        "minimum": { "type": "number" },
+        "maximum": { "type": "number" },
+        "unit": { "type": "string", "minLength": 1 }
+      },
+      "anyOf": [
+        { "properties": { "minimum": true }, "required": ["minimum"] },
+        { "properties": { "maximum": true }, "required": ["maximum"] }
       ]
     }
   }

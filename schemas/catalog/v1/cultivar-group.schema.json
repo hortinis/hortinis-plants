@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:cultivar-group",
+  "title": "Hortinis catalog cultivar group",
+  "type": "object",
+  "required": [
+    "id",
+    "status",
+    "plantConceptId",
+    "denomination",
+    "evidenceReferenceIds"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "status": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/catalogStatus"
+    },
+    "plantConceptId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "denomination": { "type": "string", "minLength": 1 },
+    "replacementCultivarGroupId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "evidenceReferenceIds": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/identifierList"
+    }
+  }
+}

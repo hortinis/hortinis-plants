@@ -9,7 +9,7 @@
     "licenceId": "licence_cc_by_4_0",
     "decision": "eligible",
     "reason": "Permitted for the dev-validation profile.",
+    "reviewId": "review_tomato_rights",
     "assumedFromFileLicence": true
-  },
-  "reviewId": "review_tomato_transplant"
+  }
 }

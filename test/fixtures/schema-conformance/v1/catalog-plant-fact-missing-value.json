@@ -1,0 +1,9 @@
+{
+  "id": "fact_tomato_frost_sensitivity",
+  "status": "active",
+  "subject": { "type": "plant-concept", "id": "plant_tomato" },
+  "predicate": "frost_sensitivity",
+  "contextId": "context_fr_outdoor_transplant",
+  "evidenceReferenceIds": ["evidence_tomato_frost"],
+  "reviewId": "review_tomato_frost"
+}

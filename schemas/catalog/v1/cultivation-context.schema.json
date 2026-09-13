@@ -3,13 +3,31 @@
   "$id": "urn:hortinis:plants:schema:v1:cultivation-context",
   "title": "Hortinis catalog cultivation context",
   "type": "object",
-  "required": ["id", "geographicContextIds", "growingSystem", "propagation"],
+  "required": ["id", "geographicScope", "growingSystem", "propagation"],
   "properties": {
     "id": {
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
     },
-    "geographicContextIds": {
-      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/identifierList"
+    "geographicScope": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "geographicContextIds"],
+          "properties": {
+            "type": { "const": "specified" },
+            "geographicContextIds": {
+              "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/identifierList"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type"],
+          "properties": { "type": { "const": "unknown" } }
+        }
+      ]
     },
     "growingSystem": {
       "type": "string",
@@ -23,7 +41,38 @@
     },
     "propagation": {
       "type": "string",
-      "enum": ["direct_sowing", "transplant", "vegetative", "unknown"]
+      "enum": [
+        "direct_sowing",
+        "transplant",
+        "vegetative",
+        "direct_sowing_or_transplant",
+        "unknown"
+      ]
+    },
+    "lifeStage": {
+      "type": "string",
+      "enum": [
+        "seed",
+        "seedling",
+        "vegetative",
+        "flowering",
+        "fruiting",
+        "harvest",
+        "dormant",
+        "unknown"
+      ]
+    },
+    "soilOrContainer": {
+      "type": "string",
+      "enum": ["in_ground", "container", "raised_bed", "unknown"]
+    },
+    "irrigation": {
+      "type": "string",
+      "enum": ["irrigated", "rain_fed", "unknown"]
+    },
+    "protection": {
+      "type": "string",
+      "enum": ["none", "row_cover", "cold_frame", "cloche", "unknown"]
     }
   }
 }

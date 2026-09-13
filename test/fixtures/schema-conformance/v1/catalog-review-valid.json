@@ -1,5 +1,6 @@
 {
   "id": "review_tomato_transplant",
+  "purpose": "content",
   "status": "accepted",
   "reviewedAt": "2026-09-11T12:00:00Z",
   "reviewerId": "maintainer_primary",

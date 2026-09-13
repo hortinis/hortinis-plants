@@ -1,5 +1,6 @@
 {
   "id": "review_tomato_transplant",
+  "purpose": "content",
   "status": "accepted",
   "reviewerId": "maintainer_primary",
   "confidence": 0.84

@@ -2,85 +2,185 @@
 
 - Status: validated
 
-V1 defines the language-neutral consumer records required by the local-validation artifact. The schemas
-are authoritative in this repository and use stable identifiers under
-`urn:hortinis:plants:schema:v1:`. Consumers pin copies of the complete schema set and validate data
-without importing catalog implementation code.
+Catalog V1 is the language-neutral contract for plant identity and cultivation data exchanged with
+Hortinis. JSON Schemas under `schemas/catalog/v1/` define consumer records; schemas under
+`schemas/authoring/v1/` define curation inputs that are not themselves release records. Consumers can
+pin and validate the JSON Schemas without importing this repository's implementation code.
 
-## Contract set
+## Record families
 
-The artifact contracts are `release-manifest` and `artifact-descriptor`. The minimum identity and
-cultivation contracts are `taxon`, `plant-concept`, `localized-name`, `cultivation-context` and
-`cultivation-rule`. The shared provenance records are `evidence-reference`, `source`, `licence`,
-`review` and `attribution`. `common` contains reusable schema definitions and is not an artifact entry
-type.
+The catalog is a set of linked records, not one deeply nested object per plant:
 
-Each public schema describes one JSON object. JSON Lines chunks contain one object per line and declare
-the object's schema identifier in their artifact descriptor. Metadata is normalized: catalog records
-refer to evidence records by identifier, and evidence records refer to shared source, licence and review
-records. A source, licence or review is not repeated in every plant or rule.
+- Identity: `taxon`, `plant-concept`, `cultivar-group`, `cultivar`, and `localized-name`.
+- Facts and applicability: `plant-fact`, `cultivation-context`, `cultivation-rule`,
+  `geographic-context`, and `relationship`.
+- Provenance and governance: `evidence-reference`, `source`, `licence`, `review`, and `attribution`.
+- Delivery: `release-manifest`, metadata `artifact-descriptor`, and `chunk-descriptor`.
 
-## Versions and artifact descriptors
+Every JSON Lines chunk contains records of exactly one schema, identified by `schemaId` in its chunk
+descriptor. The consumer follows stable identifiers to join records. It does not need to understand
+authoring assertions or the curation issue queue to read a release.
 
-The manifest uses semantic versions for the schema, catalog and minimum consumer versions. A V1 schema
-accepts schema versions with major version `1` and rejects other major versions. JSON Schema verifies
-the version syntax and supported schema major; comparing the minimum consumer version with a running
-application is a consumer compatibility check.
+## Example: a tomato and a cultivar
 
-Artifact paths are safe relative paths. An artifact descriptor records its kind, media type, schema
-identifier, byte size and lowercase SHA-256 digest. A `jsonl-gzip` descriptor additionally requires
-`contentEncoding: gzip` and a non-negative entry count. The manifest does not describe itself because a
-self-checksum would be recursive.
+The following records are an illustrative view of the current `dev-validation` scenario, not verified
+horticultural advice or a production rights determination. The actual records are split across schema-
+homogeneous chunks. Values are included only because the fixture explicitly supplies them; missing facts
+stay missing.
 
-The manifest separates required and optional artifacts. Missing required artifacts prevent activation;
-missing optional artifacts do not. Duplicate paths, hash and size verification, entry counts and
-reference resolution are artifact-level checks implemented in V1.3 and by Hortinis, not cross-document
-capabilities of JSON Schema.
+An output therefore looks like several schema-homogeneous streams. These sample records are taken from
+the validation fixture; each block shows records of one schema:
 
-## Identity, retirement and localization
+Plant concept and botanical identity:
 
-Taxa provide scientific identity. Plant concepts provide stable gardener-facing identity and reference
-a taxon without using its name as an identifier. Both record types can be active or retired and may
-identify a replacement. Artifact-level validation must ensure referenced and replacement identifiers
-resolve and do not form invalid cycles.
+```json
+{
+  "id": "plant_tomato",
+  "status": "active",
+  "taxonId": "taxon_tomato",
+  "evidenceReferenceIds": ["evidence_tomato_identity"]
+}
+```
 
-Only catalog-owned user-facing text is localized. Each localized name is a separate, BCP 47-tagged
-record associated with a taxon or plant concept. Rules, identifiers, contexts, units and review states
-remain structured language-neutral values. A profile may omit a requested language; consumers fall back
-to another explicitly tagged preferred name and then to the scientific name. Preferred-name uniqueness,
-tag canonicalization and fallback ordering require semantic checks across records.
+```json
+{
+  "id": "taxon_tomato",
+  "status": "active",
+  "scientificName": "Solanum lycopersicum",
+  "evidenceReferenceIds": ["evidence_tomato_identity"]
+}
+```
 
-Public consumer records allow additive top-level properties so an older V1 consumer can ignore a
-compatible addition. Closed nested structures such as checksums, normalization metadata, rights
-decisions and timing variants reject unknown properties because an unknown member could change their
-meaning.
+Localized name and generic plant fact:
 
-## Cultivation rules
+```json
+{
+  "id": "name_tomato_fr",
+  "subject": { "type": "plant-concept", "id": "plant_tomato" },
+  "languageTag": "fr",
+  "value": "tomate",
+  "kind": "common",
+  "preferred": true,
+  "evidenceReferenceIds": ["evidence_tomato_name"]
+}
+```
 
-V1 rules publish plant-specific parameters, not recommendations. A rule references a plant concept or
-cultivar, a reusable cultivation context and evidence. Cultivar-scoped rules remain cultivar-scoped and are
-never widened to the parent plant concept. The minimum timing variants are a calendar-date window and a
-day-offset window relative to the last spring frost, first autumn frost or previous crop harvest.
+```json
+{
+  "id": "fact_tomato_frost",
+  "status": "active",
+  "subject": { "type": "plant-concept", "id": "plant_tomato" },
+  "predicate": "frost_sensitivity",
+  "value": "sensitive",
+  "contextId": "context_fr_outdoor",
+  "evidenceReferenceIds": ["evidence_tomato_rule"],
+  "reviewId": "review_tomato"
+}
+```
 
-The catalog does not translate rule actions into prose or combine them with the current date, garden,
-weather or observations. Hortinis evaluates applicable rules and owns explanations, limitations and
-abstention. Soil-temperature, growing-degree-day and richer cultivar-specific rule contracts remain
-outside V1.1 unless the accepted P0.7a scenario proves one is required.
+Cultivar identity and its own cultivation rule:
 
-## Provenance and rights
+```json
+{
+  "id": "cultivar_marmande",
+  "status": "active",
+  "plantConceptId": "plant_tomato",
+  "denomination": "Marmande",
+  "evidenceReferenceIds": ["evidence_marmande"]
+}
+```
 
-Evidence references preserve the source manifest, source release, source record and locator. When a
-value is normalized, the evidence reference stores the original JSON value and may describe the
-normalization method. Its rights decision references a licence and records an explicit eligibility
-decision and reason. Its review identifier resolves to a separate review record.
+```json
+{"id":"rule_tomato_generic","status":"active","subject":{"type":"plant-concept","id":"plant_tomato"},"contextId":"context_fr_outdoor","action":"transplant","timing":{"type":"relative-day-window","anchor":"last_spring_frost","startOffsetDays":14,"endOffsetDays":42},"evidenceReferenceIds":["evidence_tomato_rule"],"reviewId":"review_tomato"}
+{"id":"rule_marmande","status":"active","subject":{"type":"cultivar","id":"cultivar_marmande"},"contextId":"context_fr_outdoor","action":"transplant","timing":{"type":"relative-day-window","anchor":"last_spring_frost","startOffsetDays":21,"endOffsetDays":49},"supersedesRuleIds":["rule_tomato_generic"],"evidenceReferenceIds":["evidence_marmande_rule"],"reviewId":"review_marmande"}
+```
 
-Licence records describe the rights instrument and required notice. Attribution records connect an
-included record scope to a source release, licence, profile and notice. Their inclusion keeps
-`attributions.json` machine-validatable without treating a licence declaration as proof of rights in
-upstream material.
+The rule block is one JSONL chunk because both records share the cultivation-rule schema. `evidenceReferenceIds`
+lead to records carrying source release, source record, locator, rights decision and rights-review
+reference. `reviewId` identifies the content review for a fact or rule.
 
-V1.1 schemas describe compiled consumer projections. They do not define the generic assertion authoring
-contract used before projection. V1.2 defines that boundary with the assertion, cultivar and curation-issue
-schemas. The tracked `dev-validation` input contains generic tomato, two explicitly scoped tomato cultivars
-(`Marmande` and `Montfavet H 63-5 F1`) and lettuce. This authoring dataset is compiled into consumer records
-in V1.3; it is not itself a release artifact.
+For example, the cultivar rule's evidence and its two review decisions are linked records too:
+
+```json
+{
+  "id": "evidence_marmande_rule",
+  "sourceId": "source_validation_fixture",
+  "sourceManifestId": "source_manifest_dev_validation",
+  "sourceReleaseId": "dev-validation-1",
+  "sourceRecordId": "marmande-rule",
+  "locator": "fixture://tomato/marmande/rule",
+  "rights": {
+    "licenceId": "licence_cc_by_4_0",
+    "decision": "eligible",
+    "reason": "Curated validation fixture",
+    "reviewId": "review_rights_fixture"
+  }
+}
+```
+
+```json
+{"id":"review_marmande","purpose":"content","status":"accepted","reviewedAt":"2026-09-11T00:00:00Z","reviewerId":"hortinis-maintainer","confidence":0.8,"notes":"Scenario fixture; cultivar-specific scope retained."}
+{"id":"review_rights_fixture","purpose":"rights","status":"accepted","reviewedAt":"2026-09-11T00:00:00Z","reviewerId":"hortinis-maintainer","notes":"Synthetic dev-validation provenance only; not a production source-rights determination."}
+```
+
+Hortinis can load the manifest, verify the compressed chunk hashes/counts, validate each line with the
+declared schema, then resolve IDs to compose a selected plant and cultivar view. The content review and
+rights review remain distinguishable, and this synthetic fixture is not evidence that the data can ship in
+a production profile.
+
+For a selected cultivar, Hortinis starts with the parent plant-concept data and applies cultivar-scoped
+data automatically. A cultivar record replaces a parent record only when its `supersedes*Ids` explicitly
+names that parent record. Otherwise both records remain available; the catalog does not guess which value
+is more specific, average them, or silently discard one. A generic tomato selection receives generic data
+only. This inheritance behavior is a consumer projection rule; it does not change the stored scope of a
+cultivar record.
+
+## Identity and names
+
+Taxa carry botanical identity; plant concepts carry Hortinis-facing identity. A concept may omit `taxonId`
+when the mapping is not known. Taxon, concept, group and cultivar IDs are stable opaque strings, never
+scientific names, file paths or row numbers. Cultivars require a denomination and parent plant concept;
+group membership is optional and may include zero or multiple group IDs.
+
+Localized names belong to a subject and carry a BCP 47 language tag. A cultivar's denomination is not
+treated as a translation. Consumers may choose an explicitly available name but must not synthesize a
+translation or infer an absent name.
+
+## Facts, contexts and rules
+
+`plant-fact` uses the fixed predicate registry and typed value branches. `cultivation-rule` carries one of
+the fixed actions and one timing form: calendar-month window, calendar-date window, relative-day window,
+soil-temperature threshold, or growing-degree-day threshold. Calendar months/dates are not conflated;
+cross-year windows are represented by start and end values in order. Relative anchors are explicit.
+Temperature uses `Cel`; GDD uses `Cel.d`, a stated base temperature and `daily-mean` method.
+
+Every claim refers to a context. Geographic scope is either a set of stable geographic-context IDs or
+explicitly `unknown`. Geographic contexts describe semantic scope and parentage only: these contracts do
+not ship polygons, coordinates, climate grids or dynamic weather. Missing data is not inferred.
+
+Rules publish parameters, not final recommendations. Hortinis combines applicable catalog records with
+garden state and observations, owns any explanation, and may abstain when required input is missing.
+
+## Authoring versus consumer release
+
+`authoring:v1:assertion` records one source-backed statement before projection; `authoring:v1:curation-issue`
+records unresolved mappings, contradictions and review issues. Authoring can retain unreviewed or rejected
+material and is not a consumer release. Consumer chunks contain only accepted records whose evidence,
+rights review and licence permit the selected release profile. Content review and rights review have
+separate purposes; a file-level licence declaration is not proof of upstream rights.
+
+## Delivery and versions
+
+The release manifest separates required and optional artifacts and records schema version, catalog
+version, minimum consumer version, profile and generation time. A JSON Lines chunk descriptor includes
+its single record schema, gzip encoding, byte size, entry count and SHA-256 digest. Metadata artifact
+descriptors describe manifests or schema documents. Manifest self-checksums are avoided because they
+would be recursive.
+
+Schema identifiers carry the contract major (`...:v1:`); the schema version field validates as `1.x`.
+Version comparison, compatibility guarantees, migration policy and compatibility fixtures are deferred
+until coordinated with Hortinis. This contract does not define a compatibility table or runtime policy.
+
+JSON Schema validates individual record shape. Cross-record referential integrity, duplicate detection,
+supersession ancestry, profile eligibility, rights gates and chunk integrity require build-time or
+consumer-level semantic checks.

@@ -1,16 +1,13 @@
 # Relationships and threats
 
-Relationships are directed, contextual assertions, never unqualified labels such as `good companion`.
+V1 `relationship` records are directed, contextual, reviewed evidence claims, not unqualified labels such
+as `good companion`. Each record identifies a subject, target, relation, effect, context, evidence and
+content review; an optional mechanism is retained only when supplied by the source. Multiple sources or
+effects remain separate records unless an explicit review resolves them.
 
-Each relationship records:
+The current relation registry is `supports`, `inhibits`, `attracts`, `repels`, `competes_with`,
+`facilitates` and `unknown`. The effect registry is `beneficial`, `adverse`, `mixed`, `neutral` and
+`unknown`. These values do not encode final Hortinis recommendations.
 
-- subject and target;
-- effect and mechanism;
-- applicable context;
-- evidence grade;
-- source and licence;
-- review state.
-
-Threats distinguish pests, diseases and physiological disorders. Before becoming user-facing advice, they require symptoms, scope and source-backed management information.
-
-These domains are designed for post-MVP extension. They are not required for the first France catalog release unless a specific accepted recommendation depends on them.
+Pest, disease and physiological-disorder records and management recommendations are deferred. They
+require explicit scope, evidence, licence and source-backed information before becoming user-facing advice.

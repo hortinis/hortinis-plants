@@ -156,9 +156,9 @@
       }
     },
     {
-      "id": "catalog-release-manifest-incompatible-version",
+      "id": "catalog-release-manifest-unsupported-schema-major",
       "schemaId": "urn:hortinis:plants:schema:v1:release-manifest",
-      "fixture": "catalog-release-manifest-incompatible-version.json",
+      "fixture": "catalog-release-manifest-unsupported-schema-major.json",
       "expected": {
         "valid": false,
         "errors": [{ "instancePath": "/schemaVersion", "keyword": "pattern" }]
@@ -343,11 +343,7 @@
       "fixture": "catalog-cultivation-rule-ambiguous-target.json",
       "expected": {
         "valid": false,
-        "errors": [
-          { "instancePath": "", "keyword": "oneOf" },
-          { "instancePath": "", "keyword": "not" },
-          { "instancePath": "", "keyword": "not" }
-        ]
+        "errors": [{ "instancePath": "", "keyword": "required" }]
       }
     },
     {
@@ -366,10 +362,181 @@
       "expected": { "valid": true }
     },
     {
-      "id": "catalog-assertion-valid",
-      "schemaId": "urn:hortinis:plants:schema:v1:assertion",
+      "id": "catalog-cultivar-missing-denomination",
+      "schemaId": "urn:hortinis:plants:schema:v1:cultivar",
+      "fixture": "catalog-cultivar-missing-denomination.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "", "keyword": "required" }]
+      }
+    },
+    {
+      "id": "catalog-cultivar-group-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:cultivar-group",
+      "fixture": "catalog-cultivar-group-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "catalog-cultivar-group-missing-denomination",
+      "schemaId": "urn:hortinis:plants:schema:v1:cultivar-group",
+      "fixture": "catalog-cultivar-group-missing-denomination.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "", "keyword": "required" }]
+      }
+    },
+    {
+      "id": "catalog-geographic-context-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:geographic-context",
+      "fixture": "catalog-geographic-context-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "catalog-geographic-context-missing-kind",
+      "schemaId": "urn:hortinis:plants:schema:v1:geographic-context",
+      "fixture": "catalog-geographic-context-missing-kind.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "", "keyword": "required" }]
+      }
+    },
+    {
+      "id": "catalog-plant-fact-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:plant-fact",
+      "fixture": "catalog-plant-fact-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "catalog-plant-fact-missing-value",
+      "schemaId": "urn:hortinis:plants:schema:v1:plant-fact",
+      "fixture": "catalog-plant-fact-missing-value.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "", "keyword": "required" }]
+      }
+    },
+    {
+      "id": "catalog-relationship-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:relationship",
+      "fixture": "catalog-relationship-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "catalog-relationship-invalid-effect",
+      "schemaId": "urn:hortinis:plants:schema:v1:relationship",
+      "fixture": "catalog-relationship-invalid-effect.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/effect", "keyword": "enum" }]
+      }
+    },
+    {
+      "id": "catalog-chunk-descriptor-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:chunk-descriptor",
+      "fixture": "catalog-chunk-descriptor-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "catalog-chunk-descriptor-missing-schema",
+      "schemaId": "urn:hortinis:plants:schema:v1:chunk-descriptor",
+      "fixture": "catalog-chunk-descriptor-missing-schema.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "", "keyword": "required" }]
+      }
+    },
+    {
+      "id": "catalog-cultivation-rule-calendar-month-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:cultivation-rule",
+      "fixture": "catalog-cultivation-rule-calendar-month-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "catalog-cultivation-rule-soil-temperature-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:cultivation-rule",
+      "fixture": "catalog-cultivation-rule-soil-temperature-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "catalog-cultivation-rule-soil-temperature-between-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:cultivation-rule",
+      "fixture": "catalog-cultivation-rule-soil-temperature-between-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "catalog-cultivation-rule-gdd-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:cultivation-rule",
+      "fixture": "catalog-cultivation-rule-gdd-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "catalog-temperature-profile-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:temperature-profile",
+      "fixture": "catalog-temperature-profile-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "catalog-temperature-profile-missing-value",
+      "schemaId": "urn:hortinis:plants:schema:v1:temperature-profile",
+      "fixture": "catalog-temperature-profile-missing-value.json",
+      "expected": {
+        "valid": false,
+        "errors": [
+          { "instancePath": "", "keyword": "anyOf" },
+          { "instancePath": "", "keyword": "required" },
+          { "instancePath": "", "keyword": "required" },
+          { "instancePath": "", "keyword": "required" }
+        ]
+      }
+    },
+    {
+      "id": "catalog-germination-profile-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:germination-profile",
+      "fixture": "catalog-germination-profile-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "catalog-germination-profile-empty",
+      "schemaId": "urn:hortinis:plants:schema:v1:germination-profile",
+      "fixture": "catalog-germination-profile-empty.json",
+      "expected": {
+        "valid": false,
+        "errors": [
+          { "instancePath": "", "keyword": "anyOf" },
+          { "instancePath": "", "keyword": "required" },
+          { "instancePath": "", "keyword": "required" }
+        ]
+      }
+    },
+    {
+      "id": "authoring-curation-issue-valid",
+      "schemaId": "urn:hortinis:plants:schema:authoring:v1:curation-issue",
+      "fixture": "authoring-curation-issue-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "authoring-curation-issue-missing-reason",
+      "schemaId": "urn:hortinis:plants:schema:authoring:v1:curation-issue",
+      "fixture": "authoring-curation-issue-missing-reason.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "", "keyword": "required" }]
+      }
+    },
+    {
+      "id": "authoring-assertion-valid",
+      "schemaId": "urn:hortinis:plants:schema:authoring:v1:assertion",
       "fixture": "catalog-assertion-valid.json",
       "expected": { "valid": true }
+    },
+    {
+      "id": "authoring-assertion-missing-value",
+      "schemaId": "urn:hortinis:plants:schema:authoring:v1:assertion",
+      "fixture": "authoring-assertion-missing-value.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "", "keyword": "required" }]
+      }
     },
     {
       "id": "importer-run-manifest-valid",

@@ -3,7 +3,7 @@
   "$id": "urn:hortinis:plants:schema:v1:plant-concept",
   "title": "Hortinis catalog plant concept",
   "type": "object",
-  "required": ["id", "status", "taxonId", "evidenceReferenceIds"],
+  "required": ["id", "status", "evidenceReferenceIds"],
   "properties": {
     "id": {
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"

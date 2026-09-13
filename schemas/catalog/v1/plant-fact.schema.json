@@ -1,0 +1,345 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:plant-fact",
+  "title": "Hortinis catalog plant fact",
+  "type": "object",
+  "required": [
+    "id",
+    "status",
+    "subject",
+    "predicate",
+    "value",
+    "contextId",
+    "evidenceReferenceIds",
+    "reviewId"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "status": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/catalogStatus"
+    },
+    "subject": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/subjectReference"
+    },
+    "predicate": {
+      "type": "string",
+      "enum": [
+        "life_cycle",
+        "growth_habit",
+        "mature_height",
+        "mature_spread",
+        "sun_requirement",
+        "soil_texture",
+        "soil_ph_range",
+        "drainage_requirement",
+        "water_requirement",
+        "frost_sensitivity",
+        "minimum_germination_temperature",
+        "germination_profile",
+        "growing_temperature",
+        "germination_days",
+        "days_to_first_harvest",
+        "spacing"
+      ]
+    },
+    "value": {},
+    "contextId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "supersedesFactIds": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/optionalIdentifierList"
+    },
+    "evidenceReferenceIds": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/identifierList"
+    },
+    "reviewId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "predicate": { "const": "life_cycle" } },
+        "required": ["predicate"]
+      },
+      "then": {
+        "properties": {
+          "value": { "enum": ["annual", "biennial", "perennial", "unknown"] }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "predicate": { "const": "growth_habit" } },
+        "required": ["predicate"]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "enum": [
+              "herbaceous",
+              "bushy",
+              "climbing",
+              "creeping",
+              "rosette",
+              "tree",
+              "shrub",
+              "unknown"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "predicate": { "enum": ["mature_height", "mature_spread"] }
+        },
+        "required": ["predicate"]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["unit"],
+            "properties": {
+              "minimum": { "type": "number", "minimum": 0 },
+              "maximum": { "type": "number", "exclusiveMinimum": 0 },
+              "unit": { "const": "m" }
+            },
+            "anyOf": [
+              { "properties": { "minimum": true }, "required": ["minimum"] },
+              { "properties": { "maximum": true }, "required": ["maximum"] }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "predicate": { "const": "sun_requirement" } },
+        "required": ["predicate"]
+      },
+      "then": {
+        "properties": {
+          "value": { "enum": ["full_sun", "partial_shade", "shade", "unknown"] }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "predicate": { "const": "soil_texture" } },
+        "required": ["predicate"]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "enum": [
+              "sand",
+              "loamy_sand",
+              "sandy_loam",
+              "loam",
+              "silt_loam",
+              "silt",
+              "sandy_clay_loam",
+              "clay_loam",
+              "silty_clay_loam",
+              "sandy_clay",
+              "silty_clay",
+              "clay",
+              "unknown"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "predicate": { "const": "soil_ph_range" } },
+        "required": ["predicate"]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["minimum", "maximum"],
+            "properties": {
+              "minimum": { "type": "number", "minimum": 0, "maximum": 14 },
+              "maximum": { "type": "number", "minimum": 0, "maximum": 14 }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "predicate": { "const": "drainage_requirement" } },
+        "required": ["predicate"]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "enum": [
+              "freely_drained",
+              "moist_but_drained",
+              "poorly_drained",
+              "unknown"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "predicate": { "const": "water_requirement" } },
+        "required": ["predicate"]
+      },
+      "then": {
+        "properties": {
+          "value": { "enum": ["low", "moderate", "high", "unknown"] }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "predicate": { "const": "frost_sensitivity" } },
+        "required": ["predicate"]
+      },
+      "then": {
+        "properties": {
+          "value": { "enum": ["sensitive", "tolerant", "hardy", "unknown"] }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "predicate": { "const": "minimum_germination_temperature" }
+        },
+        "required": ["predicate"]
+      },
+      "then": { "properties": { "value": { "$ref": "#/$defs/temperature" } } }
+    },
+    {
+      "if": {
+        "properties": { "predicate": { "const": "germination_profile" } },
+        "required": ["predicate"]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "$ref": "urn:hortinis:plants:schema:v1:germination-profile"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "predicate": { "const": "growing_temperature" } },
+        "required": ["predicate"]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "$ref": "urn:hortinis:plants:schema:v1:temperature-profile"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "predicate": { "const": "germination_days" } },
+        "required": ["predicate"]
+      },
+      "then": { "properties": { "value": { "$ref": "#/$defs/duration" } } }
+    },
+    {
+      "if": {
+        "properties": { "predicate": { "const": "days_to_first_harvest" } },
+        "required": ["predicate"]
+      },
+      "then": {
+        "properties": { "value": { "$ref": "#/$defs/harvestDuration" } }
+      }
+    },
+    {
+      "if": {
+        "properties": { "predicate": { "const": "spacing" } },
+        "required": ["predicate"]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["unit"],
+            "properties": {
+              "minimum": { "type": "number", "exclusiveMinimum": 0 },
+              "maximum": { "type": "number", "exclusiveMinimum": 0 },
+              "unit": { "const": "cm" }
+            },
+            "anyOf": [
+              { "properties": { "minimum": true }, "required": ["minimum"] },
+              { "properties": { "maximum": true }, "required": ["maximum"] }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "temperature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "unit"],
+      "properties": {
+        "value": { "type": "number" },
+        "unit": { "const": "Cel" }
+      }
+    },
+    "duration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unit", "anchor"],
+      "properties": {
+        "minimum": { "type": "number", "minimum": 0 },
+        "maximum": { "type": "number", "minimum": 0 },
+        "unit": { "const": "d" },
+        "anchor": {
+          "enum": ["after_sowing", "after_stratification", "unknown"]
+        }
+      },
+      "anyOf": [
+        { "properties": { "minimum": true }, "required": ["minimum"] },
+        { "properties": { "maximum": true }, "required": ["maximum"] }
+      ]
+    },
+    "harvestDuration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unit", "anchor"],
+      "properties": {
+        "minimum": { "type": "number", "minimum": 0 },
+        "maximum": { "type": "number", "minimum": 0 },
+        "unit": { "const": "d" },
+        "anchor": {
+          "enum": [
+            "after_sowing",
+            "after_emergence",
+            "after_transplant",
+            "after_planting",
+            "unknown"
+          ]
+        }
+      },
+      "anyOf": [
+        { "properties": { "minimum": true }, "required": ["minimum"] },
+        { "properties": { "maximum": true }, "required": ["maximum"] }
+      ]
+    }
+  }
+}

@@ -1,17 +1,15 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:hortinis:plants:schema:v1:review",
-  "title": "Hortinis catalog review",
+  "title": "Hortinis catalog review decision",
   "type": "object",
-  "required": ["id", "status"],
+  "required": ["id", "purpose", "status"],
   "properties": {
     "id": {
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
     },
-    "status": {
-      "type": "string",
-      "enum": ["unreviewed", "accepted", "rejected", "superseded"]
-    },
+    "purpose": { "enum": ["content", "rights"] },
+    "status": { "enum": ["unreviewed", "accepted", "rejected", "superseded"] },
     "reviewedAt": {
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/utcTimestamp"
     },
@@ -30,12 +28,16 @@
         "required": ["status"]
       },
       "then": {
-        "properties": {
-          "reviewedAt": true,
-          "reviewerId": true
-        },
-        "required": ["reviewedAt", "reviewerId"]
+        "required": ["reviewedAt", "reviewerId"],
+        "properties": { "reviewedAt": true, "reviewerId": true }
       }
+    },
+    {
+      "if": {
+        "properties": { "purpose": { "const": "rights" } },
+        "required": ["purpose"]
+      },
+      "then": { "properties": { "confidence": false } }
     }
   ]
 }

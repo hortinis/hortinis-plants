@@ -1,2 +1,2 @@
-{"id":"cultivar_marmande","status":"active","plantConceptId":"plant_tomato","evidenceReferenceIds":["evidence_marmande"]}
-{"id":"cultivar_montfavet_h63_5_f1","status":"active","plantConceptId":"plant_tomato","evidenceReferenceIds":["evidence_montfavet"]}
+{"id":"cultivar_marmande","status":"active","plantConceptId":"plant_tomato","denomination":"Marmande","evidenceReferenceIds":["evidence_marmande"]}
+{"id":"cultivar_montfavet_h63_5_f1","status":"active","plantConceptId":"plant_tomato","denomination":"Montfavet H 63-5 F1","evidenceReferenceIds":["evidence_montfavet"]}

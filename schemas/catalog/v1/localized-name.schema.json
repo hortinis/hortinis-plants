@@ -5,8 +5,7 @@
   "type": "object",
   "required": [
     "id",
-    "subjectType",
-    "subjectId",
+    "subject",
     "languageTag",
     "value",
     "kind",
@@ -17,12 +16,18 @@
     "id": {
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
     },
-    "subjectType": {
-      "type": "string",
-      "enum": ["taxon", "plant-concept"]
-    },
-    "subjectId": {
-      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": {
+          "enum": ["taxon", "plant-concept", "cultivar-group", "cultivar"]
+        },
+        "id": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+        }
+      }
     },
     "languageTag": {
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/languageTag"

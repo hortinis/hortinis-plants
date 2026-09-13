@@ -11,5 +11,6 @@
     "startOffsetDays": 7,
     "endOffsetDays": 21
   },
-  "evidenceReferenceIds": ["evidence_tomato_transplant"]
+  "evidenceReferenceIds": ["evidence_tomato_transplant"],
+  "reviewId": "review_tomato_transplant"
 }

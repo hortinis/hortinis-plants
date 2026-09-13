@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:authoring:v1:curation-issue",
+  "title": "Hortinis catalog curation issue",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "kind", "status", "affectedRecordIds", "reason"],
+  "properties": {
+    "id": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "kind": {
+      "enum": [
+        "unresolved-mapping",
+        "contradiction",
+        "missing-evidence",
+        "rights-review",
+        "invalid-context"
+      ]
+    },
+    "status": { "enum": ["open", "resolved", "accepted-limitation"] },
+    "affectedRecordIds": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/identifierList"
+    },
+    "reason": { "type": "string", "minLength": 1 },
+    "resolution": { "type": "string", "minLength": 1 },
+    "evidenceReferenceIds": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/optionalIdentifierList"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": { "enum": ["resolved", "accepted-limitation"] }
+        },
+        "required": ["status"]
+      },
+      "then": {
+        "properties": { "resolution": true },
+        "required": ["resolution"]
+      }
+    }
+  ]
+}

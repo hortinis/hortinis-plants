@@ -6,10 +6,12 @@
   "required": [
     "id",
     "status",
+    "subject",
     "contextId",
     "action",
     "timing",
-    "evidenceReferenceIds"
+    "evidenceReferenceIds",
+    "reviewId"
   ],
   "properties": {
     "id": {
@@ -18,11 +20,8 @@
     "status": {
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/catalogStatus"
     },
-    "plantConceptId": {
-      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
-    },
-    "cultivarId": {
-      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    "subject": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/subjectReference"
     },
     "contextId": {
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
@@ -33,38 +32,30 @@
         "start_indoors",
         "direct_sow",
         "transplant",
-        "plant_now",
-        "harvest"
+        "plant",
+        "harvest",
+        "establish_outdoors"
       ]
     },
     "timing": {
       "oneOf": [
+        { "$ref": "#/$defs/calendarMonthWindow" },
         { "$ref": "#/$defs/calendarDateWindow" },
-        { "$ref": "#/$defs/relativeDayWindow" }
+        { "$ref": "#/$defs/relativeDayWindow" },
+        { "$ref": "#/$defs/soilTemperatureThreshold" },
+        { "$ref": "#/$defs/growingDegreeDayThreshold" }
       ]
+    },
+    "supersedesRuleIds": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/optionalIdentifierList"
     },
     "evidenceReferenceIds": {
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/identifierList"
+    },
+    "reviewId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
     }
   },
-  "oneOf": [
-    {
-      "properties": { "plantConceptId": true, "cultivarId": true },
-      "required": ["plantConceptId"],
-      "not": {
-        "required": ["cultivarId"],
-        "properties": { "cultivarId": true }
-      }
-    },
-    {
-      "properties": { "plantConceptId": true, "cultivarId": true },
-      "required": ["cultivarId"],
-      "not": {
-        "required": ["plantConceptId"],
-        "properties": { "plantConceptId": true }
-      }
-    }
-  ],
   "$defs": {
     "monthDay": {
       "type": "object",
@@ -75,15 +66,24 @@
         "day": { "type": "integer", "minimum": 1, "maximum": 31 }
       }
     },
+    "calendarMonthWindow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "startMonth", "endMonth"],
+      "properties": {
+        "type": { "const": "calendar-month-window" },
+        "startMonth": { "type": "integer", "minimum": 1, "maximum": 12 },
+        "endMonth": { "type": "integer", "minimum": 1, "maximum": 12 }
+      }
+    },
     "calendarDateWindow": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["type", "start", "end", "precision"],
+      "required": ["type", "start", "end"],
       "properties": {
         "type": { "const": "calendar-date-window" },
         "start": { "$ref": "#/$defs/monthDay" },
-        "end": { "$ref": "#/$defs/monthDay" },
-        "precision": { "type": "string", "enum": ["day", "month"] }
+        "end": { "$ref": "#/$defs/monthDay" }
       }
     },
     "relativeDayWindow": {
@@ -93,7 +93,6 @@
       "properties": {
         "type": { "const": "relative-day-window" },
         "anchor": {
-          "type": "string",
           "enum": [
             "last_spring_frost",
             "first_autumn_frost",
@@ -103,6 +102,128 @@
         "startOffsetDays": { "type": "integer" },
         "endOffsetDays": { "type": "integer" }
       }
+    },
+    "temperature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "unit"],
+      "properties": {
+        "value": { "type": "number" },
+        "unit": { "const": "Cel" }
+      }
+    },
+    "temperatureRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimum", "maximum", "unit"],
+      "properties": {
+        "minimum": { "type": "number" },
+        "maximum": { "type": "number" },
+        "unit": { "const": "Cel" }
+      }
+    },
+    "measurement": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "depth": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["value", "unit"],
+          "properties": {
+            "value": { "type": "number", "exclusiveMinimum": 0 },
+            "unit": { "const": "cm" }
+          }
+        },
+        "period": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["value", "unit"],
+          "properties": {
+            "value": { "type": "number", "exclusiveMinimum": 0 },
+            "unit": { "const": "d" }
+          }
+        },
+        "aggregation": { "enum": ["minimum", "maximum", "mean", "median"] }
+      },
+      "anyOf": [
+        { "properties": { "depth": true }, "required": ["depth"] },
+        { "properties": { "period": true }, "required": ["period"] },
+        { "properties": { "aggregation": true }, "required": ["aggregation"] }
+      ]
+    },
+    "soilTemperatureThreshold": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "operator", "temperature"],
+          "properties": {
+            "type": { "const": "soil-temperature-threshold" },
+            "operator": { "enum": ["at-least", "at-most"] },
+            "temperature": { "$ref": "#/$defs/temperature" },
+            "measurement": { "$ref": "#/$defs/measurement" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "operator", "temperatureRange"],
+          "properties": {
+            "type": { "const": "soil-temperature-threshold" },
+            "operator": { "const": "between" },
+            "temperatureRange": { "$ref": "#/$defs/temperatureRange" },
+            "measurement": { "$ref": "#/$defs/measurement" }
+          }
+        }
+      ]
+    },
+    "growingDegreeDayThreshold": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "threshold",
+        "baseTemperature",
+        "method",
+        "accumulationAnchor"
+      ],
+      "properties": {
+        "type": { "const": "growing-degree-day-threshold" },
+        "threshold": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["value", "unit"],
+          "properties": {
+            "value": { "type": "number", "minimum": 0 },
+            "unit": { "const": "Cel.d" }
+          }
+        },
+        "baseTemperature": { "$ref": "#/$defs/temperature" },
+        "method": { "const": "daily-mean" },
+        "accumulationAnchor": {
+          "enum": [
+            "calendar-date",
+            "sowing",
+            "transplanting",
+            "planting",
+            "last_spring_frost"
+          ]
+        },
+        "start": { "$ref": "#/$defs/monthDay" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "accumulationAnchor": { "const": "calendar-date" }
+            },
+            "required": ["accumulationAnchor"]
+          },
+          "then": { "properties": { "start": true }, "required": ["start"] },
+          "else": { "not": { "required": ["start"] } }
+        }
+      ]
     }
   }
 }

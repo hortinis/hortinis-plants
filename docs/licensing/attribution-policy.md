@@ -11,7 +11,8 @@ Each notice must contain:
 - required attribution text;
 - included profile and record scope.
 
-Generate attribution from assertions included in the profile; unused source records must not create notices.
+Generate attribution from consumer records included in the profile and their referenced evidence; unused
+source records must not create notices.
 
 For the GROW Edible Plant Database, use the University of Dundee dataset record at DOI
 `10.15132/10000157` as the licence evidence locator. Attribute the named creators and GROW Consortium,

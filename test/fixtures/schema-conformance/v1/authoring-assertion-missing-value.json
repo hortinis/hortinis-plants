@@ -1,0 +1,8 @@
+{
+  "id": "assertion_marmande_window",
+  "subject": { "type": "cultivar", "id": "cultivar_marmande" },
+  "predicate": "transplant_window",
+  "contextId": "context_fr_outdoor_transplant",
+  "evidenceReferenceIds": ["evidence_marmande_rule"],
+  "reviewId": "review_marmande"
+}

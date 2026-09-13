@@ -1,0 +1,19 @@
+{
+  "id": "rule_tomato_soil_temperature_band",
+  "status": "active",
+  "subject": { "type": "plant-concept", "id": "plant_tomato" },
+  "contextId": "context_fr_outdoor_direct_sowing",
+  "action": "direct_sow",
+  "timing": {
+    "type": "soil-temperature-threshold",
+    "operator": "between",
+    "temperatureRange": { "minimum": 10, "maximum": 18, "unit": "Cel" },
+    "measurement": {
+      "depth": { "value": 5, "unit": "cm" },
+      "period": { "value": 3, "unit": "d" },
+      "aggregation": "mean"
+    }
+  },
+  "evidenceReferenceIds": ["evidence_tomato_soil"],
+  "reviewId": "review_tomato_soil"
+}

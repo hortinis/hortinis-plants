@@ -1,0 +1,6 @@
+{
+  "id": "cultivar_marmande",
+  "status": "active",
+  "plantConceptId": "plant_tomato",
+  "evidenceReferenceIds": ["evidence_marmande"]
+}

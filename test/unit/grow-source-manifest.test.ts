@@ -37,7 +37,9 @@ describe("GROW source metadata", () => {
     const germination = ajv.getSchema(
       "urn:hortinis:plants:schema:v1:germination-profile",
     );
-    const assertion = ajv.getSchema("urn:hortinis:plants:schema:v1:assertion");
+    const assertion = ajv.getSchema(
+      "urn:hortinis:plants:schema:authoring:v1:assertion",
+    );
     const rule = ajv.getSchema(
       "urn:hortinis:plants:schema:v1:cultivation-rule",
     );
@@ -84,11 +86,10 @@ describe("GROW source metadata", () => {
       assertions: [
         {
           id: "assertion_bad_temperature",
-          subjectType: "plant-concept",
-          subjectId: "plant_unmapped",
+          subject: { type: "plant-concept", id: "plant_unmapped" },
           predicate: "growing_temperature",
           value: { unit: "Cel", minimum: 30, maximum: 10 },
-          context: {},
+          contextId: "context_unknown",
           evidenceReferenceIds: ["evidence_missing"],
           reviewId: "review_missing",
         },
