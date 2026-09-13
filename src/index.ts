@@ -24,3 +24,8 @@ export type {
   DatasetValidationIssue,
   ValidationDataset,
 } from "./curation/validation-dataset.js";
+export { importGrowSource } from "./adapters/grow/adapter.js";
+export type {
+  GrowImportOptions,
+  GrowImportResult,
+} from "./adapters/grow/adapter.js";

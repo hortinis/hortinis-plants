@@ -4,3 +4,4 @@ dist/
 artifacts/releases/
 coverage/
 *.tsbuildinfo
+.cache/import-runs/

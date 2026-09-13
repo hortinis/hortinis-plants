@@ -1,6 +1,8 @@
 node_modules/
 dist/
 .cache/source-inputs/
+.cache/import-runs/
+data/sources/grow/releases/
 artifacts/releases/
 coverage/
 *.tsbuildinfo

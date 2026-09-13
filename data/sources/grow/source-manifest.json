@@ -1,0 +1,67 @@
+{
+  "id": "source_manifest_grow_epd_2020",
+  "provider": {
+    "id": "provider_university_dundee",
+    "name": "University of Dundee"
+  },
+  "release": {
+    "identifier": "doi:10.15132/10000157",
+    "publishedAt": "2020-05"
+  },
+  "resources": [
+    {
+      "locator": "plant1.accdb",
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "9a4a5262e1584529030e9cdc95edaf7528959a825a3ee54053cb3d8778b23860"
+      },
+      "byteSize": 5435392,
+      "mediaType": "application/x-msaccess"
+    },
+    {
+      "locator": "PlantingCalendar.xlsx",
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "f373169ae093f795820eb1827fa52103cfc51fb444cc118f2b7a0e262b82cd63"
+      },
+      "byteSize": 162311,
+      "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    },
+    {
+      "locator": "Edible_Plant_Database.docx",
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "f7f6bf68cec8fe441c83ed29bfe24cad4d2d30ce27415ce6a0a03ffb5a5a872f"
+      },
+      "byteSize": 18635,
+      "mediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    },
+    {
+      "locator": "ReadMe.md",
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "45995cd3a062821e191c562d61d9a2a2aac710e6cc8f6de724cd172de8c5a2a7"
+      },
+      "byteSize": 779,
+      "mediaType": "text/markdown"
+    }
+  ],
+  "licenceReview": {
+    "status": "accepted",
+    "declaredLicence": "CC-BY-4.0",
+    "evidenceLocator": "https://discovery.dundee.ac.uk/en/datasets/edible-plant-database/",
+    "notes": "University of Dundee release record declares CC BY 4.0. Images are separately licensed and excluded."
+  },
+  "profileEligibility": [
+    {
+      "profile": "commercial",
+      "decision": "eligible",
+      "reason": "The dataset record declares CC BY 4.0; attribution and modification notice are generated. Excluded image fields remain outside the import."
+    },
+    {
+      "profile": "dev-validation",
+      "decision": "eligible",
+      "reason": "The dataset record declares CC BY 4.0; attribution and modification notice are generated."
+    }
+  ]
+}

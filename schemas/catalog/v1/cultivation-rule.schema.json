@@ -29,7 +29,13 @@
     },
     "action": {
       "type": "string",
-      "enum": ["start_indoors", "direct_sow", "transplant", "plant_now"]
+      "enum": [
+        "start_indoors",
+        "direct_sow",
+        "transplant",
+        "plant_now",
+        "harvest"
+      ]
     },
     "timing": {
       "oneOf": [

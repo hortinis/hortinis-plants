@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:temperature-profile",
+  "title": "Hortinis normalized temperature profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["unit"],
+  "properties": {
+    "unit": { "const": "Cel" },
+    "minimum": { "type": "number" },
+    "maximum": { "type": "number" },
+    "optimum": { "type": "number" }
+  },
+  "anyOf": [
+    { "properties": { "minimum": true }, "required": ["minimum"] },
+    { "properties": { "maximum": true }, "required": ["maximum"] },
+    { "properties": { "optimum": true }, "required": ["optimum"] }
+  ]
+}

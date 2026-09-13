@@ -71,5 +71,33 @@
     "reviewId": {
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "predicate": { "const": "growing_temperature" } },
+        "required": ["predicate"]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "$ref": "urn:hortinis:plants:schema:v1:temperature-profile"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "predicate": { "const": "germination_profile" } },
+        "required": ["predicate"]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "$ref": "urn:hortinis:plants:schema:v1:germination-profile"
+          }
+        }
+      }
+    }
+  ]
 }

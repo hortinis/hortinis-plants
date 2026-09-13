@@ -1,9 +1,16 @@
+import {
+  isValidGerminationProfile,
+  isValidTemperatureProfile,
+} from "../domain/temperature-profile.js";
+
 export interface DatasetValidationIssue {
   readonly code:
     | "DUPLICATE_ID"
     | "MISSING_REFERENCE"
     | "INVALID_SCOPE"
-    | "CULTIVAR_RULES_NOT_DISTINCT";
+    | "CULTIVAR_RULES_NOT_DISTINCT"
+    | "INVALID_TEMPERATURE_PROFILE"
+    | "INVALID_GERMINATION_PROFILE";
   readonly recordId: string;
   readonly message: string;
 }
@@ -26,7 +33,17 @@ export function validateValidationDataset(
 ): DatasetValidationIssue[] {
   const issues: DatasetValidationIssue[] = [];
   const ids = new Map<string, Set<string>>();
-  for (const [kind, records] of Object.entries(dataset)) {
+  const collections: readonly [string, readonly DatasetRecord[]][] = [
+    ["taxa", dataset.taxa],
+    ["plantConcepts", dataset.plantConcepts],
+    ["cultivars", dataset.cultivars],
+    ["contexts", dataset.contexts],
+    ["rules", dataset.rules],
+    ["assertions", dataset.assertions],
+    ["evidence", dataset.evidence],
+    ["reviews", dataset.reviews],
+  ];
+  for (const [kind, records] of collections) {
     const seen = new Set<string>();
     ids.set(kind, seen);
     for (const record of records) {
@@ -85,6 +102,29 @@ export function validateValidationDataset(
       id,
       issues,
     );
+    const predicate = stringField(record, "predicate");
+    if (
+      predicate === "growing_temperature" &&
+      !isValidTemperatureProfile(record.value)
+    ) {
+      issues.push({
+        code: "INVALID_TEMPERATURE_PROFILE",
+        recordId: id,
+        message:
+          "Temperature assertion must use a valid Celsius profile with ordered bounds.",
+      });
+    }
+    if (
+      predicate === "germination_profile" &&
+      !isValidGerminationProfile(record.value)
+    ) {
+      issues.push({
+        code: "INVALID_GERMINATION_PROFILE",
+        recordId: id,
+        message:
+          "Germination profile must have valid Celsius temperature and/or day duration values.",
+      });
+    }
     const reviewId = stringField(record, "reviewId");
     if (reviewId !== undefined && !has("reviews", reviewId)) {
       issues.push({

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:germination-profile",
+  "title": "Hortinis germination profile",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "temperature": {
+      "$ref": "urn:hortinis:plants:schema:v1:temperature-profile"
+    },
+    "duration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unit"],
+      "properties": {
+        "unit": { "const": "d" },
+        "minimum": { "type": "number", "minimum": 0 },
+        "maximum": { "type": "number", "minimum": 0 }
+      },
+      "anyOf": [
+        { "properties": { "minimum": true }, "required": ["minimum"] },
+        { "properties": { "maximum": true }, "required": ["maximum"] }
+      ]
+    }
+  },
+  "anyOf": [
+    {
+      "properties": { "temperature": true },
+      "required": ["temperature"]
+    },
+    {
+      "properties": { "duration": true },
+      "required": ["duration"]
+    }
+  ]
+}
