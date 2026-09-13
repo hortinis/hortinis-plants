@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { createReadStream } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
@@ -6,15 +6,18 @@ import {
   type DatasetRecord,
   type ValidationDataset,
 } from "../../src/curation/validation-dataset.js";
+import { readJsonLines } from "../../src/serialization/json-lines.js";
 
 const root = join(process.cwd(), "data/validation/v1.2");
 
 async function readRecords(file: string): Promise<DatasetRecord[]> {
-  const text = await readFile(join(root, file), "utf8");
-  return text
-    .split("\n")
-    .filter(Boolean)
-    .map((line) => JSON.parse(line) as DatasetRecord);
+  const records: DatasetRecord[] = [];
+  for await (const { value } of readJsonLines(
+    createReadStream(join(root, file)),
+  )) {
+    records.push(value as DatasetRecord);
+  }
+  return records;
 }
 
 describe("V1.2 validation dataset", () => {

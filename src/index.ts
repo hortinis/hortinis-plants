@@ -16,8 +16,26 @@ export {
   serializeCanonicalJson,
 } from "./serialization/canonical-json.js";
 export type { CanonicalJsonErrorCode } from "./serialization/canonical-json.js";
+export {
+  DEFAULT_MAX_JSON_LINE_BYTES,
+  JsonLinesError,
+  readJsonLines,
+  writeJsonLines,
+} from "./serialization/json-lines.js";
+export type {
+  JsonLineRecord,
+  JsonLinesErrorCode,
+  JsonLinesReadOptions,
+  JsonLinesWriteOptions,
+} from "./serialization/json-lines.js";
 export { compressDeterministicGzip } from "./artifact/deterministic-gzip.js";
-export type { CompressedArtifact } from "./artifact/deterministic-gzip.js";
+export { writeDeterministicGzip } from "./artifact/deterministic-gzip.js";
+export type {
+  CompressedArtifact,
+  CompressedArtifactMetadata,
+} from "./artifact/deterministic-gzip.js";
+export { writeCompressedJsonLines } from "./artifact/json-lines-gzip.js";
+export type { CompressedJsonLinesOptions } from "./artifact/json-lines-gzip.js";
 export { validateValidationDataset } from "./curation/validation-dataset.js";
 export type {
   DatasetRecord,

@@ -1,6 +1,9 @@
 import { createHash } from "node:crypto";
+import { createWriteStream } from "node:fs";
 import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
+import { Readable, Transform, type TransformCallback } from "node:stream";
+import { pipeline } from "node:stream/promises";
 import { fileURLToPath } from "node:url";
 import {
   GROW_LICENCE_ID,
@@ -26,6 +29,7 @@ import type {
   GrowSourceResource,
 } from "./types.js";
 import { serializeCanonicalJson } from "../../serialization/canonical-json.js";
+import { writeJsonLines } from "../../serialization/json-lines.js";
 
 export interface GrowImportOptions {
   readonly inputDirectory: string;
@@ -606,9 +610,7 @@ async function writeOutputs(
   const outputEntries: { path: string; sha256: string; entryCount: number }[] =
     [];
   for (const [filename, rows] of Object.entries(outputs)) {
-    const bytes = jsonlBytes(rows);
-    await writeFile(join(outputDirectory, filename), bytes);
-    const sha256 = createHash("sha256").update(bytes).digest("hex");
+    const sha256 = await writeJsonlFile(join(outputDirectory, filename), rows);
     outputHashes[filename] = sha256;
     outputEntries.push({ path: filename, sha256, entryCount: rows.length });
   }
@@ -721,12 +723,25 @@ function isNodeError(value: unknown): value is NodeJS.ErrnoException {
   return value instanceof Error && "code" in value;
 }
 
-function jsonlBytes(rows: readonly unknown[]): Buffer {
-  if (rows.length === 0) return Buffer.alloc(0);
-  return Buffer.concat(
-    rows.flatMap((row) => [
-      Buffer.from(serializeCanonicalJson(row)),
-      Buffer.from("\n"),
-    ]),
+async function writeJsonlFile(
+  path: string,
+  rows: readonly unknown[],
+): Promise<string> {
+  const hash = createHash("sha256");
+  const meter = new Transform({
+    transform(
+      chunk: Buffer,
+      _encoding: BufferEncoding,
+      callback: TransformCallback,
+    ) {
+      hash.update(chunk);
+      callback(null, chunk);
+    },
+  });
+  await pipeline(
+    Readable.from(writeJsonLines(rows)),
+    meter,
+    createWriteStream(path),
   );
+  return hash.digest("hex");
 }

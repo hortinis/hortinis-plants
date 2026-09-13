@@ -14,6 +14,8 @@ Use the charter for scope, the model and provenance pages for data rules, the co
 - [Validation and release](quality/validation-and-release.md)
 - [Implementation plan](development/implementation-plan.md)
 - [Schema compilation](development/schema-compilation.md)
+- [Streaming JSON Lines](development/streaming-json-lines.md)
+- [Deterministic gzip](development/deterministic-gzip.md)
 - [Validation API](development/validation-api.md)
 - [Open questions](open-questions.md)
 - [Project and data licensing decision](architecture/decisions/0004-project-and-data-licensing.md)

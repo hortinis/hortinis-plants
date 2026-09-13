@@ -137,17 +137,19 @@ Acceptance: the example schemas and validation API have complete passing and fai
 
 Acceptance: logically identical objects produce identical bytes and SHA-256 hashes.
 
-### C1.9 — Streaming JSON Lines
+### C1.9 — Streaming JSON Lines (`validated`)
 
-- Read and write one canonical JSON value per line.
+- Read one JSON value per line and write canonical JSON values.
 - Process records without loading a complete dataset into memory.
 - Include line numbers in parsing and validation errors.
-- Define blank-line and final-newline behavior.
+- Enforce strict UTF-8/LF framing, reject blank lines, and require a final LF.
+- Accept valid noncanonical input JSON while rejecting duplicate object keys; always emit canonical JSON.
+- Bound each encoded record to a configurable limit (16 MiB by default).
 - Allow validation during streaming reads and writes.
 
 Acceptance: a large generated fixture is processed with bounded memory and deterministic output.
 
-### C1.10 — Hashing and deterministic gzip (`in progress`)
+### C1.10 — Hashing and deterministic gzip (`validated`)
 
 #### C1.10a — V1 in-memory deterministic gzip metadata (`validated`)
 
@@ -158,10 +160,11 @@ Acceptance: a large generated fixture is processed with bounded memory and deter
 
 Acceptance: two runs over identical inputs produce identical compressed bytes, sizes and hashes.
 
-#### C1.10b — Streaming hashing and compression (`planned`)
+#### C1.10b — Streaming hashing and compression (`validated`)
 
 - Calculate SHA-256 while streaming.
-- Integrate with C1.9 bounded-memory JSON Lines processing.
+- Normalize gzip metadata before writing or hashing compressed bytes.
+- Integrate with C1.9 bounded-memory JSON Lines processing and count entries during the stream.
 
 Acceptance: large inputs are compressed and hashed with bounded memory and deterministic output.
 
