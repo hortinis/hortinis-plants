@@ -5,6 +5,11 @@
 The first broad catalog curation set uses every record from the pinned GROW 2020 import and the pinned WFO
 2026-06 reconciliation. It is source-location-qualified and is not a France-specific release profile.
 
+The ordered implementation work required to turn these ignored queues into validated tracked authoring
+records is defined in the
+[GROW/WFO C4 authoring workflow implementation plan](grow-wfo-authoring-workflow-plan.md). Until C4.1–C4.5
+are implemented, the queues are inspection aids and there is no supported automatic promotion step.
+
 ## Generate the review queue
 
 Run the two source jobs, then generate the C4 queue:

@@ -40,3 +40,12 @@ foundation tooling choices are resolved in [the implementation plan](development
 ## Authoring-to-consumer projection
 
 - **in progress:** A `sowing_window` assertion must not be projected to `start_indoors` or `direct_sow` unless the source and reviewed context identify that action. Keep ambiguous source claims in authoring/candidate data; do not infer an action.
+- **in progress:** Define the authoring representation for GROW's combined `indoors_or_undercover`
+  calendar action before accepting any of those candidates. Until then, record-level decisions must defer
+  them; they must not be silently projected to `start_indoors`, `direct_sow` or a particular shelter type.
+- **in progress:** Decide whether `taxon.scientificName` remains a stored convenience value constrained to
+  equal the active accepted `taxonomic-name`, or becomes a C5-derived projection. C4 must author accepted
+  and synonym taxonomic-name records either way and must not allow the two representations to disagree.
+- **in progress:** Before the first production C4 subject record is authored, decide whether any stable
+  identifier from the `dev-validation` fixture is deliberately promoted to canonical use. The workflow
+  must not reuse fixture identifiers or evidence automatically.

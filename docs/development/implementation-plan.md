@@ -9,7 +9,7 @@
 - **C1 — Foundation (`in progress`):** add schemas, source manifests, importer boundaries, contributor workflow, deterministic build rules and CI checks.
 - **C2 — Contracts (`validated`):** implement separate authoring and consumer schemas for taxon, plant concept, cultivar group, cultivar, localized name, plant fact, source, assertion, context, licence, review, cultivation rule, relationship, geography, manifest and homogeneous JSONL chunks; add complete schema conformance fixtures. Compatibility policy is deferred for Hortinis coordination.
 - **C3 — Sources:** pin WFO, TAXREF and GROW; preserve GROW image exclusions; retain Practical Plants block licences; audit CropGraph citations and geography; implement immutable-locator adapters.
-- **C4 — Curation:** reconcile identities; separate plant concepts from taxa; normalize names, units, contexts and calendar anchors; report unresolved mappings and contradictions; curate the MVP.
+- **C4 — Curation (`in progress`):** reconcile identities; separate plant concepts from taxa; normalize names, units, contexts and calendar anchors; report unresolved mappings and contradictions; implement the [GROW/WFO authoring workflow](grow-wfo-authoring-workflow-plan.md); curate the MVP.
 - **C5 — Release:** compile accepted projections into deterministic JSONL.gz chunks; generate manifests, hashes, source manifests and attribution; enforce size, determinism and licence gates; publish manual GitHub Release assets.
 - **C6 — Integration:** test contract acquisition, Dexie import, activation, rollback, quota failure, retired references and cross-runtime recommendation fixtures.
 - **C7 — Optional artifacts (`planned`):** after the first release, specify and build independently licensed image packs with per-image provenance; coordinate a separate `hortinis-climate` repository and artifact without making either one a core catalog dependency.
@@ -311,6 +311,19 @@ Acceptance: formatting, lint, typecheck, tests, build and `pnpm import:grow` pas
 covers exact accepted and synonym candidates, ambiguity, unmatched names, malformed CSV, duplicate GROW
 names and deterministic outcomes. A full-snapshot run is validated separately once the ignored archive
 is available locally.
+
+#### C4.1–C4.8 — GROW/WFO authoring workflow (`planned`)
+
+Implement the [detailed C4 authoring workflow plan](grow-wfo-authoring-workflow-plan.md) in order:
+contracts; draft integrity and pinned WFO lookup; manifest-driven validation; semantic status gates;
+transactional decision application; identity and subject curation; assertion curation; and the repository
+handoff gate. Generated queues remain ignored review aids, tracked authoring records remain canonical and
+no C4 command publishes a consumer release.
+
+Acceptance: a clean checkout validates tracked authoring data without the WFO archive; a local deep audit
+verifies it against pinned adapter outputs; every accepted record has explicit provenance, rights and
+review; completion is reported separately from structural validity; C5 receives no inferred or unreviewed
+records.
 
 The release manifest is the consumer-facing acquisition entry point. It records catalog and schema versions, profile, minimum consumer version, required and optional artifacts, counts, sizes, hashes and references to metadata. Its schema belongs to C2; producing populated manifests and applying profile, rights, supersession and inheritance gates belongs to C5. Publishing is deliberately excluded from basic CI.
 
