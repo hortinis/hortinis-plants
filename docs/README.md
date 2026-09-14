@@ -14,6 +14,7 @@ Use the charter for scope, the model and provenance pages for data rules, the co
 - [Catalog V1 consumer contracts](contracts/catalog-v1.md)
 - [Validation and release](quality/validation-and-release.md)
 - [Implementation plan](development/implementation-plan.md)
+- [GROW/WFO C4 curation workflow](development/grow-wfo-curation.md)
 - [Schema compilation](development/schema-compilation.md)
 - [Streaming JSON Lines](development/streaming-json-lines.md)
 - [Deterministic gzip](development/deterministic-gzip.md)

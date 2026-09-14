@@ -42,6 +42,11 @@ export type {
   DatasetValidationIssue,
   ValidationDataset,
 } from "./curation/validation-dataset.js";
+export { generateGrowWfoDrafts } from "./curation/grow-wfo-drafts.js";
+export type {
+  GrowWfoDraftOptions,
+  GrowWfoDraftResult,
+} from "./curation/grow-wfo-drafts.js";
 export { runImporter } from "./importer/runner.js";
 export { ImporterRunError } from "./importer/errors.js";
 export type {

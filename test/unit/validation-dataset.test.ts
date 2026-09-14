@@ -143,4 +143,107 @@ describe("V1.2 validation dataset", () => {
       }),
     );
   });
+
+  it("resolves C4 taxonomy, name, and subject decisions independently", () => {
+    const c4Dataset: ValidationDataset = {
+      sourceManifestIds: [
+        "source_manifest_grow_epd_2020",
+        "source_manifest_wfo_plant_list_2026_06",
+      ],
+      taxa: [
+        {
+          id: "taxon_example",
+          status: "active",
+          scientificName: "Examplea officinalis",
+          evidenceReferenceIds: [],
+        },
+      ],
+      plantConcepts: [
+        {
+          id: "plant_example",
+          status: "active",
+          taxonId: "taxon_example",
+          evidenceReferenceIds: [],
+        },
+      ],
+      cultivars: [],
+      contexts: [],
+      rules: [],
+      assertions: [],
+      evidence: [],
+      reviews: [
+        {
+          id: "review_content_example",
+          purpose: "content",
+          status: "accepted",
+        },
+      ],
+      externalTaxonomyCrosswalks: [
+        {
+          id: "crosswalk_example",
+          taxonId: "taxon_example",
+          externalIdentifier: {
+            sourceId: "source_world_flora_online_plant_list",
+            sourceManifestId: "source_manifest_wfo_plant_list_2026_06",
+            sourceReleaseId: "2026-06",
+            identifier: "wfo-example",
+          },
+          externalName: "Examplea officinalis",
+          taxonRank: "species",
+          taxonomicStatus: "Accepted",
+          matchMethod: "exact-name",
+          locator: "https://example.test/wfo#example",
+          status: "accepted",
+          reviewId: "review_content_example",
+        },
+      ],
+      sourceNameDecisions: [
+        {
+          id: "name_decision_example",
+          sourceId: "source_grow_edible_plant_database",
+          sourceManifestId: "source_manifest_grow_epd_2020",
+          sourceReleaseId: "doi:10.15132/10000157",
+          sourceRecordId: "1",
+          sourceName: "Examplea officinalis",
+          sourceLocator: "plant1.accdb#table=Edible%20plants&record.ID=1",
+          decision: "accept-candidate",
+          externalTaxonomyCrosswalkId: "crosswalk_example",
+          status: "accepted",
+          reviewId: "review_content_example",
+        },
+      ],
+      sourceSubjectMappings: [
+        {
+          id: "subject_mapping_example",
+          sourceId: "source_grow_edible_plant_database",
+          sourceManifestId: "source_manifest_grow_epd_2020",
+          sourceReleaseId: "doi:10.15132/10000157",
+          sourceRecordId: "1",
+          sourceLocator: "plant1.accdb#table=Edible%20plants&record.ID=1",
+          subject: { type: "plant-concept", id: "plant_example" },
+          externalTaxonomyCrosswalkId: "crosswalk_example",
+          status: "accepted",
+          reviewId: "review_content_example",
+        },
+      ],
+    };
+
+    expect(validateValidationDataset(c4Dataset)).toEqual([]);
+    expect(
+      validateValidationDataset({
+        ...c4Dataset,
+        sourceNameDecisions: [
+          {
+            ...c4Dataset.sourceNameDecisions![0]!,
+            sourceManifestId: "unknown",
+          },
+        ],
+      }),
+    ).toContainEqual(
+      expect.objectContaining({
+        code: "MISSING_REFERENCE",
+        recordId: "name_decision_example",
+      }),
+    );
+  });
 });

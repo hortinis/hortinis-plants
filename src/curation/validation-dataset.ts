@@ -23,6 +23,11 @@ export type DatasetRecord = Readonly<Record<string, unknown>>;
 
 export interface ValidationDataset {
   readonly sourceManifestId?: string;
+  /**
+   * Pinned releases permitted in C4 authoring decisions. This is distinct from
+   * `sourceManifestId`, which retains the V1 single-source evidence check.
+   */
+  readonly sourceManifestIds?: readonly string[];
   readonly taxa: readonly DatasetRecord[];
   readonly plantConcepts: readonly DatasetRecord[];
   readonly cultivarGroups?: readonly DatasetRecord[];
@@ -39,6 +44,9 @@ export interface ValidationDataset {
   readonly licences?: readonly DatasetRecord[];
   readonly reviews: readonly DatasetRecord[];
   readonly curationIssues?: readonly DatasetRecord[];
+  readonly externalTaxonomyCrosswalks?: readonly DatasetRecord[];
+  readonly sourceNameDecisions?: readonly DatasetRecord[];
+  readonly sourceSubjectMappings?: readonly DatasetRecord[];
 }
 
 type Collection = readonly DatasetRecord[];
@@ -64,6 +72,9 @@ export function validateValidationDataset(
     licences: dataset.licences ?? [],
     reviews: dataset.reviews,
     curationIssues: dataset.curationIssues ?? [],
+    externalTaxonomyCrosswalks: dataset.externalTaxonomyCrosswalks ?? [],
+    sourceNameDecisions: dataset.sourceNameDecisions ?? [],
+    sourceSubjectMappings: dataset.sourceSubjectMappings ?? [],
   };
   const recordsByKind = new Map<string, Map<string, DatasetRecord>>();
   const globalIds = new Map<string, string>();
@@ -271,8 +282,98 @@ export function validateValidationDataset(
     const id = recordId(record);
     checkIdReferences(record, "evidenceReferenceIds", "evidence", missing, id);
   }
+  for (const record of dataset.externalTaxonomyCrosswalks ?? []) {
+    const id = recordId(record);
+    const taxonId = stringField(record, "taxonId");
+    if (taxonId !== undefined) missing(id, "taxa", taxonId);
+    checkReview(stringField(record, "reviewId"), "content", id, get, issues);
+    checkReplacement(
+      record,
+      "supersedesCrosswalkId",
+      "externalTaxonomyCrosswalks",
+      missing,
+      id,
+    );
+    checkAllowedSourceManifest(record, id);
+  }
+  for (const record of dataset.sourceNameDecisions ?? []) {
+    const id = recordId(record);
+    checkReview(stringField(record, "reviewId"), "content", id, get, issues);
+    checkReplacement(
+      record,
+      "supersedesDecisionId",
+      "sourceNameDecisions",
+      missing,
+      id,
+    );
+    const crosswalkId = stringField(record, "externalTaxonomyCrosswalkId");
+    if (crosswalkId !== undefined)
+      missing(id, "externalTaxonomyCrosswalks", crosswalkId);
+    checkAllowedSourceManifest(record, id);
+  }
+  for (const record of dataset.sourceSubjectMappings ?? []) {
+    const id = recordId(record);
+    checkSubject(record.subject, id, false, missing, issues);
+    checkReview(stringField(record, "reviewId"), "content", id, get, issues);
+    checkReplacement(
+      record,
+      "supersedesMappingId",
+      "sourceSubjectMappings",
+      missing,
+      id,
+    );
+    const crosswalkId = stringField(record, "externalTaxonomyCrosswalkId");
+    if (crosswalkId !== undefined)
+      missing(id, "externalTaxonomyCrosswalks", crosswalkId);
+    checkReviewedNameDecision(record, id, crosswalkId);
+    checkAllowedSourceManifest(record, id);
+  }
 
   return issues;
+
+  function checkAllowedSourceManifest(record: DatasetRecord, id: string): void {
+    const allowed = dataset.sourceManifestIds;
+    if (allowed === undefined) return;
+    const sourceManifestId =
+      stringField(record, "sourceManifestId") ??
+      stringField(asRecord(record.externalIdentifier), "sourceManifestId");
+    if (sourceManifestId === undefined || !allowed.includes(sourceManifestId)) {
+      issues.push({
+        code: "MISSING_REFERENCE",
+        recordId: id,
+        message: `References source manifest ${sourceManifestId ?? "<missing>"} outside this curation dataset`,
+      });
+    }
+  }
+
+  function checkReviewedNameDecision(
+    mapping: DatasetRecord,
+    id: string,
+    crosswalkId: string | undefined,
+  ): void {
+    const sourceId = stringField(mapping, "sourceId");
+    const sourceManifestId = stringField(mapping, "sourceManifestId");
+    const sourceReleaseId = stringField(mapping, "sourceReleaseId");
+    const sourceRecordId = stringField(mapping, "sourceRecordId");
+    const reviewed = (dataset.sourceNameDecisions ?? []).some(
+      (decision) =>
+        stringField(decision, "sourceId") === sourceId &&
+        stringField(decision, "sourceManifestId") === sourceManifestId &&
+        stringField(decision, "sourceReleaseId") === sourceReleaseId &&
+        stringField(decision, "sourceRecordId") === sourceRecordId &&
+        stringField(decision, "status") === "accepted" &&
+        (crosswalkId === undefined ||
+          stringField(decision, "externalTaxonomyCrosswalkId") === crosswalkId),
+    );
+    if (!reviewed) {
+      issues.push({
+        code: "MISSING_REFERENCE",
+        recordId: id,
+        message:
+          "An accepted source-subject mapping requires an accepted source-name decision for the same source record.",
+      });
+    }
+  }
 
   function validateScopedRecord(
     record: DatasetRecord,
@@ -368,12 +469,20 @@ function checkContentReview(
 }
 
 function checkReview(
-  reviewId: string,
+  reviewId: string | undefined,
   expectedPurpose: "content" | "rights",
   recordId: string,
   get: (kind: string, id: string) => DatasetRecord | undefined,
   issues: DatasetValidationIssue[],
 ): void {
+  if (reviewId === undefined) {
+    issues.push({
+      code: "MISSING_REFERENCE",
+      recordId,
+      message: `References missing ${expectedPurpose} review`,
+    });
+    return;
+  }
   const review = get("reviews", reviewId);
   if (review === undefined) {
     issues.push({

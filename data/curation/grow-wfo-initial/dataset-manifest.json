@@ -1,0 +1,17 @@
+{
+  "datasetVersion": "0.1.0",
+  "id": "curation_grow_wfo_initial",
+  "status": "in progress",
+  "scope": "All pinned GROW 2020 source records reconciled against the pinned WFO 2026-06 snapshot.",
+  "sourceManifestIds": [
+    "source_manifest_grow_epd_2020",
+    "source_manifest_wfo_plant_list_2026_06"
+  ],
+  "authoringCollections": [
+    "external-taxonomy-crosswalks.jsonl",
+    "source-name-decisions.jsonl",
+    "source-subject-mappings.jsonl",
+    "curation-issues.jsonl"
+  ],
+  "reviewDraftCommand": "pnpm curate:grow-wfo:drafts"
+}

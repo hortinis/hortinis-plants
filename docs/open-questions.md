@@ -29,11 +29,12 @@ foundation tooling choices are resolved in [the implementation plan](development
 
 ## GROW adapter
 
-- **in progress:** Define whether each GROW calendar location represents only its named coordinates or can support its associated source strata, then map those source scopes to Hortinis geographic contexts. Until resolved, retain only the source location/strata context and do not widen assertions.
+- **validated:** Scope each GROW calendar claim to the country named by its source calendar location. Preserve the named location and associated strata in the evidence, but do not claim a distinct climate-region or strata scope without a later documented decision. Normalize the source label `Irland` to `Ireland` while retaining the original label in provenance.
 - **validated:** Preserve `Sow outdoors / plant out` as a combined, source-native action. Where the source context supports it, represent it as `establish_outdoors` with propagation `direct_sowing_or_transplant`; retain the original source field. Never split it into direct sowing or transplanting. Recommendation logic must abstain when it needs that distinction.
-- **in progress:** Define the source anchor for `Length of gorwing to harvest` before normalizing it to a consumer-facing harvest duration. Preserve parsed days only as an unreviewed source candidate.
+- **validated:** Retain parsed `Length of gorwing to harvest` values as unreviewed source candidates. Do not normalize or project them to consumer-facing harvest duration until a source-backed anchor is available.
 - **in progress:** Review plant identity mappings for crop forms and repeated taxa before converting GROW source IDs into catalog subject IDs. Unmapped rows remain source records and candidates.
 - **validated:** Use Celsius (`Cel`) for GROW temperature data. Preserve source values and model reported minimum, maximum and optimum only when supplied; ranges labelled optimum/ideal are bands, not absolute survival limits.
+- **validated:** Map GROW temperature classes to qualitative frost sensitivity without inventing a numeric threshold: `Very tender` and `Tender` to `sensitive`; `Half hardy` to `unknown`; and `Hardy`, `Very hardy`, and normalized `Very hard` to `hardy`. Retain the original class and normalization method in provenance. Exclude `Not applicable.`.
 - **validated:** Apply CC BY 4.0 to the GROW dataset package based on the University of Dundee record at DOI `10.15132/10000157`; exclude separately licensed images and generate attribution with an adaptation notice.
 
 ## Authoring-to-consumer projection
