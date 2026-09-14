@@ -9,6 +9,8 @@ export interface DatasetValidationIssue {
     | "MISSING_REFERENCE"
     | "INVALID_SCOPE"
     | "INVALID_SUPERSESSION"
+    | "INVALID_TAXONOMIC_NAME"
+    | "DUPLICATE_ACCEPTED_TAXONOMIC_NAME"
     | "DUPLICATE_PREFERRED_NAME"
     | "INVALID_REVIEW_REFERENCE"
     | "INVALID_CALENDAR_VALUE"
@@ -29,6 +31,7 @@ export interface ValidationDataset {
    */
   readonly sourceManifestIds?: readonly string[];
   readonly taxa: readonly DatasetRecord[];
+  readonly taxonomicNames?: readonly DatasetRecord[];
   readonly plantConcepts: readonly DatasetRecord[];
   readonly cultivarGroups?: readonly DatasetRecord[];
   readonly cultivars: readonly DatasetRecord[];
@@ -47,6 +50,8 @@ export interface ValidationDataset {
   readonly externalTaxonomyCrosswalks?: readonly DatasetRecord[];
   readonly sourceNameDecisions?: readonly DatasetRecord[];
   readonly sourceSubjectMappings?: readonly DatasetRecord[];
+  readonly sourceGeographyDecisions?: readonly DatasetRecord[];
+  readonly sourceAssertionDecisions?: readonly DatasetRecord[];
 }
 
 type Collection = readonly DatasetRecord[];
@@ -57,6 +62,7 @@ export function validateValidationDataset(
   const issues: DatasetValidationIssue[] = [];
   const collections: Readonly<Record<string, Collection>> = {
     taxa: dataset.taxa,
+    taxonomicNames: dataset.taxonomicNames ?? [],
     plantConcepts: dataset.plantConcepts,
     cultivarGroups: dataset.cultivarGroups ?? [],
     cultivars: dataset.cultivars,
@@ -75,6 +81,8 @@ export function validateValidationDataset(
     externalTaxonomyCrosswalks: dataset.externalTaxonomyCrosswalks ?? [],
     sourceNameDecisions: dataset.sourceNameDecisions ?? [],
     sourceSubjectMappings: dataset.sourceSubjectMappings ?? [],
+    sourceGeographyDecisions: dataset.sourceGeographyDecisions ?? [],
+    sourceAssertionDecisions: dataset.sourceAssertionDecisions ?? [],
   };
   const recordsByKind = new Map<string, Map<string, DatasetRecord>>();
   const globalIds = new Map<string, string>();
@@ -117,6 +125,42 @@ export function validateValidationDataset(
     const id = recordId(record);
     checkIdReferences(record, "evidenceReferenceIds", "evidence", missing, id);
     checkReplacement(record, "replacementTaxonId", "taxa", missing, id);
+  }
+  for (const record of dataset.taxonomicNames ?? []) {
+    const id = recordId(record);
+    const taxonId = stringField(record, "taxonId");
+    if (taxonId !== undefined) missing(id, "taxa", taxonId);
+    checkIdReferences(record, "evidenceReferenceIds", "evidence", missing, id);
+    checkReview(stringField(record, "reviewId"), "content", id, get, issues);
+    checkReplacement(
+      record,
+      "replacementTaxonomicNameId",
+      "taxonomicNames",
+      missing,
+      id,
+    );
+    checkAllowedSourceManifest(record, id);
+
+    const acceptedNameId = stringField(record, "acceptedTaxonomicNameId");
+    if (acceptedNameId !== undefined) {
+      const acceptedName = get("taxonomicNames", acceptedNameId);
+      if (acceptedName === undefined) {
+        missing(id, "taxonomicNames", acceptedNameId);
+      } else if (
+        stringField(acceptedName, "nameStatus") !== "accepted" ||
+        stringField(acceptedName, "status") !== "active" ||
+        stringField(acceptedName, "taxonId") !== taxonId
+      ) {
+        issues.push({
+          code: "INVALID_TAXONOMIC_NAME",
+          recordId: id,
+          message: `Synonym ${id} must reference an active accepted name on the same taxon`,
+        });
+      }
+    }
+  }
+  if (dataset.taxonomicNames !== undefined) {
+    checkAcceptedTaxonomicNames(dataset, issues);
   }
   for (const record of dataset.plantConcepts) {
     const id = recordId(record);
@@ -313,7 +357,10 @@ export function validateValidationDataset(
   }
   for (const record of dataset.sourceSubjectMappings ?? []) {
     const id = recordId(record);
-    checkSubject(record.subject, id, false, missing, issues);
+    const decision = stringField(record, "decision");
+    if (decision === "map") {
+      checkSubject(record.subject, id, false, missing, issues);
+    }
     checkReview(stringField(record, "reviewId"), "content", id, get, issues);
     checkReplacement(
       record,
@@ -325,8 +372,53 @@ export function validateValidationDataset(
     const crosswalkId = stringField(record, "externalTaxonomyCrosswalkId");
     if (crosswalkId !== undefined)
       missing(id, "externalTaxonomyCrosswalks", crosswalkId);
-    checkReviewedNameDecision(record, id, crosswalkId);
+    if (decision === "map") checkReviewedNameDecision(record, id, crosswalkId);
     checkAllowedSourceManifest(record, id);
+  }
+  for (const record of dataset.sourceGeographyDecisions ?? []) {
+    const id = recordId(record);
+    checkReview(stringField(record, "reviewId"), "content", id, get, issues);
+    checkReplacement(
+      record,
+      "supersedesDecisionId",
+      "sourceGeographyDecisions",
+      missing,
+      id,
+    );
+    if (stringField(record, "decision") === "map") {
+      const geographicContextId = stringField(record, "geographicContextId");
+      if (geographicContextId !== undefined)
+        missing(id, "geographicContexts", geographicContextId);
+    }
+    checkAllowedSourceManifest(record, id);
+  }
+  for (const record of dataset.sourceAssertionDecisions ?? []) {
+    const id = recordId(record);
+    checkReview(stringField(record, "reviewId"), "content", id, get, issues);
+    checkReplacement(
+      record,
+      "supersedesDecisionId",
+      "sourceAssertionDecisions",
+      missing,
+      id,
+    );
+    if (stringField(record, "decision") === "accept") {
+      const assertionId = stringField(record, "assertionId");
+      const contextId = stringField(record, "contextId");
+      if (assertionId !== undefined) {
+        const assertion = get("assertions", assertionId);
+        if (assertion === undefined) {
+          missing(id, "assertions", assertionId);
+        } else if (stringField(assertion, "contextId") !== contextId) {
+          issues.push({
+            code: "INVALID_SCOPE",
+            recordId: id,
+            message: `Accepted decision context ${contextId ?? "<missing>"} does not match assertion ${assertionId}`,
+          });
+        }
+      }
+      if (contextId !== undefined) missing(id, "contexts", contextId);
+    }
   }
 
   return issues;
@@ -361,7 +453,9 @@ export function validateValidationDataset(
         stringField(decision, "sourceManifestId") === sourceManifestId &&
         stringField(decision, "sourceReleaseId") === sourceReleaseId &&
         stringField(decision, "sourceRecordId") === sourceRecordId &&
-        stringField(decision, "status") === "accepted" &&
+        !["unresolved", "reject"].includes(
+          stringField(decision, "decision") ?? "",
+        ) &&
         (crosswalkId === undefined ||
           stringField(decision, "externalTaxonomyCrosswalkId") === crosswalkId),
     );
@@ -411,6 +505,56 @@ export function validateValidationDataset(
           message: `${ownKind} record ${id} may supersede only a record on the same or an ancestor subject`,
         });
       }
+    }
+  }
+}
+
+function checkAcceptedTaxonomicNames(
+  dataset: ValidationDataset,
+  issues: DatasetValidationIssue[],
+): void {
+  const activeAcceptedNames = new Map<string, DatasetRecord[]>();
+  for (const name of dataset.taxonomicNames ?? []) {
+    if (
+      stringField(name, "status") !== "active" ||
+      stringField(name, "nameStatus") !== "accepted"
+    ) {
+      continue;
+    }
+    const taxonId = stringField(name, "taxonId");
+    if (taxonId === undefined) continue;
+    const names = activeAcceptedNames.get(taxonId) ?? [];
+    names.push(name);
+    activeAcceptedNames.set(taxonId, names);
+  }
+
+  for (const taxon of dataset.taxa) {
+    if (stringField(taxon, "status") !== "active") continue;
+    const taxonId = recordId(taxon);
+    const names = activeAcceptedNames.get(taxonId) ?? [];
+    if (names.length === 0) {
+      issues.push({
+        code: "INVALID_TAXONOMIC_NAME",
+        recordId: taxonId,
+        message: `Active taxon ${taxonId} requires one active accepted taxonomic name`,
+      });
+      continue;
+    }
+    if (names.length > 1) {
+      issues.push({
+        code: "DUPLICATE_ACCEPTED_TAXONOMIC_NAME",
+        recordId: taxonId,
+        message: `Active taxon ${taxonId} has more than one active accepted taxonomic name`,
+      });
+      continue;
+    }
+    const acceptedScientificName = stringField(names[0], "scientificName");
+    if (stringField(taxon, "scientificName") !== acceptedScientificName) {
+      issues.push({
+        code: "INVALID_TAXONOMIC_NAME",
+        recordId: taxonId,
+        message: `Taxon scientificName must equal its active accepted taxonomic name ${acceptedScientificName ?? "<missing>"}`,
+      });
     }
   }
 }

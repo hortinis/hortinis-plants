@@ -158,6 +158,41 @@ describe("V1.2 validation dataset", () => {
           evidenceReferenceIds: [],
         },
       ],
+      taxonomicNames: [
+        {
+          id: "taxonomic_name_example",
+          taxonId: "taxon_example",
+          status: "active",
+          scientificName: "Examplea officinalis",
+          nameStatus: "accepted",
+          taxonRank: "species",
+          externalIdentifier: {
+            sourceId: "source_world_flora_online_plant_list",
+            sourceManifestId: "source_manifest_wfo_plant_list_2026_06",
+            sourceReleaseId: "2026-06",
+            identifier: "wfo-example",
+          },
+          evidenceReferenceIds: [],
+          reviewId: "review_content_example",
+        },
+        {
+          id: "taxonomic_name_example_synonym",
+          taxonId: "taxon_example",
+          status: "active",
+          scientificName: "Examplea prior",
+          nameStatus: "synonym",
+          taxonRank: "species",
+          acceptedTaxonomicNameId: "taxonomic_name_example",
+          externalIdentifier: {
+            sourceId: "source_world_flora_online_plant_list",
+            sourceManifestId: "source_manifest_wfo_plant_list_2026_06",
+            sourceReleaseId: "2026-06",
+            identifier: "wfo-example-synonym",
+          },
+          evidenceReferenceIds: [],
+          reviewId: "review_content_example",
+        },
+      ],
       plantConcepts: [
         {
           id: "plant_example",
@@ -167,9 +202,37 @@ describe("V1.2 validation dataset", () => {
         },
       ],
       cultivars: [],
-      contexts: [],
+      geographicContexts: [
+        {
+          id: "geography_example",
+          kind: "administrative-area",
+          name: "Example country",
+          evidenceReferenceIds: [],
+        },
+      ],
+      contexts: [
+        {
+          id: "context_example",
+          geographicScope: {
+            type: "specified",
+            geographicContextIds: ["geography_example"],
+          },
+          growingSystem: "outdoor",
+          propagation: "unknown",
+        },
+      ],
       rules: [],
-      assertions: [],
+      assertions: [
+        {
+          id: "assertion_example",
+          subject: { type: "plant-concept", id: "plant_example" },
+          predicate: "frost_sensitivity",
+          value: "hardy",
+          contextId: "context_example",
+          evidenceReferenceIds: [],
+          reviewId: "review_content_example",
+        },
+      ],
       evidence: [],
       reviews: [
         {
@@ -193,7 +256,6 @@ describe("V1.2 validation dataset", () => {
           taxonomicStatus: "Accepted",
           matchMethod: "exact-name",
           locator: "https://example.test/wfo#example",
-          status: "accepted",
           reviewId: "review_content_example",
         },
       ],
@@ -208,7 +270,7 @@ describe("V1.2 validation dataset", () => {
           sourceLocator: "plant1.accdb#table=Edible%20plants&record.ID=1",
           decision: "accept-candidate",
           externalTaxonomyCrosswalkId: "crosswalk_example",
-          status: "accepted",
+          reason: "Accept the reviewed exact-name candidate.",
           reviewId: "review_content_example",
         },
       ],
@@ -220,15 +282,67 @@ describe("V1.2 validation dataset", () => {
           sourceReleaseId: "doi:10.15132/10000157",
           sourceRecordId: "1",
           sourceLocator: "plant1.accdb#table=Edible%20plants&record.ID=1",
+          decision: "map",
           subject: { type: "plant-concept", id: "plant_example" },
           externalTaxonomyCrosswalkId: "crosswalk_example",
-          status: "accepted",
+          reason: "Map the source record to the reviewed plant concept.",
           reviewId: "review_content_example",
+        },
+      ],
+      sourceGeographyDecisions: [
+        {
+          id: "geography_decision_example",
+          sourceId: "source_grow_edible_plant_database",
+          sourceManifestId: "source_manifest_grow_epd_2020",
+          sourceReleaseId: "doi:10.15132/10000157",
+          sourceLocation: {
+            sheetCode: "EXAMPLE",
+            country: "Example country",
+            name: "Example country (Example city)",
+            locator: "PlantingCalendar.xlsx!EXAMPLE",
+          },
+          decision: "map",
+          geographicContextId: "geography_example",
+          normalization: {
+            originalCountry: "Example country",
+            normalizedCountry: "Example country",
+            method: "identity",
+          },
+          reason: "Preserve the source-named country scope.",
+          reviewId: "review_content_example",
+        },
+      ],
+      sourceAssertionDecisions: [
+        {
+          id: "assertion_decision_example",
+          sourceCandidateId: "candidate_example",
+          draftManifestSha256:
+            "70ea61f87b9b8ca0ca5e272f1e5a0d2fb3afb63bdd88b15994e10e781239ac1a",
+          decision: "accept",
+          reason: "Accept the reviewed source-backed assertion.",
+          reviewId: "review_content_example",
+          assertionId: "assertion_example",
+          contextId: "context_example",
         },
       ],
     };
 
     expect(validateValidationDataset(c4Dataset)).toEqual([]);
+    expect(
+      validateValidationDataset({
+        ...c4Dataset,
+        taxonomicNames: c4Dataset.taxonomicNames!.map((name) =>
+          name.id === "taxonomic_name_example_synonym"
+            ? { ...name, taxonId: "taxon_other" }
+            : name,
+        ),
+      }),
+    ).toContainEqual(
+      expect.objectContaining({
+        code: "INVALID_TAXONOMIC_NAME",
+        recordId: "taxonomic_name_example_synonym",
+      }),
+    );
     expect(
       validateValidationDataset({
         ...c4Dataset,

@@ -41,6 +41,7 @@
         "sowing_window",
         "transplant_window",
         "harvest_window",
+        "cultivation_window",
         "growing_degree_days"
       ]
     },
@@ -80,6 +81,34 @@
         "properties": {
           "value": {
             "$ref": "urn:hortinis:plants:schema:v1:germination-profile"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "predicate": { "const": "cultivation_window" } },
+        "required": ["predicate"]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["action", "timing"],
+            "properties": {
+              "action": { "enum": ["harvest", "establish_outdoors"] },
+              "timing": {
+                "oneOf": [
+                  {
+                    "$ref": "urn:hortinis:plants:schema:v1:cultivation-rule#/$defs/calendarMonthWindow"
+                  },
+                  {
+                    "$ref": "urn:hortinis:plants:schema:v1:cultivation-rule#/$defs/calendarDateWindow"
+                  }
+                ]
+              }
+            }
           }
         }
       }

@@ -1,0 +1,16 @@
+{
+  "id": "assertion-grow-calendar-1",
+  "subject": { "type": "plant-concept", "id": "plant-tomato" },
+  "predicate": "cultivation_window",
+  "value": {
+    "action": "direct_sow",
+    "timing": {
+      "type": "calendar-date-window",
+      "start": { "month": 5, "day": 15 },
+      "end": { "month": 6, "day": 16 }
+    }
+  },
+  "contextId": "context-italy-outdoor-establishment",
+  "evidenceReferenceIds": ["evidence-grow-calendar-1"],
+  "reviewId": "review-assertion-1"
+}

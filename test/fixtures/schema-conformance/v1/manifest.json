@@ -528,6 +528,21 @@
       }
     },
     {
+      "id": "authoring-curation-dataset-manifest-valid",
+      "schemaId": "urn:hortinis:plants:schema:authoring:v1:curation-dataset-manifest",
+      "fixture": "authoring-curation-dataset-manifest-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "authoring-curation-dataset-manifest-invalid",
+      "schemaId": "urn:hortinis:plants:schema:authoring:v1:curation-dataset-manifest",
+      "fixture": "authoring-curation-dataset-manifest-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/collections", "keyword": "minItems" }]
+      }
+    },
+    {
       "id": "authoring-assertion-valid",
       "schemaId": "urn:hortinis:plants:schema:authoring:v1:assertion",
       "fixture": "catalog-assertion-valid.json",
@@ -540,6 +555,24 @@
       "expected": {
         "valid": false,
         "errors": [{ "instancePath": "", "keyword": "required" }]
+      }
+    },
+    {
+      "id": "authoring-cultivation-window-valid",
+      "schemaId": "urn:hortinis:plants:schema:authoring:v1:assertion",
+      "fixture": "authoring-cultivation-window-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "authoring-cultivation-window-invalid",
+      "schemaId": "urn:hortinis:plants:schema:authoring:v1:assertion",
+      "fixture": "authoring-cultivation-window-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [
+          { "instancePath": "", "keyword": "if" },
+          { "instancePath": "/value/action", "keyword": "enum" }
+        ]
       }
     },
     {
@@ -615,6 +648,36 @@
       "expected": {
         "valid": false,
         "errors": [{ "instancePath": "/subject/type", "keyword": "enum" }]
+      }
+    },
+    {
+      "id": "authoring-source-geography-decision-valid",
+      "schemaId": "urn:hortinis:plants:schema:authoring:v1:source-geography-decision",
+      "fixture": "authoring-source-geography-decision-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "authoring-source-geography-decision-invalid",
+      "schemaId": "urn:hortinis:plants:schema:authoring:v1:source-geography-decision",
+      "fixture": "authoring-source-geography-decision-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/decision", "keyword": "enum" }]
+      }
+    },
+    {
+      "id": "authoring-source-assertion-decision-valid",
+      "schemaId": "urn:hortinis:plants:schema:authoring:v1:source-assertion-decision",
+      "fixture": "authoring-source-assertion-decision-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "authoring-source-assertion-decision-invalid",
+      "schemaId": "urn:hortinis:plants:schema:authoring:v1:source-assertion-decision",
+      "fixture": "authoring-source-assertion-decision-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/decision", "keyword": "enum" }]
       }
     },
     {

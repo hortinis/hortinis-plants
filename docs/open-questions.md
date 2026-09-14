@@ -43,9 +43,9 @@ foundation tooling choices are resolved in [the implementation plan](development
 - **in progress:** Define the authoring representation for GROW's combined `indoors_or_undercover`
   calendar action before accepting any of those candidates. Until then, record-level decisions must defer
   them; they must not be silently projected to `start_indoors`, `direct_sow` or a particular shelter type.
-- **in progress:** Decide whether `taxon.scientificName` remains a stored convenience value constrained to
-  equal the active accepted `taxonomic-name`, or becomes a C5-derived projection. C4 must author accepted
-  and synonym taxonomic-name records either way and must not allow the two representations to disagree.
+- **validated:** Retain `taxon.scientificName` in the V1 authoring model as a stored convenience value and
+  require it to equal the taxon's single active accepted `taxonomic-name`. Reconsider removing the stored
+  value only through a later schema-version decision; C5 must not choose between disagreeing values.
 - **in progress:** Before the first production C4 subject record is authored, decide whether any stable
   identifier from the `dev-validation` fixture is deliberately promoted to canonical use. The workflow
   must not reuse fixture identifiers or evidence automatically.

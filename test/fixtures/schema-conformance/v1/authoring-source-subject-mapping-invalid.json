@@ -5,7 +5,8 @@
   "sourceReleaseId": "doi:10.15132/10000157",
   "sourceRecordId": "1",
   "sourceLocator": "plant1.accdb#Edible plants.ID=1",
+  "decision": "map",
   "subject": { "type": "taxon", "id": "catalog-taxon-not-subject" },
-  "status": "accepted",
+  "reason": "A taxon is not a horticultural subject.",
   "reviewId": "review-subject-1"
 }

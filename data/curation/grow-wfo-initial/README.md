@@ -19,6 +19,12 @@ command writes deterministic, ignored review queues below `.cache/curation-draft
   source location; and
 - `curation-issues.jsonl` reports unresolved taxonomy and the absence of reviewed subject mappings.
 
-After review, record decisions in the JSON Lines collections named by `dataset-manifest.json`. Do not copy
-generated queue records into those collections as accepted decisions without the required review, source
-locator, rights, and scope checks.
+The manifest declares all curator-owned JSON Lines collections and checksummed tracked source metadata.
+The collections are intentionally zero-byte files until an explicit decision is applied. Its review
+baseline pins the GROW and WFO configuration hashes plus the SHA-256 of the canonical draft manifest;
+C4.2 will extend the draft manifest with verifiable descriptors for each queue.
+
+After review, record decisions in the JSON Lines collections named by `dataset-manifest.json`. Decision
+outcome, review status and supersession are separate: the newer record links to the older record it
+supersedes. Do not copy generated queue records into those collections as accepted decisions without the
+required review, source locator, rights, and scope checks.

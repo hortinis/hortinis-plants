@@ -1,9 +1,9 @@
 {
   "schemaVersion": "1.0.0",
   "datasetVersion": "0.1.0",
-  "id": "curation_grow_wfo_initial",
+  "id": "curation_fixture",
   "status": "in progress",
-  "scope": "All pinned GROW 2020 source records reconciled against the pinned WFO 2026-06 snapshot.",
+  "scope": "Curation manifest schema fixture.",
   "collections": [
     {
       "role": "taxa",
@@ -136,48 +136,12 @@
       "authority": "tracked-source-metadata"
     },
     {
-      "role": "source",
-      "id": "source_grow_edible_plant_database",
-      "path": "data/sources/grow/source.json",
-      "format": "json",
-      "schemaId": "urn:hortinis:plants:schema:v1:source",
-      "sha256": "516a86fbb0177aef21c3b220ef6ec416e6c7f5b75a4e253e34d9e0dbd6833757",
-      "authority": "tracked-source-metadata"
-    },
-    {
-      "role": "licence",
-      "id": "licence_cc_by_4_0",
-      "path": "data/sources/grow/licence.json",
-      "format": "json",
-      "schemaId": "urn:hortinis:plants:schema:v1:licence",
-      "sha256": "54e5956a89ee56596200a9add6eca910b791faf963f7f52b7b06a2ab9f5c9f40",
-      "authority": "tracked-source-metadata"
-    },
-    {
       "role": "source-manifest",
       "id": "source_manifest_wfo_plant_list_2026_06",
       "path": "data/sources/wfo/source-manifest.json",
       "format": "json",
       "schemaId": "urn:hortinis:plants:schema:v1:source-manifest",
       "sha256": "84387d586405feff508678c4c69ebe95e1704d240af818a2dc7ee663f1ff3e08",
-      "authority": "tracked-source-metadata"
-    },
-    {
-      "role": "source",
-      "id": "source_world_flora_online_plant_list",
-      "path": "data/sources/wfo/source.json",
-      "format": "json",
-      "schemaId": "urn:hortinis:plants:schema:v1:source",
-      "sha256": "8b0ccc0c294ff92d00409af105b3aab130e6b3937c65767efa579874e6fd3c2d",
-      "authority": "tracked-source-metadata"
-    },
-    {
-      "role": "licence",
-      "id": "licence_cc0_1_0",
-      "path": "data/sources/wfo/licence.json",
-      "format": "json",
-      "schemaId": "urn:hortinis:plants:schema:v1:licence",
-      "sha256": "15b8396fb2fe782819c8671c1ffe15105ff794ddfc413d1d632b8af5a55f6f24",
       "authority": "tracked-source-metadata"
     }
   ],

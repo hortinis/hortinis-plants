@@ -3,14 +3,17 @@
   "$id": "urn:hortinis:plants:schema:v1:taxonomic-name",
   "title": "Hortinis catalog taxonomic name",
   "type": "object",
+  "additionalProperties": false,
   "required": [
     "id",
     "taxonId",
+    "status",
     "scientificName",
     "nameStatus",
     "taxonRank",
     "externalIdentifier",
-    "evidenceReferenceIds"
+    "evidenceReferenceIds",
+    "reviewId"
   ],
   "properties": {
     "id": {
@@ -18,6 +21,9 @@
     },
     "taxonId": {
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "status": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/catalogStatus"
     },
     "scientificName": { "type": "string", "minLength": 1 },
     "authorship": { "type": "string", "minLength": 1 },
@@ -49,10 +55,18 @@
     "externalIdentifier": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["sourceId", "sourceReleaseId", "identifier"],
+      "required": [
+        "sourceId",
+        "sourceManifestId",
+        "sourceReleaseId",
+        "identifier"
+      ],
       "properties": {
         "sourceId": {
           "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+        },
+        "sourceManifestId": {
+          "$ref": "urn:hortinis:plants:schema:v1:source-manifest#/$defs/sourceManifestId"
         },
         "sourceReleaseId": { "type": "string", "minLength": 1 },
         "identifier": { "type": "string", "minLength": 1 }
@@ -60,6 +74,12 @@
     },
     "evidenceReferenceIds": {
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/identifierList"
+    },
+    "reviewId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "replacementTaxonomicNameId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
     }
   },
   "allOf": [

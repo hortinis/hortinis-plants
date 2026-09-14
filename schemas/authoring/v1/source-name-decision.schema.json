@@ -13,7 +13,7 @@
     "sourceName",
     "sourceLocator",
     "decision",
-    "status",
+    "reason",
     "reviewId"
   ],
   "properties": {
@@ -36,7 +36,8 @@
         "manual-match",
         "documented-correction",
         "unresolved",
-        "not-taxonomic"
+        "not-taxonomic",
+        "reject"
       ]
     },
     "externalTaxonomyCrosswalkId": {
@@ -44,7 +45,6 @@
     },
     "correctedComparisonName": { "type": "string", "minLength": 1 },
     "reason": { "type": "string", "minLength": 1 },
-    "status": { "enum": ["accepted", "rejected", "superseded"] },
     "reviewId": {
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
     },
@@ -56,13 +56,36 @@
     {
       "if": {
         "properties": {
-          "decision": { "enum": ["accept-candidate", "manual-match"] }
+          "decision": {
+            "enum": [
+              "accept-candidate",
+              "manual-match",
+              "documented-correction"
+            ]
+          }
         },
         "required": ["decision"]
       },
       "then": {
         "required": ["externalTaxonomyCrosswalkId"],
         "properties": { "externalTaxonomyCrosswalkId": true }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "enum": ["unresolved", "not-taxonomic", "reject"]
+          }
+        },
+        "required": ["decision"]
+      },
+      "then": {
+        "required": ["reason"],
+        "properties": {
+          "reason": true,
+          "externalTaxonomyCrosswalkId": false
+        }
       }
     },
     {
@@ -76,16 +99,6 @@
           "correctedComparisonName": true,
           "reason": true
         }
-      }
-    },
-    {
-      "if": {
-        "properties": { "status": { "const": "superseded" } },
-        "required": ["status"]
-      },
-      "then": {
-        "required": ["supersedesDecisionId"],
-        "properties": { "supersedesDecisionId": true }
       }
     }
   ]

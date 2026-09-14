@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:authoring:v1:curation-dataset-manifest",
+  "title": "Hortinis curation dataset manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "datasetVersion",
+    "id",
+    "status",
+    "scope",
+    "collections",
+    "dependencies",
+    "reviewBaseline",
+    "reviewDraftCommand"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "datasetVersion": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/semanticVersion"
+    },
+    "id": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "status": {
+      "enum": ["planned", "in progress", "validated", "blocked"]
+    },
+    "scope": { "type": "string", "minLength": 1 },
+    "collections": {
+      "type": "array",
+      "minItems": 17,
+      "maxItems": 17,
+      "items": { "$ref": "#/$defs/collection" }
+    },
+    "dependencies": {
+      "type": "array",
+      "minItems": 2,
+      "items": { "$ref": "#/$defs/dependency" }
+    },
+    "reviewBaseline": { "$ref": "#/$defs/reviewBaseline" },
+    "reviewDraftCommand": { "type": "string", "minLength": 1 }
+  },
+  "$defs": {
+    "collectionRole": {
+      "enum": [
+        "taxa",
+        "taxonomic-names",
+        "plant-concepts",
+        "cultivar-groups",
+        "cultivars",
+        "localized-names",
+        "geographic-contexts",
+        "cultivation-contexts",
+        "evidence-references",
+        "reviews",
+        "external-taxonomy-crosswalks",
+        "source-name-decisions",
+        "source-subject-mappings",
+        "source-geography-decisions",
+        "source-assertion-decisions",
+        "assertions",
+        "curation-issues"
+      ]
+    },
+    "collection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "path", "format", "schemaId", "authority"],
+      "properties": {
+        "role": { "$ref": "#/$defs/collectionRole" },
+        "path": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/safeRelativePath"
+        },
+        "format": { "const": "jsonl" },
+        "schemaId": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:"
+        },
+        "authority": { "const": "curator-authored" }
+      }
+    },
+    "dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "id",
+        "path",
+        "format",
+        "schemaId",
+        "sha256",
+        "authority"
+      ],
+      "properties": {
+        "role": { "enum": ["source-manifest", "source", "licence"] },
+        "id": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+        },
+        "path": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/safeRelativePath"
+        },
+        "format": { "const": "json" },
+        "schemaId": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:"
+        },
+        "sha256": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/sha256"
+        },
+        "authority": { "const": "tracked-source-metadata" }
+      }
+    },
+    "reviewBaseline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "growImporterConfigurationSha256",
+        "wfoReconciliationConfigurationSha256",
+        "draftManifestSha256"
+      ],
+      "properties": {
+        "growImporterConfigurationSha256": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/sha256"
+        },
+        "wfoReconciliationConfigurationSha256": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/sha256"
+        },
+        "draftManifestSha256": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/sha256"
+        }
+      }
+    }
+  }
+}

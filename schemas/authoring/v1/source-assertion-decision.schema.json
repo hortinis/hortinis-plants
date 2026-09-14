@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:authoring:v1:source-assertion-decision",
+  "title": "Reviewed source assertion decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "sourceCandidateId",
+    "draftManifestSha256",
+    "decision",
+    "reason",
+    "reviewId"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "sourceCandidateId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "draftManifestSha256": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/sha256"
+    },
+    "decision": { "enum": ["accept", "reject", "defer"] },
+    "reason": { "type": "string", "minLength": 1 },
+    "reviewId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "assertionId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "contextId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "projectionIntent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "action"],
+      "properties": {
+        "type": { "const": "cultivation-rule" },
+        "action": { "enum": ["harvest", "establish_outdoors"] }
+      }
+    },
+    "supersedesDecisionId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "decision": { "const": "accept" } },
+        "required": ["decision"]
+      },
+      "then": {
+        "required": ["assertionId", "contextId"],
+        "properties": { "assertionId": true, "contextId": true }
+      },
+      "else": {
+        "properties": {
+          "assertionId": false,
+          "contextId": false,
+          "projectionIntent": false
+        }
+      }
+    }
+  ]
+}

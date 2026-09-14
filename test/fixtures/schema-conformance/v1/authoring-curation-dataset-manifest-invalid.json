@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "1.0.0",
+  "datasetVersion": "0.1.0",
+  "id": "curation_fixture",
+  "status": "in progress",
+  "scope": "Fixture manifest with no declared collections.",
+  "collections": [],
+  "dependencies": [
+    {
+      "role": "source-manifest",
+      "id": "source_manifest_grow_epd_2020",
+      "path": "data/sources/grow/source-manifest.json",
+      "format": "json",
+      "schemaId": "urn:hortinis:plants:schema:v1:source-manifest",
+      "sha256": "3cb800e515e8c0654a1f5d71a7725da4a29df91b47f11513ceb08a169de0df70",
+      "authority": "tracked-source-metadata"
+    },
+    {
+      "role": "source-manifest",
+      "id": "source_manifest_wfo_plant_list_2026_06",
+      "path": "data/sources/wfo/source-manifest.json",
+      "format": "json",
+      "schemaId": "urn:hortinis:plants:schema:v1:source-manifest",
+      "sha256": "84387d586405feff508678c4c69ebe95e1704d240af818a2dc7ee663f1ff3e08",
+      "authority": "tracked-source-metadata"
+    }
+  ],
+  "reviewBaseline": {
+    "growImporterConfigurationSha256": "6d1ed7b4d1c2816e3ef1502637a8be7697ab672d9c2d654db18257d5bf1223c7",
+    "wfoReconciliationConfigurationSha256": "63a591cec4657a91ac9a98bd95a0056a361b8cdf51caa0b60fe84c9594d5635a",
+    "draftManifestSha256": "70ea61f87b9b8ca0ca5e272f1e5a0d2fb3afb63bdd88b15994e10e781239ac1a"
+  },
+  "reviewDraftCommand": "pnpm curate:grow-wfo:drafts"
+}

@@ -312,7 +312,7 @@ covers exact accepted and synonym candidates, ambiguity, unmatched names, malfor
 names and deterministic outcomes. A full-snapshot run is validated separately once the ignored archive
 is available locally.
 
-#### C4.1–C4.8 — GROW/WFO authoring workflow (`planned`)
+#### C4.1–C4.8 — GROW/WFO authoring workflow (`in progress`)
 
 Implement the [detailed C4 authoring workflow plan](grow-wfo-authoring-workflow-plan.md) in order:
 contracts; draft integrity and pinned WFO lookup; manifest-driven validation; semantic status gates;

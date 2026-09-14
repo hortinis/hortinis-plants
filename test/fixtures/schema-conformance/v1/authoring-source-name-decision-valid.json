@@ -8,6 +8,6 @@
   "sourceLocator": "plant1.accdb#Edible plants.ID=1",
   "decision": "accept-candidate",
   "externalTaxonomyCrosswalkId": "crosswalk-tomato-wfo-2026",
-  "status": "accepted",
+  "reason": "The exact WFO candidate was reviewed and accepted.",
   "reviewId": "review-taxonomy-1"
 }

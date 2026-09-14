@@ -7,6 +7,6 @@
   "sourceName": "Solanum lycopersicum",
   "sourceLocator": "plant1.accdb#Edible plants.ID=1",
   "decision": "unknown",
-  "status": "accepted",
+  "reason": "Invalid decision value.",
   "reviewId": "review-taxonomy-1"
 }

@@ -12,6 +12,5 @@
   "taxonomicStatus": "accepted",
   "matchMethod": "fuzzy",
   "locator": "https://example.test/wfo.zip!classification.csv#row=2",
-  "status": "accepted",
   "reviewId": "review-taxonomy-1"
 }

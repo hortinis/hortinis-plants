@@ -1,0 +1,8 @@
+{
+  "id": "assertion-decision-grow-calendar-1",
+  "sourceCandidateId": "candidate_000717ea1d5590bff9572521",
+  "draftManifestSha256": "70ea61f87b9b8ca0ca5e272f1e5a0d2fb3afb63bdd88b15994e10e781239ac1a",
+  "decision": "supersede",
+  "reason": "Supersession is a link, not a decision outcome.",
+  "reviewId": "review-assertion-1"
+}

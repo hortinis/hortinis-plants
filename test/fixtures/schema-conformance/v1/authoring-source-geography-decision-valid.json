@@ -1,0 +1,21 @@
+{
+  "id": "geography-decision-grow-atc",
+  "sourceId": "source_grow_edible_plant_database",
+  "sourceManifestId": "source_manifest_grow_epd_2020",
+  "sourceReleaseId": "doi:10.15132/10000157",
+  "sourceLocation": {
+    "sheetCode": "ATC",
+    "country": "Irland",
+    "name": "Irland (Cloughjordan)",
+    "locator": "PlantingCalendar.xlsx!ATC"
+  },
+  "decision": "map",
+  "geographicContextId": "geography-ireland",
+  "normalization": {
+    "originalCountry": "Irland",
+    "normalizedCountry": "Ireland",
+    "method": "grow-country-spelling-normalization-v1"
+  },
+  "reason": "Map the named GROW calendar country while retaining its original spelling.",
+  "reviewId": "review-geography-1"
+}

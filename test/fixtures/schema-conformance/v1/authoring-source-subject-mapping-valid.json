@@ -5,8 +5,9 @@
   "sourceReleaseId": "doi:10.15132/10000157",
   "sourceRecordId": "1",
   "sourceLocator": "plant1.accdb#Edible plants.ID=1",
+  "decision": "map",
   "subject": { "type": "cultivar-group", "id": "cultivar-group-tomato" },
   "externalTaxonomyCrosswalkId": "crosswalk-tomato-wfo-2026",
-  "status": "accepted",
+  "reason": "The source record describes this reviewed cultivar group.",
   "reviewId": "review-subject-1"
 }

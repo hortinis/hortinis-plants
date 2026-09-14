@@ -1,6 +1,6 @@
 # GROW/WFO C4 authoring workflow implementation plan
 
-- Status: planned
+- Status: in progress
 - Scope: tracked authoring decisions derived from the pinned GROW 2020 and WFO 2026-06 runs
 - Excludes: consumer release construction, GitHub publication and automatic editorial acceptance
 
@@ -35,6 +35,11 @@ valid dataset may remain `in progress`; this workflow never labels it release-re
    `establish_outdoors`, not a narrower `direct_sow` or `transplant` action.
 7. Harvest-duration candidates remain deferred until their source anchor is resolved.
 
+Decision outcome, review state and supersession are separate. A decision records the current substantive
+outcome, its `reviewId` resolves the editorial state, and a newer record optionally names the older record
+that it supersedes. `superseded` is therefore a derived historical state, not an outcome that leaves the
+replacement unspecified. Rejected WFO proposals do not create external crosswalk records.
+
 ## Input and ownership boundaries
 
 | Information                        | Authoritative input                                                      | Workflow behavior                                                                                     |
@@ -57,6 +62,10 @@ Replace the filename-only authoring list with a schema-validated manifest contai
 descriptors. A descriptor records the collection role, safe path, format and schema identifier. The
 manifest also pins both source manifests, the relevant adapter configuration hashes and the curation
 draft fingerprint used during review.
+
+For this initial contract, `draftManifestSha256` is the SHA-256 of the canonical bytes of
+`draft-manifest.json`. C4.2 adds hashes and record metadata for every queue so that local audit can verify
+the draft contents as well as this top-level fingerprint.
 
 The initial dataset supports these tracked collections:
 
@@ -121,11 +130,11 @@ Add an authoring schema for one explicit decision per GROW candidate. It records
 
 - a stable decision identifier;
 - the exact source candidate identifier and pinned draft fingerprint;
-- `accept`, `reject`, `defer` or `supersede`;
+- `accept`, `reject` or `defer`;
 - a reason and content-review identifier;
 - the target authoring assertion identifier when accepted;
 - the reviewed context and projection intent for a cultivation rule when relevant; and
-- the superseded decision identifier when superseding an earlier choice.
+- an optional superseded decision identifier when replacing an earlier choice.
 
 An accepted decision materializes an assertion and its evidence but does not materialize a consumer fact
 or cultivation rule. C5 owns authoring-to-consumer projection.
@@ -207,7 +216,7 @@ adapters or draft generation never changes tracked authoring data.
 
 ## Ordered implementation increments
 
-### C4.1 — Authoring workflow contracts (`planned`)
+### C4.1 — Authoring workflow contracts (`validated`)
 
 - Add the curation-dataset manifest schema and collection descriptors.
 - Add source-geography-decision and source-assertion-decision schemas.
