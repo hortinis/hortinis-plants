@@ -1,0 +1,11 @@
+{
+  "id": "mapping-grow-record-1",
+  "sourceId": "source_grow_edible_plant_database",
+  "sourceManifestId": "source_manifest_grow_epd_2020",
+  "sourceReleaseId": "doi:10.15132/10000157",
+  "sourceRecordId": "1",
+  "sourceLocator": "plant1.accdb#Edible plants.ID=1",
+  "subject": { "type": "taxon", "id": "catalog-taxon-not-subject" },
+  "status": "accepted",
+  "reviewId": "review-subject-1"
+}

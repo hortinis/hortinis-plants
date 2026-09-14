@@ -413,21 +413,24 @@ async function verifyInputs(
           `Input path escapes resource directory: ${input.path}`,
         );
       }
-      let expectedSha256 = input.sha256;
+      const expectedSha256 = input.sha256;
+      let declaredChecksum: SourceResource["checksum"];
       if (input.role === "upstream") {
         const declaration = sourceResources.find(
           (resource) => resource.locator === input.locator,
         );
         if (
-          declaration?.checksum?.algorithm !== "sha256" ||
+          (declaration?.checksum?.algorithm !== "sha256" &&
+            declaration?.checksum?.algorithm !== "md5") ||
           typeof declaration.checksum.value !== "string"
         ) {
           throw new ImporterRunError(
             "SOURCE_RESOURCE_MISMATCH",
-            `Input ${input.locator} is not declared with a SHA-256 checksum by its source manifest`,
+            `Input ${input.locator} is not declared with a supported checksum by its source manifest`,
           );
         }
         if (
+          declaration.checksum.algorithm === "sha256" &&
           expectedSha256 !== undefined &&
           expectedSha256 !== declaration.checksum.value
         ) {
@@ -436,18 +439,19 @@ async function verifyInputs(
             `Importer checksum disagrees with source manifest for ${input.locator}`,
           );
         }
-        expectedSha256 = declaration.checksum.value;
+        declaredChecksum = declaration.checksum;
       }
       if (
-        expectedSha256 === undefined ||
-        !/^[0-9a-f]{64}$/u.test(expectedSha256)
+        (expectedSha256 !== undefined &&
+          !/^[0-9a-f]{64}$/u.test(expectedSha256)) ||
+        (input.role === "derived" && expectedSha256 === undefined)
       ) {
         throw new ImporterRunError(
           "INVALID_IMPORTER_DEFINITION",
           `Input ${input.locator} has no valid SHA-256 checksum`,
         );
       }
-      let actual: { sha256: string; byteSize: number };
+      let actual: { sha256: string; md5: string; byteSize: number };
       try {
         actual = await hashFile(absolutePath);
       } catch (error) {
@@ -458,7 +462,17 @@ async function verifyInputs(
         );
       }
       const { sha256: actualSha256, byteSize } = actual;
-      if (actualSha256 !== expectedSha256) {
+      if (
+        declaredChecksum !== undefined &&
+        actual[declaredChecksum.algorithm as "md5" | "sha256"] !==
+          declaredChecksum.value
+      ) {
+        throw new ImporterRunError(
+          "SOURCE_RESOURCE_MISMATCH",
+          `${String(declaredChecksum.algorithm).toUpperCase()} mismatch for input ${input.locator}: expected ${String(declaredChecksum.value)}, got ${actual[declaredChecksum.algorithm as "md5" | "sha256"]}`,
+        );
+      }
+      if (expectedSha256 !== undefined && actualSha256 !== expectedSha256) {
         throw new ImporterRunError(
           "SOURCE_RESOURCE_MISMATCH",
           `SHA-256 mismatch for input ${input.locator}: expected ${expectedSha256}, got ${actualSha256}`,
@@ -482,15 +496,17 @@ async function verifyInputs(
 
 async function hashFile(
   path: string,
-): Promise<{ sha256: string; byteSize: number }> {
-  const hash = createHash("sha256");
+): Promise<{ sha256: string; md5: string; byteSize: number }> {
+  const sha256 = createHash("sha256");
+  const md5 = createHash("md5");
   let byteSize = 0;
   for await (const chunk of createReadStream(path)) {
     const bytes = chunk as Buffer;
-    hash.update(bytes);
+    sha256.update(bytes);
+    md5.update(bytes);
     byteSize += bytes.byteLength;
   }
-  return { sha256: hash.digest("hex"), byteSize };
+  return { sha256: sha256.digest("hex"), md5: md5.digest("hex"), byteSize };
 }
 
 function getOutput(

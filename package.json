@@ -19,12 +19,14 @@
     "typecheck": "tsc --project tsconfig.json",
     "test": "vitest run",
     "coverage": "vitest run --coverage",
-    "import:grow": "pnpm build && node dist/adapters/grow/cli.js"
+    "import:grow": "pnpm build && node dist/adapters/grow/cli.js",
+    "import:wfo": "pnpm build && node dist/adapters/wfo/cli.js"
   },
   "dependencies": {
     "ajv": "8.20.0",
     "csv-parse": "^6.2.1",
-    "exceljs": "^4.4.0"
+    "exceljs": "^4.4.0",
+    "unzipper": "0.10.14"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

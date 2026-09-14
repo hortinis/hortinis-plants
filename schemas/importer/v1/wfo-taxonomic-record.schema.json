@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:wfo-taxonomic-record",
+  "title": "Selected WFO snapshot taxonomic record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "externalIdentifier",
+    "scientificName",
+    "taxonRank",
+    "taxonomicStatus",
+    "sourceLocator",
+    "selectionReasons"
+  ],
+  "properties": {
+    "externalIdentifier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceId",
+        "sourceManifestId",
+        "sourceReleaseId",
+        "identifier"
+      ],
+      "properties": {
+        "sourceId": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+        },
+        "sourceManifestId": {
+          "$ref": "urn:hortinis:plants:schema:v1:source-manifest#/$defs/sourceManifestId"
+        },
+        "sourceReleaseId": { "type": "string", "minLength": 1 },
+        "identifier": { "type": "string", "minLength": 1 }
+      }
+    },
+    "scientificName": { "type": "string", "minLength": 1 },
+    "authorship": { "type": "string", "minLength": 1 },
+    "taxonRank": { "type": "string", "minLength": 1 },
+    "taxonomicStatus": { "type": "string", "minLength": 1 },
+    "acceptedNameUsageId": { "type": "string", "minLength": 1 },
+    "parentNameUsageId": { "type": "string", "minLength": 1 },
+    "genus": { "type": "string", "minLength": 1 },
+    "family": { "type": "string", "minLength": 1 },
+    "sourceLocator": { "type": "string", "minLength": 1 },
+    "selectionReasons": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "source-name-match",
+          "accepted-name-target",
+          "synonym-of-selected-taxon",
+          "genus-ancestor",
+          "family-ancestor"
+        ]
+      }
+    }
+  }
+}

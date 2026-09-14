@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:authoring:v1:external-taxonomy-crosswalk",
+  "title": "Reviewed external taxonomy crosswalk",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "taxonId",
+    "externalIdentifier",
+    "externalName",
+    "taxonRank",
+    "taxonomicStatus",
+    "matchMethod",
+    "locator",
+    "status",
+    "reviewId"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "taxonId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "externalIdentifier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceId",
+        "sourceManifestId",
+        "sourceReleaseId",
+        "identifier"
+      ],
+      "properties": {
+        "sourceId": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+        },
+        "sourceManifestId": {
+          "$ref": "urn:hortinis:plants:schema:v1:source-manifest#/$defs/sourceManifestId"
+        },
+        "sourceReleaseId": { "type": "string", "minLength": 1 },
+        "identifier": { "type": "string", "minLength": 1 }
+      }
+    },
+    "externalName": { "type": "string", "minLength": 1 },
+    "authorship": { "type": "string", "minLength": 1 },
+    "taxonRank": { "type": "string", "minLength": 1 },
+    "taxonomicStatus": { "type": "string", "minLength": 1 },
+    "acceptedNameIdentifier": { "type": "string", "minLength": 1 },
+    "locator": { "type": "string", "minLength": 1 },
+    "matchMethod": {
+      "enum": ["exact-name", "exact-synonym", "manual", "documented-correction"]
+    },
+    "status": { "enum": ["accepted", "rejected", "superseded"] },
+    "reviewId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "supersedesCrosswalkId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "matchMethod": { "const": "exact-synonym" } },
+        "required": ["matchMethod"]
+      },
+      "then": {
+        "required": ["acceptedNameIdentifier"],
+        "properties": { "acceptedNameIdentifier": true }
+      }
+    },
+    {
+      "if": {
+        "properties": { "status": { "const": "superseded" } },
+        "required": ["status"]
+      },
+      "then": {
+        "required": ["supersedesCrosswalkId"],
+        "properties": { "supersedesCrosswalkId": true }
+      }
+    }
+  ]
+}

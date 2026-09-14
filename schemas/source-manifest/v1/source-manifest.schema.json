@@ -41,7 +41,7 @@
         "required": ["locator", "checksum"],
         "properties": {
           "locator": { "type": "string", "minLength": 1 },
-          "checksum": { "$ref": "#/$defs/sha256Checksum" },
+          "checksum": { "$ref": "#/$defs/resourceChecksum" },
           "byteSize": { "type": "integer", "minimum": 0 },
           "mediaType": { "type": "string", "minLength": 1 }
         }
@@ -100,6 +100,27 @@
           "pattern": "^[0-9a-f]{64}$"
         }
       }
+    },
+    "md5Checksum": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "value"],
+      "properties": {
+        "algorithm": { "const": "md5" },
+        "value": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        }
+      }
+    },
+    "resourceChecksum": {
+      "type": "object",
+      "if": {
+        "properties": { "algorithm": { "const": "md5" } },
+        "required": ["algorithm"]
+      },
+      "then": { "$ref": "#/$defs/md5Checksum" },
+      "else": { "$ref": "#/$defs/sha256Checksum" }
     }
   }
 }

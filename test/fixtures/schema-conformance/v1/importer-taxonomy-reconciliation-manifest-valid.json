@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "1.0.0",
+  "job": { "name": "grow-wfo-taxonomy-reconciliation", "version": "0.1.0" },
+  "sourceManifests": [
+    {
+      "id": "source_manifest_grow_epd_2020",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "id": "source_manifest_wfo_plant_list_2026_06",
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    }
+  ],
+  "inputs": [
+    {
+      "locator": "https://example.test/wfo.zip",
+      "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "byteSize": 100,
+      "role": "source-snapshot"
+    },
+    {
+      "locator": "grow-import-run:source-records.jsonl",
+      "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "byteSize": 50,
+      "role": "importer-output"
+    }
+  ],
+  "configuration": {},
+  "configurationSha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+  "tools": { "node": "v24.0.0" },
+  "outputs": [
+    {
+      "path": "taxon-match-candidates.jsonl",
+      "schemaId": "urn:hortinis:plants:schema:v1:taxon-match-candidate",
+      "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "byteSize": 80,
+      "recordCount": 1
+    }
+  ],
+  "counts": {
+    "growRecords": 1,
+    "uniqueInputNames": 1,
+    "candidateAccepted": 1,
+    "candidateSynonym": 0,
+    "ambiguous": 0,
+    "unplaced": 0,
+    "unresolvedStatus": 0,
+    "unmatched": 0,
+    "wfoRowsScanned": 2,
+    "selectedWfoRecords": 2,
+    "unresolvedMappings": 0
+  }
+}

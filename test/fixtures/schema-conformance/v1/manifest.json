@@ -84,6 +84,10 @@
         "valid": false,
         "errors": [
           {
+            "instancePath": "/resources/0/checksum",
+            "keyword": "if"
+          },
+          {
             "instancePath": "/resources/0/checksum/value",
             "keyword": "pattern"
           }
@@ -567,6 +571,119 @@
         "valid": false,
         "errors": [{ "instancePath": "/kind", "keyword": "enum" }]
       }
+    },
+    {
+      "id": "authoring-external-taxonomy-crosswalk-valid",
+      "schemaId": "urn:hortinis:plants:schema:authoring:v1:external-taxonomy-crosswalk",
+      "fixture": "authoring-external-taxonomy-crosswalk-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "authoring-external-taxonomy-crosswalk-invalid",
+      "schemaId": "urn:hortinis:plants:schema:authoring:v1:external-taxonomy-crosswalk",
+      "fixture": "authoring-external-taxonomy-crosswalk-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/matchMethod", "keyword": "enum" }]
+      }
+    },
+    {
+      "id": "authoring-source-name-decision-valid",
+      "schemaId": "urn:hortinis:plants:schema:authoring:v1:source-name-decision",
+      "fixture": "authoring-source-name-decision-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "authoring-source-name-decision-invalid",
+      "schemaId": "urn:hortinis:plants:schema:authoring:v1:source-name-decision",
+      "fixture": "authoring-source-name-decision-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/decision", "keyword": "enum" }]
+      }
+    },
+    {
+      "id": "authoring-source-subject-mapping-valid",
+      "schemaId": "urn:hortinis:plants:schema:authoring:v1:source-subject-mapping",
+      "fixture": "authoring-source-subject-mapping-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "authoring-source-subject-mapping-invalid",
+      "schemaId": "urn:hortinis:plants:schema:authoring:v1:source-subject-mapping",
+      "fixture": "authoring-source-subject-mapping-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/subject/type", "keyword": "enum" }]
+      }
+    },
+    {
+      "id": "catalog-taxonomic-name-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:taxonomic-name",
+      "fixture": "catalog-taxonomic-name-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "catalog-taxonomic-name-invalid",
+      "schemaId": "urn:hortinis:plants:schema:v1:taxonomic-name",
+      "fixture": "catalog-taxonomic-name-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/nameStatus", "keyword": "enum" }]
+      }
+    },
+    {
+      "id": "importer-taxon-match-candidate-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:taxon-match-candidate",
+      "fixture": "importer-taxon-match-candidate-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "importer-taxon-match-candidate-invalid",
+      "schemaId": "urn:hortinis:plants:schema:v1:taxon-match-candidate",
+      "fixture": "importer-taxon-match-candidate-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/normalization", "keyword": "const" }]
+      }
+    },
+    {
+      "id": "importer-wfo-taxonomic-record-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:wfo-taxonomic-record",
+      "fixture": "importer-wfo-taxonomic-record-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "importer-wfo-taxonomic-record-invalid",
+      "schemaId": "urn:hortinis:plants:schema:v1:wfo-taxonomic-record",
+      "fixture": "importer-wfo-taxonomic-record-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [
+          { "instancePath": "/selectionReasons", "keyword": "minItems" }
+        ]
+      }
+    },
+    {
+      "id": "importer-taxonomy-reconciliation-manifest-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:taxonomy-reconciliation-manifest",
+      "fixture": "importer-taxonomy-reconciliation-manifest-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "importer-taxonomy-reconciliation-manifest-invalid",
+      "schemaId": "urn:hortinis:plants:schema:v1:taxonomy-reconciliation-manifest",
+      "fixture": "importer-taxonomy-reconciliation-manifest-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/schemaVersion", "keyword": "const" }]
+      }
+    },
+    {
+      "id": "source-manifest-md5-checksum-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:source-manifest",
+      "fixture": "source-manifest-md5-checksum-valid.json",
+      "expected": { "valid": true }
     }
   ]
 }

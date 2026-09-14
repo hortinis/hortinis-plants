@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:taxonomic-name",
+  "title": "Hortinis catalog taxonomic name",
+  "type": "object",
+  "required": [
+    "id",
+    "taxonId",
+    "scientificName",
+    "nameStatus",
+    "taxonRank",
+    "externalIdentifier",
+    "evidenceReferenceIds"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "taxonId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "scientificName": { "type": "string", "minLength": 1 },
+    "authorship": { "type": "string", "minLength": 1 },
+    "nameStatus": { "enum": ["accepted", "synonym"] },
+    "taxonRank": {
+      "type": "string",
+      "enum": [
+        "kingdom",
+        "phylum",
+        "class",
+        "order",
+        "family",
+        "genus",
+        "subgenus",
+        "section",
+        "species",
+        "subspecies",
+        "variety",
+        "subvariety",
+        "form",
+        "cultivar-group",
+        "unranked",
+        "other"
+      ]
+    },
+    "acceptedTaxonomicNameId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "externalIdentifier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceId", "sourceReleaseId", "identifier"],
+      "properties": {
+        "sourceId": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+        },
+        "sourceReleaseId": { "type": "string", "minLength": 1 },
+        "identifier": { "type": "string", "minLength": 1 }
+      }
+    },
+    "evidenceReferenceIds": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/identifierList"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "nameStatus": { "const": "synonym" } },
+        "required": ["nameStatus"]
+      },
+      "then": {
+        "required": ["acceptedTaxonomicNameId"],
+        "properties": { "acceptedTaxonomicNameId": true }
+      }
+    },
+    {
+      "if": {
+        "properties": { "nameStatus": { "const": "accepted" } },
+        "required": ["nameStatus"]
+      },
+      "then": { "properties": { "acceptedTaxonomicNameId": false } }
+    }
+  ]
+}

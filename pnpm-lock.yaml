@@ -17,6 +17,9 @@ importers:
       exceljs:
         specifier: ^4.4.0
         version: 4.4.0
+      unzipper:
+        specifier: 0.10.14
+        version: 0.10.14
     devDependencies:
       '@eslint/js':
         specifier: 10.0.1

@@ -1,0 +1,21 @@
+{
+  "id": "taxon-match-grow-1-candidate",
+  "source": {
+    "sourceId": "source_grow_edible_plant_database",
+    "sourceManifestId": "source_manifest_grow_epd_2020",
+    "sourceReleaseId": "doi:10.15132/10000157",
+    "sourceRecordId": "1",
+    "sourceLocator": "plant1.accdb#Edible plants.ID=1"
+  },
+  "snapshot": {
+    "sourceManifestId": "source_manifest_wfo_plant_list_2026_06",
+    "sourceReleaseId": "2026-06",
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "sourceName": "Solanum lycopersicum",
+  "comparisonName": "Solanum lycopersicum",
+  "normalization": "unicode-casefold-v1",
+  "outcome": "unmatched",
+  "alternatives": [],
+  "reviewState": "unreviewed"
+}

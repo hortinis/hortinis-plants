@@ -1,7 +1,10 @@
 # Source adapter guide
 
 An adapter converts one pinned source release into staged records through the shared importer runner. It
-must not write a compiled consumer artifact or construct its own run manifest.
+must not write a compiled consumer artifact or construct its own run manifest. Cross-source reconciliation
+jobs are separate from one-source adapters; when they consume multiple pinned releases or importer runs,
+they use a reconciliation-specific manifest and retain the same validation, canonical serialization,
+hashing, deterministic-output and atomic-publication requirements.
 
 Each adapter records:
 
@@ -31,3 +34,41 @@ The University of Dundee release is DOI `10.15132/10000157` (May 2020) and is de
 The Access ID is the only cross-resource join key. The pinned source data contains 140 plant records, although the release description says 146; the adapter reports this discrepancy and validates the known ID set. Workbook dates use year 2017 as a carrier and are emitted as month/day windows. Temperature values normalize to Celsius (`Cel`). Scalar optimum germination temperatures populate `optimum`; reported numeric ranges populate `minimum` and `maximum`; no midpoint or missing bound is inferred. Germination duration remains coupled to the reported germination temperature.
 
 The calendar workbook identifies twelve representative locations and source strata. Their coordinates and source names are retained as source-location applicability; the adapter does not map them to Hortinis climate contexts. The catalog contract can represent “Sow outdoors / plant out” as `establish_outdoors` with the combined `direct_sowing_or_transplant` context. Preserve the original source field and never split it into direct sowing or transplanting. The GROW adapter still keeps records staged until their identity, context, timing anchor and rights are resolved; unmapped records remain candidates and diagnostics, not canonical assertions.
+
+## WFO snapshot and GROW name reconciliation
+
+The WFO adapter uses the pinned 2026-06 archive described in `data/sources/wfo/README.md` and
+`source-manifest.json`. Download the exact `_DwC_backbone_R.zip` release to the ignored
+`.cache/source-inputs/wfo/2026-06/` directory. The WFO release publishes MD5 and exact byte size;
+the adapter checks both and records a SHA-256 for the exact snapshot in its reconciliation manifest.
+It streams `classification.csv` from the ZIP and requires the documented Darwin Core columns.
+
+Run `pnpm import:grow` first, then `pnpm import:wfo`. The WFO run reads every `source-records.jsonl`
+record from the pinned GROW run, including names outside the catalog MVP. It emits one reviewable
+candidate per GROW record. Only NFC normalization, trimming and collapsing whitespace are used for
+automatic exact-name comparison. Exact accepted names and exact synonyms can yield candidates;
+ambiguous, unplaced, unmatched and other-status names remain unresolved. No candidate is applied to a
+catalog taxon, plant concept, cultivar group or cultivar.
+
+The staged WFO taxonomy subset is limited to exact-name rows for all imported GROW records, referenced
+accepted-name targets, synonyms that point to selected accepted names, and the corresponding genus and
+family rows. It is a review/extraction subset, not a claim that WFO contains only those taxa and not a
+consumer catalog release. WFO IDs remain external identifiers scoped by source and release. GROW source
+record IDs remain independent, and no GROW-to-catalog subject mapping is emitted.
+
+The staging output goes to `.cache/import-runs/wfo/latest`; it contains candidate JSONL, selected WFO
+taxonomic rows, diagnostics and a deterministic run manifest. A WFO release update supersedes prior
+reviewed crosswalks through explicit curation; it never silently carries or changes an accepted catalog
+identity.
+
+For later reconciliation, a reviewer records a source-name decision against the preserved GROW
+`sourceRecordId` and locator. If accepted, that decision references a reviewed WFO crosswalk keyed by
+WFO source, release and identifier. A separate source-subject mapping then links the GROW record to a
+Hortinis plant concept, cultivar group or cultivar when that horticultural identity is reviewed. The
+taxonomy crosswalk alone never performs that subject mapping and never merges crop forms. Unmatched,
+ambiguous and unplaced names remain unresolved until a reviewer records a decision; an exact-string
+candidate is not itself an accepted crosswalk.
+
+The reconciled staging JSONL is not the final catalog. C4 curation will author accepted Hortinis taxa
+and scientific-name/synonym records, plant concepts and separate horticultural group/cultivar records;
+C5 will project only reviewed, profile-eligible records into deterministic consumer releases.

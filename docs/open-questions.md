@@ -16,6 +16,17 @@ foundation tooling choices are resolved in [the implementation plan](development
 - Hortinis coordination on schema compatibility guarantees, minimum-consumer enforcement and migration fixtures.
 - Artifact signing and key rotation if a future threat model requires authenticity beyond trusted local selection or authenticated HTTPS.
 
+## WFO snapshot and taxonomy scope
+
+- **in progress:** The 2026-06 Zenodo archive publishes MD5 and exact byte size, but no SHA-256 in its
+  file metadata. The WFO adapter verifies the published MD5 and size and independently records the
+  computed SHA-256 in its run manifest. Revisit the source pin if Zenodo or WFO publishes a stronger
+  release checksum.
+- **in progress:** Before producing a consumer `global-core` taxonomy projection, confirm whether its
+  WFO-derived subset should remain limited to reviewed external crosswalks plus accepted-name/synonym
+  and genus/family closure, or include additional higher-rank ancestors and non-GROW catalog seeds. The
+  current staging adapter is intentionally GROW-seeded and does not resolve this consumer-scope choice.
+
 ## GROW adapter
 
 - **in progress:** Define whether each GROW calendar location represents only its named coordinates or can support its associated source strata, then map those source scopes to Hortinis geographic contexts. Until resolved, retain only the source location/strata context and do not widen assertions.

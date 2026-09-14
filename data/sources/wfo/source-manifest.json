@@ -1,0 +1,40 @@
+{
+  "id": "source_manifest_wfo_plant_list_2026_06",
+  "provider": {
+    "id": "provider_world_flora_online",
+    "name": "World Flora Online"
+  },
+  "release": {
+    "identifier": "2026-06",
+    "publishedAt": "2026-06-22"
+  },
+  "resources": [
+    {
+      "locator": "https://zenodo.org/records/20782718/files/_DwC_backbone_R.zip",
+      "checksum": {
+        "algorithm": "md5",
+        "value": "0e4486945cd9f7af548ca87eb9a870ed"
+      },
+      "byteSize": 121660019,
+      "mediaType": "application/zip"
+    }
+  ],
+  "licenceReview": {
+    "status": "accepted",
+    "declaredLicence": "CC0-1.0",
+    "evidenceLocator": "https://www.worldfloraonline.org/downloadData",
+    "notes": "The WFO download page identifies the static Taxonomic Backbone data as CC0 1.0 Universal. Only the taxonomy backbone fields selected by this adapter are imported. The Zenodo archive publishes an MD5 and byte size; the reconciliation run additionally records a SHA-256 of the exact local archive."
+  },
+  "profileEligibility": [
+    {
+      "profile": "commercial",
+      "decision": "eligible",
+      "reason": "The WFO Taxonomic Backbone download is declared CC0-1.0; this adapter imports only its selected taxonomy fields."
+    },
+    {
+      "profile": "dev-validation",
+      "decision": "eligible",
+      "reason": "The WFO Taxonomic Backbone download is declared CC0-1.0; this adapter imports only its selected taxonomy fields."
+    }
+  ]
+}

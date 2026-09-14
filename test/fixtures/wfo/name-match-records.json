@@ -1,0 +1,86 @@
+[
+  {
+    "taxonID": "wfo-beta-accepted",
+    "scientificName": "Beta vulgaris",
+    "scientificNameAuthorship": "L.",
+    "taxonRank": "species",
+    "taxonomicStatus": "accepted",
+    "acceptedNameUsageID": "",
+    "parentNameUsageID": "wfo-beta",
+    "genus": "Beta",
+    "family": "Amaranthaceae",
+    "rowNumber": 2
+  },
+  {
+    "taxonID": "wfo-brassica-accepted",
+    "scientificName": "Brassica oleracea",
+    "scientificNameAuthorship": "L.",
+    "taxonRank": "species",
+    "taxonomicStatus": "accepted",
+    "acceptedNameUsageID": "",
+    "parentNameUsageID": "wfo-brassica",
+    "genus": "Brassica",
+    "family": "Brassicaceae",
+    "rowNumber": 3
+  },
+  {
+    "taxonID": "wfo-cabbage-synonym",
+    "scientificName": "Brassica oleracea var. capitata",
+    "scientificNameAuthorship": "L.",
+    "taxonRank": "variety",
+    "taxonomicStatus": "synonym",
+    "acceptedNameUsageID": "wfo-brassica-accepted",
+    "parentNameUsageID": "wfo-brassica",
+    "genus": "Brassica",
+    "family": "Brassicaceae",
+    "rowNumber": 4
+  },
+  {
+    "taxonID": "wfo-pea-a",
+    "scientificName": "Pisum sativum",
+    "scientificNameAuthorship": "L.",
+    "taxonRank": "species",
+    "taxonomicStatus": "accepted",
+    "acceptedNameUsageID": "",
+    "parentNameUsageID": "wfo-pisum",
+    "genus": "Pisum",
+    "family": "Fabaceae",
+    "rowNumber": 5
+  },
+  {
+    "taxonID": "wfo-pea-b",
+    "scientificName": "Pisum sativum",
+    "scientificNameAuthorship": "L.",
+    "taxonRank": "species",
+    "taxonomicStatus": "synonym",
+    "acceptedNameUsageID": "wfo-pea-a",
+    "parentNameUsageID": "wfo-pisum",
+    "genus": "Pisum",
+    "family": "Fabaceae",
+    "rowNumber": 6
+  },
+  {
+    "taxonID": "wfo-allium-unplaced",
+    "scientificName": "Allium fictum",
+    "scientificNameAuthorship": "L.",
+    "taxonRank": "species",
+    "taxonomicStatus": "unplaced",
+    "acceptedNameUsageID": "",
+    "parentNameUsageID": "",
+    "genus": "Allium",
+    "family": "Amaryllidaceae",
+    "rowNumber": 7
+  },
+  {
+    "taxonID": "wfo-orphan-synonym",
+    "scientificName": "Lactuca sativa var. fixture",
+    "scientificNameAuthorship": "L.",
+    "taxonRank": "variety",
+    "taxonomicStatus": "synonym",
+    "acceptedNameUsageID": "wfo-not-present",
+    "parentNameUsageID": "wfo-lactuca",
+    "genus": "Lactuca",
+    "family": "Asteraceae",
+    "rowNumber": 8
+  }
+]

@@ -14,6 +14,52 @@ const fixtureDirectory = join(process.cwd(), "test/fixtures/importer-run/v1");
 const locator = "fixture://release/source-records.json";
 
 describe("generic importer runner", () => {
+  it("verifies a publisher-declared MD5 and records the computed SHA-256", async () => {
+    const validationApi = await getCompiledValidationApi();
+    const directory = await mkdtemp(join(tmpdir(), "importer-md5-"));
+    try {
+      const sourceBytes = await readFile(
+        join(fixtureDirectory, "source-records.json"),
+      );
+      const sourceManifest = JSON.parse(
+        await readFile(join(fixtureDirectory, "source-manifest.json"), "utf8"),
+      ) as {
+        resources: {
+          locator: string;
+          checksum: { algorithm: string; value: string };
+        }[];
+      };
+      const resource = sourceManifest.resources[0];
+      if (resource === undefined)
+        throw new Error("Fixture resource is missing");
+      resource.checksum = {
+        algorithm: "md5",
+        value: createHash("md5").update(sourceBytes).digest("hex"),
+      };
+      const sourceManifestPath = join(directory, "source-manifest.json");
+      await writeFile(sourceManifestPath, JSON.stringify(sourceManifest));
+
+      const result = await runImporter({
+        importer: fixtureImporter(),
+        sourceManifestPath,
+        resourceDirectory: fixtureDirectory,
+        outputDirectory: join(directory, "output"),
+        validationApi,
+      });
+      const manifest = result.manifest as {
+        inputs: { locator: string; sha256: string; byteSize: number }[];
+      };
+      expect(manifest.inputs[0]).toEqual({
+        locator,
+        sha256: createHash("sha256").update(sourceBytes).digest("hex"),
+        byteSize: sourceBytes.byteLength,
+        role: "upstream",
+      });
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
   it("validates outputs and produces deterministic manifest and diagnostic summaries", async () => {
     const validationApi = await getCompiledValidationApi();
     const directory = await mkdtemp(join(tmpdir(), "importer-runner-"));

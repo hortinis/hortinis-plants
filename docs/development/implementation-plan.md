@@ -290,6 +290,28 @@ validated. The V1 local-validation track may begin after its reduced gate above.
 3. **C4 — Curation:** reconcile identities, normalize values and contexts, review rights, and report contradictions and unresolved mappings.
 4. **C5 — Release construction and publishing:** compile accepted data into deterministic JSONL.gz chunks, produce release, source, licence and attribution manifests, run build and licence gates, compare two builds, and publish immutable GitHub Release assets.
 
+#### C3.1 — WFO snapshot and GROW name-candidate reconciliation (`in progress`)
+
+- Pin the World Flora Online Plant List 2026-06 `_DwC_backbone_R.zip` archive and record its official
+  locator, release, publisher-declared checksum and size, and CC0 evidence.
+- Keep the archive in ignored `.cache/source-inputs/wfo/2026-06/`; do not vendor the 121.7 MB archive.
+- Stream `classification.csv` from the local ZIP; fail closed on missing files, checksum/size mismatch,
+  unsupported CSV shape, missing fields and duplicate WFO identifiers.
+- Compare every pinned GROW scientific name using NFC, trim and whitespace-collapse only. Stage accepted,
+  synonym, ambiguous, unplaced, unresolved-status and unmatched outcomes without selecting an ambiguous
+  alternative or mapping a GROW record to a catalog subject.
+- Restrict WFO staging rows to matched names, accepted-name targets, their synonyms and genus/family
+  context. Emit deterministic candidate/taxonomy/diagnostic JSONL and a run manifest beneath
+  `.cache/import-runs/wfo/`; do not write consumer artifacts.
+- Keep Hortinis taxa, scientific names, plant concepts, cultivar groups and cultivars distinct. A future
+  review can author release-scoped WFO crosswalks; WFO upgrades require explicit crosswalk supersession.
+- Add fixture-only tests; basic CI must not download the full WFO snapshot.
+
+Acceptance: formatting, lint, typecheck, tests, build and `pnpm import:grow` pass; the WFO unit suite
+covers exact accepted and synonym candidates, ambiguity, unmatched names, malformed CSV, duplicate GROW
+names and deterministic outcomes. A full-snapshot run is validated separately once the ignored archive
+is available locally.
+
 The release manifest is the consumer-facing acquisition entry point. It records catalog and schema versions, profile, minimum consumer version, required and optional artifacts, counts, sizes, hashes and references to metadata. Its schema belongs to C2; producing populated manifests and applying profile, rights, supersession and inheritance gates belongs to C5. Publishing is deliberately excluded from basic CI.
 
 ## C2 contract acceptance

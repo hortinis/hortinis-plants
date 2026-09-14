@@ -1,0 +1,9 @@
+{
+  "id": "licence_cc0_1_0",
+  "name": "Creative Commons CC0 1.0 Universal",
+  "expression": "CC0-1.0",
+  "referenceLocator": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "commercialUse": "allowed",
+  "attributionRequired": false,
+  "shareAlikeRequired": false
+}

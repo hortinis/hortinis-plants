@@ -1,0 +1,17 @@
+{
+  "id": "crosswalk-tomato-wfo-2026",
+  "taxonId": "taxon-tomato",
+  "externalIdentifier": {
+    "sourceId": "source_world_flora_online_plant_list",
+    "sourceManifestId": "source_manifest_wfo_plant_list_2026_06",
+    "sourceReleaseId": "2026-06",
+    "identifier": "wfo-0000000010"
+  },
+  "externalName": "Solanum lycopersicum",
+  "taxonRank": "species",
+  "taxonomicStatus": "accepted",
+  "matchMethod": "exact-name",
+  "locator": "https://example.test/wfo.zip!classification.csv#row=2",
+  "status": "accepted",
+  "reviewId": "review-taxonomy-1"
+}

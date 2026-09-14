@@ -1,0 +1,13 @@
+{
+  "id": "taxonomic-name-tomato",
+  "taxonId": "taxon-tomato",
+  "scientificName": "Solanum lycopersicum",
+  "nameStatus": "accepted",
+  "taxonRank": "species",
+  "externalIdentifier": {
+    "sourceId": "source_world_flora_online_plant_list",
+    "sourceReleaseId": "2026-06",
+    "identifier": "wfo-0000000010"
+  },
+  "evidenceReferenceIds": ["evidence-wfo-tomato"]
+}

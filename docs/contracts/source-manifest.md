@@ -13,13 +13,14 @@ Each manifest records:
 
 - the provider identifier and human-readable name;
 - the provider release identifier;
-- every acquired resource, its locator, and a lowercase SHA-256 checksum;
+- every acquired resource, its locator, a checksum and, when published, byte size;
 - the declared licence and the licence-review evidence and state; and
 - an explicit eligibility decision and reason for each relevant release profile.
 
-The manifest may include resource byte sizes and media types, but these are descriptive metadata and do
-not replace checksums. A release with unknown or unsupported rights remains ineligible under the
-licensing policy; a file-level declaration is not proof of rights in every upstream record.
+SHA-256 is the normal checksum for pinned resources. A source that publishes no stronger digest may
+declare its published MD5; the importer must verify that digest and independently write SHA-256 for the
+exact local input in its run manifest. A release with unknown or unsupported rights remains ineligible
+under the licensing policy; a file-level declaration is not proof of rights in every upstream record.
 
 The source manifest does not contain normalized assertions, source records, consumer projections,
 attribution output, or importer-run results. Assertions retain their own source-release ID, source-record

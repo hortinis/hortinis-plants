@@ -1,0 +1,27 @@
+{
+  "id": "source_manifest_md5_fixture_v1",
+  "provider": { "id": "provider_fixture_md5", "name": "MD5 Fixture" },
+  "release": { "identifier": "fixture-md5-1" },
+  "resources": [
+    {
+      "locator": "fixture://release/data",
+      "checksum": {
+        "algorithm": "md5",
+        "value": "0123456789abcdef0123456789abcdef"
+      },
+      "byteSize": 100
+    }
+  ],
+  "licenceReview": {
+    "status": "unreviewed",
+    "declaredLicence": "CC0-1.0",
+    "evidenceLocator": "fixture://licence"
+  },
+  "profileEligibility": [
+    {
+      "profile": "dev-validation",
+      "decision": "pending-review",
+      "reason": "Fixture"
+    }
+  ]
+}
