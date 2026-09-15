@@ -1,0 +1,6 @@
+{
+  "id": "assertion-review-1",
+  "reviewState": "accepted",
+  "sourceCandidate": { "id": "candidate-1" },
+  "proposedNextStep": "review source assertion"
+}

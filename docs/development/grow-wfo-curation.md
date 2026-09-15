@@ -23,6 +23,16 @@ pnpm curate:grow-wfo:drafts
 The drafts remain ignored cache files. They are a deterministic review aid and carry `reviewState:
 "unreviewed"`; they are never consumer catalog records.
 
+For a read-only lookup in the pinned WFO archive, query by normalized scientific name or WFO identifier:
+
+```sh
+pnpm curate:wfo:lookup --name "Solanum lycopersicum"
+pnpm curate:wfo:lookup --id wfo-0001029216
+```
+
+The command verifies the tracked WFO source manifest and archive pin before emitting an unreviewed lookup
+proposal with source-qualified locators. It does not modify the tracked authoring collections.
+
 ## Authoring decisions
 
 For each reviewed WFO outcome, author an external taxonomy crosswalk. Then author a source-name decision

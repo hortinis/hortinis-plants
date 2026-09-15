@@ -229,7 +229,7 @@ Acceptance: every tracked authoring collection has one declared schema and owner
 manifest validates; unresolved contract choices are recorded in `docs/open-questions.md`; no source
 candidate is accepted or promoted.
 
-### C4.2 — Draft integrity and pinned WFO lookup (`planned`)
+### C4.2 — Draft integrity and pinned WFO lookup (`validated`)
 
 - Validate source run manifests and their declared inputs before generating review queues.
 - Correct exact-synonym proposal provenance.

@@ -1,0 +1,8 @@
+{
+  "id": "subject-review-1",
+  "reviewState": "accepted",
+  "sourceRecordId": "1",
+  "sourceLocator": "plant1.accdb#Edible plants.ID=1",
+  "taxonomyCandidateId": "taxon-match-grow-1-candidate",
+  "proposedNextStep": "create plant subject"
+}

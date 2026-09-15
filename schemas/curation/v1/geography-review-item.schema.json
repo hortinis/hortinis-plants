@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:curation:v1:geography-review-item",
+  "title": "GROW geographic context review item",
+  "type": "object",
+  "required": [
+    "id",
+    "reviewState",
+    "proposedKind",
+    "proposedName",
+    "proposedScope",
+    "sourceCountryValues",
+    "sourceLocationNames",
+    "calendarCandidateCount"
+  ],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "reviewState": { "const": "unreviewed" },
+    "proposedKind": { "type": "string", "minLength": 1 },
+    "proposedName": { "type": "string", "minLength": 1 },
+    "proposedScope": { "type": "string", "minLength": 1 },
+    "sourceCountryValues": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "sourceLocationNames": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "calendarCandidateCount": { "type": "integer", "minimum": 1 }
+  },
+  "additionalProperties": false
+}

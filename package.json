@@ -21,7 +21,8 @@
     "coverage": "vitest run --coverage",
     "import:grow": "pnpm build && node dist/adapters/grow/cli.js",
     "import:wfo": "pnpm build && node dist/adapters/wfo/cli.js",
-    "curate:grow-wfo:drafts": "pnpm build && node dist/curation/grow-wfo-drafts-cli.js"
+    "curate:grow-wfo:drafts": "pnpm build && node dist/curation/grow-wfo-drafts-cli.js",
+    "curate:wfo:lookup": "pnpm build && node dist/curation/wfo-lookup-cli.js"
   },
   "dependencies": {
     "ajv": "8.20.0",

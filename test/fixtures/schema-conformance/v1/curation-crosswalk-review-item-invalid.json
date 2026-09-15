@@ -1,0 +1,17 @@
+{
+  "id": "crosswalk-review-1",
+  "reviewState": "unreviewed",
+  "proposedStatus": "accepted",
+  "proposalRoles": ["matched-accepted-name"],
+  "proposedMatchMethod": "exact-name",
+  "referringSourceRecordIds": ["1"],
+  "sourceTaxonomyCandidateIds": ["taxon-match-grow-1-candidate"],
+  "sourceNames": ["Solanum lycopersicum"],
+  "proposedExternalTaxonomyCrosswalk": {
+    "externalIdentifier": {},
+    "externalName": "Solanum lycopersicum",
+    "taxonRank": "species",
+    "taxonomicStatus": "accepted",
+    "locator": "https://example.test/wfo.zip!classification.csv#row=2"
+  }
+}

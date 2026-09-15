@@ -1,0 +1,89 @@
+{
+  "schemaVersion": "1.0.0",
+  "kind": "grow-wfo-c4-review-drafts",
+  "reviewState": "unreviewed",
+  "inputs": {
+    "growImporterRun": {
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "configurationSha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    "wfoReconciliationRun": {
+      "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "configurationSha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    },
+    "growSourceManifest": {
+      "id": "source_manifest_grow_epd_2020",
+      "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    },
+    "wfoSourceManifest": {
+      "id": "source_manifest_wfo_plant_list_2026_06",
+      "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    },
+    "wfoSnapshotSha256": "1111111111111111111111111111111111111111111111111111111111111111"
+  },
+  "counts": {
+    "sourceRecords": 1,
+    "identityReviewItems": 1,
+    "subjectMappingReviewItems": 1,
+    "assertionReviewItems": 1,
+    "taxonomyCrosswalkReviewItems": 1,
+    "geographicContextReviewItems": 1,
+    "openCurationIssues": 0
+  },
+  "outputs": [
+    {
+      "role": "identity-review-queue",
+      "path": "identity-review-queue.jsonl",
+      "mediaType": "application/jsonl",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:identity-review-item",
+      "sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "byteSize": 1,
+      "recordCount": 1
+    },
+    {
+      "role": "subject-mapping-review-queue",
+      "path": "subject-mapping-review-queue.jsonl",
+      "mediaType": "application/jsonl",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:subject-review-item",
+      "sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+      "byteSize": 1,
+      "recordCount": 1
+    },
+    {
+      "role": "assertion-review-queue",
+      "path": "assertion-review-queue.jsonl",
+      "mediaType": "application/jsonl",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:assertion-review-item",
+      "sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+      "byteSize": 1,
+      "recordCount": 1
+    },
+    {
+      "role": "taxonomy-crosswalk-review-queue",
+      "path": "taxonomy-crosswalk-review-queue.jsonl",
+      "mediaType": "application/jsonl",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:crosswalk-review-item",
+      "sha256": "5555555555555555555555555555555555555555555555555555555555555555",
+      "byteSize": 1,
+      "recordCount": 1
+    },
+    {
+      "role": "geographic-context-review-queue",
+      "path": "geographic-context-review-queue.jsonl",
+      "mediaType": "application/jsonl",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:geography-review-item",
+      "sha256": "6666666666666666666666666666666666666666666666666666666666666666",
+      "byteSize": 1,
+      "recordCount": 1
+    },
+    {
+      "role": "curation-issues",
+      "path": "curation-issues.jsonl",
+      "mediaType": "application/jsonl",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:curation-issue-review-item",
+      "sha256": "7777777777777777777777777777777777777777777777777777777777777777",
+      "byteSize": 0,
+      "recordCount": 0
+    }
+  ]
+}

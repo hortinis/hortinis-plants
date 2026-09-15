@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:curation:v1:assertion-review-item",
+  "title": "GROW source assertion review item",
+  "type": "object",
+  "required": ["id", "reviewState", "sourceCandidate", "proposedNextStep"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "reviewState": { "const": "unreviewed" },
+    "sourceCandidate": { "type": "object" },
+    "proposedNextStep": { "type": "string", "minLength": 1 },
+    "proposedAuthoringAssertion": { "type": "object" }
+  },
+  "additionalProperties": false
+}

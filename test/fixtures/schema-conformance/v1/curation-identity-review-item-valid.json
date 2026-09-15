@@ -1,0 +1,42 @@
+{
+  "id": "identity-review-1",
+  "reviewState": "unreviewed",
+  "sourceRecord": { "id": "1" },
+  "taxonomyCandidate": {
+    "id": "taxon-match-grow-1-candidate",
+    "source": {
+      "sourceId": "source_grow_edible_plant_database",
+      "sourceManifestId": "source_manifest_grow_epd_2020",
+      "sourceReleaseId": "doi:10.15132/10000157",
+      "sourceRecordId": "1",
+      "sourceLocator": "plant1.accdb#Edible plants.ID=1"
+    },
+    "snapshot": {
+      "sourceManifestId": "source_manifest_wfo_plant_list_2026_06",
+      "sourceReleaseId": "2026-06",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "sourceName": "Solanum lycopersicum",
+    "comparisonName": "Solanum lycopersicum",
+    "normalization": "unicode-nfc-trim-collapse-whitespace-v1",
+    "outcome": "candidate-accepted",
+    "alternatives": [
+      {
+        "externalIdentifier": {
+          "sourceId": "source_world_flora_online_plant_list",
+          "sourceManifestId": "source_manifest_wfo_plant_list_2026_06",
+          "sourceReleaseId": "2026-06",
+          "identifier": "wfo-0000000010"
+        },
+        "scientificName": "Solanum lycopersicum",
+        "taxonRank": "species",
+        "taxonomicStatus": "accepted",
+        "statusCategory": "accepted",
+        "sourceLocator": "https://example.test/wfo.zip!classification.csv#row=2"
+      }
+    ],
+    "matchMethod": "exact-conservative-normalization-v1",
+    "reviewState": "unreviewed"
+  },
+  "proposedNextStep": "confirm identity"
+}

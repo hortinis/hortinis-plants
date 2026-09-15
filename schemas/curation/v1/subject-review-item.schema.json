@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:curation:v1:subject-review-item",
+  "title": "GROW source subject mapping review item",
+  "type": "object",
+  "required": [
+    "id",
+    "reviewState",
+    "sourceRecordId",
+    "sourceLocator",
+    "taxonomyCandidateId",
+    "proposedNextStep"
+  ],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "reviewState": { "const": "unreviewed" },
+    "sourceRecordId": { "type": "string", "minLength": 1 },
+    "sourceLocator": { "type": "string", "minLength": 1 },
+    "taxonomyCandidateId": { "type": "string", "minLength": 1 },
+    "proposedNextStep": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": true
+}

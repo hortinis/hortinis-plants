@@ -747,6 +747,143 @@
       "schemaId": "urn:hortinis:plants:schema:v1:source-manifest",
       "fixture": "source-manifest-md5-checksum-valid.json",
       "expected": { "valid": true }
+    },
+    {
+      "id": "curation-draft-manifest-valid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:draft-manifest",
+      "fixture": "curation-draft-manifest-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "curation-draft-manifest-invalid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:draft-manifest",
+      "fixture": "curation-draft-manifest-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [
+          { "instancePath": "/kind", "keyword": "const" },
+          { "instancePath": "/outputs", "keyword": "minItems" }
+        ]
+      }
+    },
+    {
+      "id": "curation-identity-review-item-valid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:identity-review-item",
+      "fixture": "curation-identity-review-item-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "curation-identity-review-item-invalid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:identity-review-item",
+      "fixture": "curation-identity-review-item-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [
+          { "instancePath": "/reviewState", "keyword": "const" },
+          { "instancePath": "/taxonomyCandidate", "keyword": "required" },
+          { "instancePath": "/taxonomyCandidate", "keyword": "required" },
+          { "instancePath": "/taxonomyCandidate", "keyword": "required" },
+          { "instancePath": "/taxonomyCandidate", "keyword": "required" },
+          { "instancePath": "/taxonomyCandidate", "keyword": "required" },
+          { "instancePath": "/taxonomyCandidate", "keyword": "required" },
+          { "instancePath": "/taxonomyCandidate", "keyword": "required" },
+          { "instancePath": "/taxonomyCandidate", "keyword": "required" }
+        ]
+      }
+    },
+    {
+      "id": "curation-subject-review-item-valid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:subject-review-item",
+      "fixture": "curation-subject-review-item-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "curation-subject-review-item-invalid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:subject-review-item",
+      "fixture": "curation-subject-review-item-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/reviewState", "keyword": "const" }]
+      }
+    },
+    {
+      "id": "curation-assertion-review-item-valid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:assertion-review-item",
+      "fixture": "curation-assertion-review-item-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "curation-assertion-review-item-invalid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:assertion-review-item",
+      "fixture": "curation-assertion-review-item-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/reviewState", "keyword": "const" }]
+      }
+    },
+    {
+      "id": "curation-crosswalk-review-item-valid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:crosswalk-review-item",
+      "fixture": "curation-crosswalk-review-item-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "curation-crosswalk-review-item-invalid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:crosswalk-review-item",
+      "fixture": "curation-crosswalk-review-item-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [
+          {
+            "instancePath": "/proposedExternalTaxonomyCrosswalk/externalIdentifier",
+            "keyword": "required"
+          },
+          {
+            "instancePath": "/proposedExternalTaxonomyCrosswalk/externalIdentifier",
+            "keyword": "required"
+          },
+          {
+            "instancePath": "/proposedExternalTaxonomyCrosswalk/externalIdentifier",
+            "keyword": "required"
+          },
+          {
+            "instancePath": "/proposedExternalTaxonomyCrosswalk/externalIdentifier",
+            "keyword": "required"
+          }
+        ]
+      }
+    },
+    {
+      "id": "curation-geography-review-item-valid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:geography-review-item",
+      "fixture": "curation-geography-review-item-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "curation-geography-review-item-invalid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:geography-review-item",
+      "fixture": "curation-geography-review-item-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [
+          { "instancePath": "/sourceCountryValues", "keyword": "minItems" }
+        ]
+      }
+    },
+    {
+      "id": "curation-issue-review-item-valid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:curation-issue-review-item",
+      "fixture": "curation-issue-review-item-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "curation-issue-review-item-invalid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:curation-issue-review-item",
+      "fixture": "curation-issue-review-item-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/reviewState", "keyword": "const" }]
+      }
     }
   ]
 }

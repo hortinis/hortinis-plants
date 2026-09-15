@@ -1,0 +1,8 @@
+{
+  "id": "issue-1",
+  "kind": "unresolved-mapping",
+  "status": "open",
+  "reviewState": "accepted",
+  "affectedRecordIds": ["1"],
+  "reason": "No taxonomy mapping was selected."
+}

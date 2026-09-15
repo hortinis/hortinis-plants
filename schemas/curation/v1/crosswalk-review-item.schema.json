@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:curation:v1:crosswalk-review-item",
+  "title": "Consolidated WFO taxonomy crosswalk review item",
+  "type": "object",
+  "required": [
+    "id",
+    "reviewState",
+    "proposedStatus",
+    "proposalRoles",
+    "proposedMatchMethod",
+    "referringSourceRecordIds",
+    "sourceTaxonomyCandidateIds",
+    "sourceNames",
+    "proposedExternalTaxonomyCrosswalk"
+  ],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "reviewState": { "const": "unreviewed" },
+    "proposedStatus": { "const": "accepted" },
+    "proposalRoles": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "matched-accepted-name",
+          "matched-synonym",
+          "accepted-name-target"
+        ]
+      }
+    },
+    "proposedMatchMethod": {
+      "enum": ["exact-name", "exact-synonym", "review-required"]
+    },
+    "requiredBeforeAuthoring": { "type": "string", "minLength": 1 },
+    "referringSourceRecordIds": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "sourceTaxonomyCandidateIds": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "sourceNames": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "proposedExternalTaxonomyCrosswalk": {
+      "type": "object",
+      "required": [
+        "externalIdentifier",
+        "externalName",
+        "taxonRank",
+        "taxonomicStatus",
+        "locator"
+      ],
+      "properties": {
+        "externalIdentifier": {
+          "type": "object",
+          "required": [
+            "sourceId",
+            "sourceManifestId",
+            "sourceReleaseId",
+            "identifier"
+          ],
+          "properties": {
+            "sourceId": { "type": "string", "minLength": 1 },
+            "sourceManifestId": { "type": "string", "minLength": 1 },
+            "sourceReleaseId": { "type": "string", "minLength": 1 },
+            "identifier": { "type": "string", "minLength": 1 }
+          }
+        },
+        "externalName": { "type": "string", "minLength": 1 },
+        "authorship": { "type": "string", "minLength": 1 },
+        "taxonRank": { "type": "string", "minLength": 1 },
+        "taxonomicStatus": { "type": "string", "minLength": 1 },
+        "acceptedNameIdentifier": { "type": "string", "minLength": 1 },
+        "locator": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
