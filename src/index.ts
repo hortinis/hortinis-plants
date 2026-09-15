@@ -42,6 +42,14 @@ export type {
   DatasetValidationIssue,
   ValidationDataset,
 } from "./curation/validation-dataset.js";
+export { validateGrowWfoDataset } from "./curation/grow-wfo-validation.js";
+export type {
+  CurationValidationIssue,
+  GrowWfoValidationOptions,
+  GrowWfoValidationResult,
+  LoadedCurationDataset,
+  RecordLocation,
+} from "./curation/grow-wfo-validation.js";
 export { generateGrowWfoDrafts } from "./curation/grow-wfo-drafts.js";
 export {
   createWfoLookupProposal,

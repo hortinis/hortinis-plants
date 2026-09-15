@@ -19,6 +19,22 @@ command writes deterministic, ignored review queues below `.cache/curation-draft
   source location; and
 - `curation-issues.jsonl` reports unresolved taxonomy and the absence of reviewed subject mappings.
 
+Validate the tracked authoring boundary from a clean checkout with:
+
+```sh
+pnpm curate:grow-wfo:validate
+```
+
+When the local importer runs, pinned WFO archive and generated drafts are available, include them in the
+read-only deep audit:
+
+```sh
+pnpm curate:grow-wfo:validate -- --against-drafts
+```
+
+Add `--json` to either command for machine-readable deterministic diagnostics. Validation never writes
+tracked authoring collections or regenerates ignored drafts.
+
 The manifest declares all curator-owned JSON Lines collections and checksummed tracked source metadata.
 The collections are intentionally zero-byte files until an explicit decision is applied. Its review
 baseline pins the GROW and WFO configuration hashes plus the SHA-256 of the canonical draft manifest. The

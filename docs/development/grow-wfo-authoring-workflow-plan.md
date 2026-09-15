@@ -241,7 +241,7 @@ candidate is accepted or promoted.
 Acceptance: identical inputs produce byte-identical queues and manifest; corrupted or mismatched inputs
 fail without replacing the prior draft; shared and record-specific WFO choices have fixture coverage.
 
-### C4.3 — Manifest-driven dataset loader and validator (`planned`)
+### C4.3 — Manifest-driven dataset loader and validator (`validated`)
 
 - Load only collections declared by a validated manifest.
 - Reject unsafe paths, duplicate roles, unknown schema identifiers and malformed JSON Lines.
@@ -251,6 +251,12 @@ fail without replacing the prior draft; shared and record-specific WFO choices h
 
 Acceptance: `pnpm curate:grow-wfo:validate` works from a clean checkout; `--against-drafts` detects source
 or queue drift; ordinary data failures make no writes and return actionable deterministic diagnostics.
+
+Implementation note: the validator is read-only. It loads only manifest-declared collections and tracked
+dependencies, validates strict JSON/JSONL through the compiled schema registry, runs the existing
+cross-record checks, and preserves collection paths and line numbers in deterministic diagnostics.
+`--against-drafts` additionally checks the ignored draft manifest, queue descriptors, source-run fingerprints
+and pinned WFO snapshot when those local inputs are available.
 
 ### C4.4 — Semantic integrity and completion status (`planned`)
 
