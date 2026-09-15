@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "1.0.0",
+  "transactionId": "transaction_fixture",
+  "draftManifestSha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "operations": [
+    {
+      "kind": "issue",
+      "source": { "queueRole": "curation-issues", "queueItemId": "issue_fixture" },
+      "records": [
+        {
+          "collection": "curation-issues",
+          "mintAlias": "issue",
+          "value": { "kind": "unresolved-mapping", "status": "open", "affectedRecordIds": ["1"], "reason": "Fixture" }
+        }
+      ]
+    }
+  ]
+}

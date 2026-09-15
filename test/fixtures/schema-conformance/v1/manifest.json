@@ -884,6 +884,24 @@
         "valid": false,
         "errors": [{ "instancePath": "/reviewState", "keyword": "const" }]
       }
+    },
+    {
+      "id": "curation-decision-input-valid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:decision-input",
+      "fixture": "curation-decision-input-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "curation-decision-input-invalid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:decision-input",
+      "fixture": "curation-decision-input-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [
+          { "instancePath": "/draftManifestSha256", "keyword": "pattern" },
+          { "instancePath": "/operations", "keyword": "minItems" }
+        ]
+      }
     }
   ]
 }

@@ -47,6 +47,22 @@ draft queues when available and still reports tracked-dataset validity from a cl
 not. `show` joins one GROW source record with generated candidates, current decisions, authored records and
 curation issues. Both commands are read-only.
 
+## Apply an explicit transaction
+
+`apply` is the only command that changes tracked authoring collections. Its input is a strict JSON
+transaction validated against the current draft manifest. Each operation names the exact draft queue item
+and supplies the final records, reviews, evidence, and any supersession links to materialize. Records may
+use `mintAlias` when a deterministic opaque identifier should be generated from the transaction ID.
+
+```sh
+pnpm curate:grow-wfo:apply -- --input decision.json
+```
+
+The command validates the current dataset and local drafts, rejects stale draft fingerprints, stages and
+validates the complete prospective dataset, then publishes the staged directory. A failed transaction
+leaves the tracked directory unchanged. Repeating an operation whose exact record already exists is a
+no-op; replacing a current decision requires an explicit supersession link.
+
 ## Authoring decisions
 
 For each reviewed WFO outcome, author an external taxonomy crosswalk. Then author a source-name decision

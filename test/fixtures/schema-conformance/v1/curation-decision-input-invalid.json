@@ -1,0 +1,6 @@
+{
+  "schemaVersion": "1.0.0",
+  "transactionId": "transaction_fixture",
+  "draftManifestSha256": "not-a-sha",
+  "operations": []
+}

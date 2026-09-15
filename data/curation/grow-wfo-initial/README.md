@@ -35,6 +35,16 @@ pnpm curate:grow-wfo:validate -- --against-drafts
 Add `--json` to either command for machine-readable deterministic diagnostics. Validation never writes
 tracked authoring collections or regenerates ignored drafts.
 
+To apply reviewed records, create a transaction conforming to
+`urn:hortinis:plants:schema:curation:v1:decision-input` and run:
+
+```sh
+pnpm curate:grow-wfo:apply -- --input decision.json
+```
+
+The transaction must pin the exact draft manifest. It is staged and validated as a whole; stale drafts,
+duplicate current decisions, invalid supersession, or any failed relationship check prevent publication.
+
 The manifest declares all curator-owned JSON Lines collections and checksummed tracked source metadata.
 The collections are intentionally zero-byte files until an explicit decision is applied. Its review
 baseline pins the GROW and WFO configuration hashes plus the SHA-256 of the canonical draft manifest. The

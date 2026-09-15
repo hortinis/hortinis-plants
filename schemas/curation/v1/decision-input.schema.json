@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:curation:v1:decision-input",
+  "title": "GROW/WFO explicit authoring decision transaction",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "transactionId", "draftManifestSha256", "operations"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "transactionId": { "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier" },
+    "draftManifestSha256": { "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/sha256" },
+    "baseDatasetSha256": { "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/sha256" },
+    "operations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/operation" }
+    }
+  },
+  "$defs": {
+    "sourceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["queueRole", "queueItemId"],
+      "properties": {
+        "queueRole": {
+          "enum": [
+            "identity-review-queue",
+            "subject-mapping-review-queue",
+            "assertion-review-queue",
+            "taxonomy-crosswalk-review-queue",
+            "geographic-context-review-queue",
+            "curation-issues"
+          ]
+        },
+        "queueItemId": { "type": "string", "minLength": 1 }
+      }
+    },
+    "record": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["collection", "value"],
+      "properties": {
+        "collection": {
+          "enum": [
+            "taxa",
+            "taxonomic-names",
+            "plant-concepts",
+            "cultivar-groups",
+            "cultivars",
+            "localized-names",
+            "geographic-contexts",
+            "cultivation-contexts",
+            "evidence-references",
+            "reviews",
+            "external-taxonomy-crosswalks",
+            "source-name-decisions",
+            "source-subject-mappings",
+            "source-geography-decisions",
+            "source-assertion-decisions",
+            "assertions",
+            "curation-issues"
+          ]
+        },
+        "mintAlias": { "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier" },
+        "value": { "type": "object" }
+      }
+    },
+    "operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "source", "records"],
+      "properties": {
+        "kind": { "enum": ["taxonomy", "subject", "geography", "assertion", "issue"] },
+        "source": { "$ref": "#/$defs/sourceRef" },
+        "records": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/record" }
+        }
+      }
+    }
+  }
+}
