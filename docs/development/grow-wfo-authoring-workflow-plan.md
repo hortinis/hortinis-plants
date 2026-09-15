@@ -258,7 +258,7 @@ cross-record checks, and preserves collection paths and line numbers in determin
 `--against-drafts` additionally checks the ignored draft manifest, queue descriptors, source-run fingerprints
 and pinned WFO snapshot when those local inputs are available.
 
-### C4.4 — Semantic integrity and completion status (`planned`)
+### C4.4 — Semantic integrity and completion status (`validated`)
 
 - Enforce composite-key uniqueness for current crosswalks and decisions.
 - Require accepted records to reference accepted reviews of the correct purpose.

@@ -258,6 +258,23 @@ describe("V1.2 validation dataset", () => {
           locator: "https://example.test/wfo#example",
           reviewId: "review_content_example",
         },
+        {
+          id: "crosswalk_example_synonym",
+          taxonId: "taxon_example",
+          externalIdentifier: {
+            sourceId: "source_world_flora_online_plant_list",
+            sourceManifestId: "source_manifest_wfo_plant_list_2026_06",
+            sourceReleaseId: "2026-06",
+            identifier: "wfo-example-synonym",
+          },
+          externalName: "Examplea prior",
+          taxonRank: "species",
+          taxonomicStatus: "Synonym",
+          acceptedNameIdentifier: "wfo-example",
+          matchMethod: "exact-synonym",
+          locator: "https://example.test/wfo#synonym",
+          reviewId: "review_content_example",
+        },
       ],
       sourceNameDecisions: [
         {
@@ -358,6 +375,48 @@ describe("V1.2 validation dataset", () => {
         code: "MISSING_REFERENCE",
         recordId: "name_decision_example",
       }),
+    );
+
+    expect(
+      validateValidationDataset({
+        ...c4Dataset,
+        externalTaxonomyCrosswalks: [
+          ...c4Dataset.externalTaxonomyCrosswalks!,
+          {
+            ...c4Dataset.externalTaxonomyCrosswalks![0],
+            id: "crosswalk_duplicate",
+          },
+        ],
+      }),
+    ).toContainEqual(
+      expect.objectContaining({ code: "DUPLICATE_COMPOSITE_KEY" }),
+    );
+
+    expect(
+      validateValidationDataset({
+        ...c4Dataset,
+        reviews: [{ ...c4Dataset.reviews[0], status: "unreviewed" }],
+      }),
+    ).toContainEqual(
+      expect.objectContaining({
+        code: "INVALID_REVIEW_REFERENCE",
+        recordId: "taxonomic_name_example",
+      }),
+    );
+
+    expect(
+      validateValidationDataset({
+        ...c4Dataset,
+        sourceNameDecisions: [
+          ...c4Dataset.sourceNameDecisions!,
+          {
+            ...c4Dataset.sourceNameDecisions![0],
+            id: "name_decision_duplicate",
+          },
+        ],
+      }),
+    ).toContainEqual(
+      expect.objectContaining({ code: "DUPLICATE_COMPOSITE_KEY" }),
     );
   });
 });

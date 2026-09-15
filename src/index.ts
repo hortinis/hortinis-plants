@@ -65,6 +65,18 @@ export type {
   GrowWfoDraftOptions,
   GrowWfoDraftResult,
 } from "./curation/grow-wfo-drafts.js";
+export {
+  getGrowWfoStatus,
+  readGrowWfoDrafts,
+} from "./curation/grow-wfo-status.js";
+export type {
+  CompletionGate,
+  CurationStatus,
+  GrowWfoDraftData,
+  GrowWfoStatusResult,
+} from "./curation/grow-wfo-status.js";
+export { showGrowWfoRecord } from "./curation/grow-wfo-show.js";
+export type { GrowWfoRecordView } from "./curation/grow-wfo-show.js";
 export { runImporter } from "./importer/runner.js";
 export { ImporterRunError } from "./importer/errors.js";
 export type {

@@ -382,6 +382,14 @@ export async function validateGrowWfoDataset(
 
   if (options.againstDrafts) {
     await auditDrafts(manifest, repositoryRoot, validationApi, options, issues);
+    if (loaded !== undefined) {
+      await auditAuthoringLineage(
+        loaded.dataset,
+        repositoryRoot,
+        options,
+        issues,
+      );
+    }
   }
   return result(issues, loaded);
 }
@@ -736,6 +744,248 @@ async function auditDrafts(
   }
 }
 
+async function auditAuthoringLineage(
+  dataset: ValidationDataset,
+  repositoryRoot: string,
+  options: GrowWfoValidationOptions,
+  issues: CurationValidationIssue[],
+): Promise<void> {
+  const draftsDirectory = resolve(
+    options.draftsDirectory ??
+      join(repositoryRoot, ".cache/curation-drafts/grow-wfo/latest"),
+  );
+  const draftManifestPath = join(draftsDirectory, "draft-manifest.json");
+  const draftManifestBytes = await readFileOrIssue(
+    draftManifestPath,
+    issues,
+    "MISSING_DRAFT",
+  );
+  if (draftManifestBytes === undefined) return;
+  const candidateById = new Map<string, RecordValue>();
+  const assertionQueuePath = join(
+    draftsDirectory,
+    "assertion-review-queue.jsonl",
+  );
+  try {
+    for await (const entry of readJsonLines(
+      createReadStream(assertionQueuePath),
+    )) {
+      const item = asRecord(entry.value);
+      const candidate = asRecord(item?.sourceCandidate);
+      const candidateId = stringField(candidate, "id");
+      if (candidate !== undefined && candidateId !== undefined)
+        candidateById.set(candidateId, candidate);
+    }
+  } catch (error) {
+    addJsonLinesIssue(issues, assertionQueuePath, error);
+    return;
+  }
+  const draftHash = sha256(draftManifestBytes);
+  const reviews = new Map(
+    dataset.reviews.map((review) => [stringField(review, "id"), review]),
+  );
+  const subjects = currentDecisionBySourceRecord(
+    dataset.sourceSubjectMappings ?? [],
+    "supersedesMappingId",
+  );
+  const geographies = currentDecisionByLocation(
+    dataset.sourceGeographyDecisions ?? [],
+  );
+  const assertions = currentDecisionByCandidate(
+    dataset.sourceAssertionDecisions ?? [],
+  );
+  for (const decision of assertions.values()) {
+    const id = recordId(decision);
+    if (stringField(decision, "draftManifestSha256") !== draftHash) {
+      addIssue(
+        issues,
+        "CANDIDATE_LINEAGE",
+        "source-assertion-decisions.jsonl",
+        `Assertion decision ${id} does not reference the tracked draft manifest`,
+        undefined,
+        id,
+      );
+    }
+    const candidateId = stringField(decision, "sourceCandidateId");
+    const candidate =
+      candidateId === undefined ? undefined : candidateById.get(candidateId);
+    if (candidate === undefined) {
+      addIssue(
+        issues,
+        "CANDIDATE_LINEAGE",
+        "source-assertion-decisions.jsonl",
+        `Assertion decision ${id} references missing draft candidate ${candidateId ?? "<missing>"}`,
+        undefined,
+        id,
+      );
+      continue;
+    }
+    if (stringField(decision, "decision") !== "accept") continue;
+    const sourceRecordId = stringField(candidate, "sourceRecordId");
+    const subject =
+      sourceRecordId === undefined ? undefined : subjects.get(sourceRecordId);
+    if (
+      subject === undefined ||
+      stringField(subject, "decision") !== "map" ||
+      !reviewIsAccepted(subject, reviews)
+    ) {
+      addIssue(
+        issues,
+        "CANDIDATE_LINEAGE",
+        "source-assertion-decisions.jsonl",
+        `Accepted assertion decision ${id} requires a current reviewed subject mapping for source record ${sourceRecordId ?? "<missing>"}`,
+        undefined,
+        id,
+      );
+    }
+    const assertionId = stringField(decision, "assertionId");
+    const assertion = dataset.assertions.find(
+      (candidateAssertion) =>
+        stringField(candidateAssertion, "id") === assertionId,
+    );
+    if (assertion === undefined) continue;
+    const evidence = dataset.evidence.filter((reference) =>
+      stringArray(assertion.evidenceReferenceIds).includes(
+        stringField(reference, "id") ?? "",
+      ),
+    );
+    const source = {
+      sourceId: stringField(candidate, "sourceId"),
+      sourceManifestId: stringField(candidate, "sourceManifestId"),
+      sourceReleaseId: stringField(candidate, "sourceReleaseId"),
+      sourceRecordId: stringField(candidate, "sourceRecordId"),
+      locator: stringField(candidate, "sourceLocator"),
+    };
+    if (
+      !evidence.some(
+        (reference) =>
+          source.sourceId === stringField(reference, "sourceId") &&
+          source.sourceManifestId ===
+            stringField(reference, "sourceManifestId") &&
+          source.sourceReleaseId ===
+            stringField(reference, "sourceReleaseId") &&
+          source.sourceRecordId === stringField(reference, "sourceRecordId") &&
+          source.locator === stringField(reference, "locator"),
+      )
+    ) {
+      addIssue(
+        issues,
+        "CANDIDATE_LINEAGE",
+        "assertions.jsonl",
+        `Accepted assertion ${assertionId ?? "<missing>"} has no evidence for candidate ${candidateId}`,
+        undefined,
+        assertionId,
+      );
+    }
+    if (stringField(candidate, "predicate") === "calendar_window") {
+      const geography = asRecord(asRecord(candidate.applicability)?.geography);
+      const geographyKey = tupleKey([
+        stringField(candidate, "sourceId"),
+        stringField(candidate, "sourceManifestId"),
+        stringField(candidate, "sourceReleaseId"),
+        stringField(geography, "sheetCode"),
+      ]);
+      const geographyDecision =
+        geographyKey === undefined ? undefined : geographies.get(geographyKey);
+      if (
+        geographyDecision === undefined ||
+        stringField(geographyDecision, "decision") !== "map" ||
+        !reviewIsAccepted(geographyDecision, reviews)
+      ) {
+        addIssue(
+          issues,
+          "CANDIDATE_LINEAGE",
+          "source-assertion-decisions.jsonl",
+          `Accepted calendar assertion decision ${id} requires a current reviewed geography decision`,
+          undefined,
+          id,
+        );
+      }
+    }
+  }
+}
+
+function currentDecisionBySourceRecord(
+  records: readonly RecordValue[],
+  supersessionField: string,
+): Map<string, RecordValue> {
+  const superseded = new Set(
+    records
+      .map((record) => stringField(record, supersessionField))
+      .filter((id): id is string => id !== undefined),
+  );
+  const result = new Map<string, RecordValue>();
+  for (const record of records) {
+    const sourceRecordId = stringField(record, "sourceRecordId");
+    const id = stringField(record, "id");
+    if (sourceRecordId !== undefined && id !== undefined && !superseded.has(id))
+      result.set(sourceRecordId, record);
+  }
+  return result;
+}
+
+function currentDecisionByLocation(
+  records: readonly RecordValue[],
+): Map<string, RecordValue> {
+  const superseded = new Set(
+    records
+      .map((record) => stringField(record, "supersedesDecisionId"))
+      .filter((id): id is string => id !== undefined),
+  );
+  const result = new Map<string, RecordValue>();
+  for (const record of records) {
+    const key = sourceLocationKey(record);
+    const id = stringField(record, "id");
+    if (key !== undefined && id !== undefined && !superseded.has(id))
+      result.set(key, record);
+  }
+  return result;
+}
+
+function currentDecisionByCandidate(
+  records: readonly RecordValue[],
+): Map<string, RecordValue> {
+  const superseded = new Set(
+    records
+      .map((record) => stringField(record, "supersedesDecisionId"))
+      .filter((id): id is string => id !== undefined),
+  );
+  const result = new Map<string, RecordValue>();
+  for (const record of records) {
+    const candidateId = stringField(record, "sourceCandidateId");
+    const id = stringField(record, "id");
+    if (candidateId !== undefined && id !== undefined && !superseded.has(id))
+      result.set(candidateId, record);
+  }
+  return result;
+}
+
+function reviewIsAccepted(
+  record: RecordValue,
+  reviews: ReadonlyMap<string | undefined, RecordValue>,
+): boolean {
+  return (
+    stringField(reviews.get(stringField(record, "reviewId")), "status") ===
+    "accepted"
+  );
+}
+
+function sourceLocationKey(record: RecordValue): string | undefined {
+  const location = asRecord(record.sourceLocation);
+  return tupleKey([
+    stringField(record, "sourceId"),
+    stringField(record, "sourceManifestId"),
+    stringField(record, "sourceReleaseId"),
+    stringField(location, "sheetCode"),
+  ]);
+}
+
+function tupleKey(values: readonly (string | undefined)[]): string | undefined {
+  return values.every((value) => value !== undefined)
+    ? values.join("\u0000")
+    : undefined;
+}
+
 async function auditRun(
   path: string,
   expected: string,
@@ -1075,6 +1325,28 @@ function compareIssues(
 
 function isRecord(value: unknown): value is RecordValue {
   return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function asRecord(value: unknown): RecordValue | undefined {
+  return isRecord(value) ? value : undefined;
+}
+
+function stringField(
+  record: RecordValue | undefined,
+  field: string,
+): string | undefined {
+  const value = record?.[field];
+  return typeof value === "string" ? value : undefined;
+}
+
+function stringArray(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string")
+    : [];
+}
+
+function recordId(record: RecordValue): string {
+  return stringField(record, "id") ?? "<missing>";
 }
 
 function isSafeRelativePath(path: string): boolean {

@@ -6,6 +6,7 @@ import {
 export interface DatasetValidationIssue {
   readonly code:
     | "DUPLICATE_ID"
+    | "DUPLICATE_COMPOSITE_KEY"
     | "MISSING_REFERENCE"
     | "INVALID_SCOPE"
     | "INVALID_SUPERSESSION"
@@ -13,6 +14,11 @@ export interface DatasetValidationIssue {
     | "DUPLICATE_ACCEPTED_TAXONOMIC_NAME"
     | "DUPLICATE_PREFERRED_NAME"
     | "INVALID_REVIEW_REFERENCE"
+    | "INVALID_SUBJECT_TAXONOMY"
+    | "INVALID_TAXONOMY_LINK"
+    | "INVALID_SOURCE_DECISION"
+    | "INVALID_GEOGRAPHY_DECISION"
+    | "MULTIPLE_SUCCESSORS"
     | "INVALID_CALENDAR_VALUE"
     | "INVALID_VALUE_RANGE"
     | "INVALID_TEMPERATURE_PROFILE"
@@ -121,6 +127,52 @@ export function validateValidationDataset(
     }
   };
 
+  const currentCrosswalks = currentRecords(
+    dataset.externalTaxonomyCrosswalks ?? [],
+    "externalTaxonomyCrosswalks",
+    "supersedesCrosswalkId",
+    (record) => externalIdentifierKey(record.externalIdentifier),
+    get,
+    missing,
+    issues,
+  );
+  const currentNameDecisions = currentRecords(
+    dataset.sourceNameDecisions ?? [],
+    "sourceNameDecisions",
+    "supersedesDecisionId",
+    sourceRecordKey,
+    get,
+    missing,
+    issues,
+  );
+  currentRecords(
+    dataset.sourceSubjectMappings ?? [],
+    "sourceSubjectMappings",
+    "supersedesMappingId",
+    sourceRecordKey,
+    get,
+    missing,
+    issues,
+  );
+  currentRecords(
+    dataset.sourceGeographyDecisions ?? [],
+    "sourceGeographyDecisions",
+    "supersedesDecisionId",
+    sourceLocationKey,
+    get,
+    missing,
+    issues,
+  );
+  currentRecords(
+    dataset.sourceAssertionDecisions ?? [],
+    "sourceAssertionDecisions",
+    "supersedesDecisionId",
+    (record) => stringField(record, "sourceCandidateId"),
+    get,
+    missing,
+    issues,
+  );
+
   for (const record of dataset.taxa) {
     const id = recordId(record);
     checkIdReferences(record, "evidenceReferenceIds", "evidence", missing, id);
@@ -140,6 +192,19 @@ export function validateValidationDataset(
       id,
     );
     checkAllowedSourceManifest(record, id);
+
+    const crosswalk = currentCrosswalks.byExternalKey.get(
+      externalIdentifierKey(record.externalIdentifier) ?? "",
+    );
+    if (crosswalk === undefined) {
+      issues.push({
+        code: "INVALID_TAXONOMY_LINK",
+        recordId: id,
+        message: `Taxonomic name ${id} must have a current matching external taxonomy crosswalk`,
+      });
+    } else {
+      checkMatchingTaxonomyName(record, crosswalk, id, issues);
+    }
 
     const acceptedNameId = stringField(record, "acceptedTaxonomicNameId");
     if (acceptedNameId !== undefined) {
@@ -339,6 +404,17 @@ export function validateValidationDataset(
       id,
     );
     checkAllowedSourceManifest(record, id);
+    if (currentCrosswalks.currentIds.has(id)) {
+      const taxon = taxonId === undefined ? undefined : get("taxa", taxonId);
+      if (taxon !== undefined && stringField(taxon, "status") !== "active") {
+        issues.push({
+          code: "INVALID_TAXONOMY_LINK",
+          recordId: id,
+          message: `Current crosswalk ${id} must reference an active taxon`,
+        });
+      }
+      checkSynonymCrosswalk(record, currentCrosswalks, id, issues);
+    }
   }
   for (const record of dataset.sourceNameDecisions ?? []) {
     const id = recordId(record);
@@ -351,8 +427,16 @@ export function validateValidationDataset(
       id,
     );
     const crosswalkId = stringField(record, "externalTaxonomyCrosswalkId");
-    if (crosswalkId !== undefined)
+    if (crosswalkId !== undefined) {
       missing(id, "externalTaxonomyCrosswalks", crosswalkId);
+      if (!currentCrosswalks.currentIds.has(crosswalkId)) {
+        issues.push({
+          code: "INVALID_SOURCE_DECISION",
+          recordId: id,
+          message: `Source-name decision ${id} must reference a current crosswalk`,
+        });
+      }
+    }
     checkAllowedSourceManifest(record, id);
   }
   for (const record of dataset.sourceSubjectMappings ?? []) {
@@ -360,6 +444,7 @@ export function validateValidationDataset(
     const decision = stringField(record, "decision");
     if (decision === "map") {
       checkSubject(record.subject, id, false, missing, issues);
+      checkSubjectTaxonomy(record, id, currentNameDecisions, currentCrosswalks);
     }
     checkReview(stringField(record, "reviewId"), "content", id, get, issues);
     checkReplacement(
@@ -372,7 +457,14 @@ export function validateValidationDataset(
     const crosswalkId = stringField(record, "externalTaxonomyCrosswalkId");
     if (crosswalkId !== undefined)
       missing(id, "externalTaxonomyCrosswalks", crosswalkId);
-    if (decision === "map") checkReviewedNameDecision(record, id, crosswalkId);
+    if (decision === "map")
+      checkReviewedNameDecision(
+        record,
+        id,
+        crosswalkId,
+        currentNameDecisions.bySourceKey,
+        currentCrosswalks,
+      );
     checkAllowedSourceManifest(record, id);
   }
   for (const record of dataset.sourceGeographyDecisions ?? []) {
@@ -389,6 +481,20 @@ export function validateValidationDataset(
       const geographicContextId = stringField(record, "geographicContextId");
       if (geographicContextId !== undefined)
         missing(id, "geographicContexts", geographicContextId);
+      const location = asRecord(record.sourceLocation);
+      const normalization = asRecord(record.normalization);
+      if (
+        location !== undefined &&
+        normalization !== undefined &&
+        stringField(normalization, "originalCountry") !==
+          stringField(location, "country")
+      ) {
+        issues.push({
+          code: "INVALID_GEOGRAPHY_DECISION",
+          recordId: id,
+          message: `Geography decision ${id} must retain the source country as normalization.originalCountry`,
+        });
+      }
     }
     checkAllowedSourceManifest(record, id);
   }
@@ -442,29 +548,71 @@ export function validateValidationDataset(
     mapping: DatasetRecord,
     id: string,
     crosswalkId: string | undefined,
+    currentNames: ReadonlyMap<string, DatasetRecord>,
+    crosswalks: CurrentRecords,
   ): void {
-    const sourceId = stringField(mapping, "sourceId");
-    const sourceManifestId = stringField(mapping, "sourceManifestId");
-    const sourceReleaseId = stringField(mapping, "sourceReleaseId");
-    const sourceRecordId = stringField(mapping, "sourceRecordId");
-    const reviewed = (dataset.sourceNameDecisions ?? []).some(
-      (decision) =>
-        stringField(decision, "sourceId") === sourceId &&
-        stringField(decision, "sourceManifestId") === sourceManifestId &&
-        stringField(decision, "sourceReleaseId") === sourceReleaseId &&
-        stringField(decision, "sourceRecordId") === sourceRecordId &&
-        !["unresolved", "reject"].includes(
-          stringField(decision, "decision") ?? "",
-        ) &&
-        (crosswalkId === undefined ||
-          stringField(decision, "externalTaxonomyCrosswalkId") === crosswalkId),
-    );
-    if (!reviewed) {
+    const reviewed = currentNames.get(sourceRecordKey(mapping) ?? "");
+    const reviewedDecision = stringField(reviewed, "decision");
+    if (
+      reviewed === undefined ||
+      ![
+        "accept-candidate",
+        "manual-match",
+        "documented-correction",
+        "not-taxonomic",
+      ].includes(reviewedDecision ?? "") ||
+      (crosswalkId !== undefined &&
+        stringField(reviewed, "externalTaxonomyCrosswalkId") !== crosswalkId) ||
+      (crosswalkId !== undefined && !crosswalks.currentIds.has(crosswalkId))
+    ) {
       issues.push({
-        code: "MISSING_REFERENCE",
+        code: "INVALID_SOURCE_DECISION",
         recordId: id,
         message:
           "An accepted source-subject mapping requires an accepted source-name decision for the same source record.",
+      });
+    }
+  }
+
+  function checkSubjectTaxonomy(
+    mapping: DatasetRecord,
+    id: string,
+    names: CurrentRecords,
+    crosswalks: CurrentRecords,
+  ): void {
+    const crosswalkId = stringField(mapping, "externalTaxonomyCrosswalkId");
+    const nameDecision = names.bySourceKey.get(sourceRecordKey(mapping) ?? "");
+    const nameCrosswalkId = stringField(
+      nameDecision,
+      "externalTaxonomyCrosswalkId",
+    );
+    if (nameCrosswalkId !== undefined && crosswalkId !== nameCrosswalkId) {
+      issues.push({
+        code: "INVALID_SUBJECT_TAXONOMY",
+        recordId: id,
+        message: `Subject mapping ${id} must use the source-name decision's crosswalk`,
+      });
+    }
+    const crosswalk =
+      crosswalkId === undefined ? undefined : crosswalks.byId.get(crosswalkId);
+    const crosswalkTaxonId = stringField(crosswalk, "taxonId");
+    const subjectTaxonId = subjectTaxonIdFor(asRecord(mapping.subject), get);
+    if (
+      crosswalkTaxonId !== undefined &&
+      subjectTaxonId !== undefined &&
+      crosswalkTaxonId !== subjectTaxonId
+    ) {
+      issues.push({
+        code: "INVALID_SUBJECT_TAXONOMY",
+        recordId: id,
+        message: `Subject mapping ${id} subject taxon ${subjectTaxonId} does not match crosswalk taxon ${crosswalkTaxonId}`,
+      });
+    }
+    if (crosswalkId !== undefined && subjectTaxonId === undefined) {
+      issues.push({
+        code: "INVALID_SUBJECT_TAXONOMY",
+        recordId: id,
+        message: `Subject mapping ${id} requires a subject with a resolvable taxon when a crosswalk is selected`,
       });
     }
   }
@@ -559,6 +707,244 @@ function checkAcceptedTaxonomicNames(
   }
 }
 
+interface CurrentRecords {
+  readonly byId: ReadonlyMap<string, DatasetRecord>;
+  readonly byExternalKey: ReadonlyMap<string, DatasetRecord>;
+  readonly bySourceKey: ReadonlyMap<string, DatasetRecord>;
+  readonly currentIds: ReadonlySet<string>;
+}
+
+function currentRecords(
+  records: readonly DatasetRecord[],
+  kind: string,
+  supersessionField: string,
+  key: (record: DatasetRecord) => string | undefined,
+  get: (kind: string, id: string) => DatasetRecord | undefined,
+  missing: (recordId: string, kind: string, id: string) => void,
+  issues: DatasetValidationIssue[],
+): CurrentRecords {
+  const byId = new Map<string, DatasetRecord>();
+  const byKey = new Map<string, DatasetRecord[]>();
+  const byExternalKey = new Map<string, DatasetRecord>();
+  const bySourceKey = new Map<string, DatasetRecord>();
+  const successors = new Map<string, string[]>();
+
+  for (const record of records) {
+    const id = stringField(record, "id");
+    if (id === undefined) continue;
+    byId.set(id, record);
+    const recordKey = key(record);
+    if (recordKey !== undefined) {
+      const keyed = byKey.get(recordKey) ?? [];
+      keyed.push(record);
+      byKey.set(recordKey, keyed);
+    }
+    const supersededId = stringField(record, supersessionField);
+    if (supersededId === undefined) continue;
+    const target = get(kind, supersededId);
+    if (target === undefined) {
+      missing(id, kind, supersededId);
+      continue;
+    }
+    if (supersededId === id) {
+      issues.push({
+        code: "INVALID_SUPERSESSION",
+        recordId: id,
+        message: `${kind} record ${id} cannot supersede itself`,
+      });
+    }
+    const targetKey = key(target);
+    if (
+      recordKey === undefined ||
+      targetKey === undefined ||
+      recordKey !== targetKey
+    ) {
+      issues.push({
+        code: "INVALID_SUPERSESSION",
+        recordId: id,
+        message: `${kind} record ${id} may supersede only a record with the same composite key`,
+      });
+    }
+    const targetSuccessors = successors.get(supersededId) ?? [];
+    targetSuccessors.push(id);
+    successors.set(supersededId, targetSuccessors);
+  }
+
+  for (const [targetId, successorIds] of successors) {
+    if (successorIds.length > 1) {
+      issues.push({
+        code: "MULTIPLE_SUCCESSORS",
+        recordId: targetId,
+        message: `${kind} record ${targetId} has multiple successors: ${successorIds.sort().join(", ")}`,
+      });
+    }
+  }
+
+  const visiting = new Set<string>();
+  const visited = new Set<string>();
+  const visit = (id: string): void => {
+    if (visited.has(id)) return;
+    if (visiting.has(id)) {
+      issues.push({
+        code: "INVALID_SUPERSESSION",
+        recordId: id,
+        message: `${kind} supersession links contain a cycle`,
+      });
+      return;
+    }
+    visiting.add(id);
+    const supersededId = stringField(byId.get(id), supersessionField);
+    if (supersededId !== undefined && byId.has(supersededId))
+      visit(supersededId);
+    visiting.delete(id);
+    visited.add(id);
+  };
+  for (const id of byId.keys()) visit(id);
+
+  const currentIds = new Set<string>();
+  for (const id of byId.keys()) {
+    if (!successors.has(id)) currentIds.add(id);
+  }
+  for (const [recordKey, keyed] of byKey) {
+    const current = keyed.filter((record) => currentIds.has(recordId(record)));
+    if (current.length > 1) {
+      issues.push({
+        code: "DUPLICATE_COMPOSITE_KEY",
+        recordId: recordId(current[0]!),
+        message: `${kind} has multiple current records for composite key ${recordKey}`,
+      });
+    }
+    if (current.length > 0) {
+      const record = current[0]!;
+      if (recordKey.includes("\u0000")) byExternalKey.set(recordKey, record);
+      if (kind !== "externalTaxonomyCrosswalks")
+        bySourceKey.set(recordKey, record);
+    }
+  }
+  return { byId, byExternalKey, bySourceKey, currentIds };
+}
+
+function externalIdentifierKey(value: unknown): string | undefined {
+  const identifier = asRecord(value);
+  return tupleKey([
+    stringField(identifier, "sourceId"),
+    stringField(identifier, "sourceManifestId"),
+    stringField(identifier, "sourceReleaseId"),
+    stringField(identifier, "identifier"),
+  ]);
+}
+
+function sourceRecordKey(record: DatasetRecord): string | undefined {
+  return tupleKey([
+    stringField(record, "sourceId"),
+    stringField(record, "sourceManifestId"),
+    stringField(record, "sourceReleaseId"),
+    stringField(record, "sourceRecordId"),
+  ]);
+}
+
+function sourceLocationKey(record: DatasetRecord): string | undefined {
+  const location = asRecord(record.sourceLocation);
+  return tupleKey([
+    stringField(record, "sourceId"),
+    stringField(record, "sourceManifestId"),
+    stringField(record, "sourceReleaseId"),
+    stringField(location, "locator"),
+  ]);
+}
+
+function tupleKey(values: readonly (string | undefined)[]): string | undefined {
+  return values.every((value) => value !== undefined)
+    ? values.join("\u0000")
+    : undefined;
+}
+
+function checkMatchingTaxonomyName(
+  name: DatasetRecord,
+  crosswalk: DatasetRecord,
+  id: string,
+  issues: DatasetValidationIssue[],
+): void {
+  const externalName = stringField(crosswalk, "externalName");
+  const scientificName = stringField(name, "scientificName");
+  const externalRank = stringField(crosswalk, "taxonRank");
+  const nameRank = stringField(name, "taxonRank");
+  const externalStatus = stringField(crosswalk, "taxonomicStatus");
+  const expectedStatus =
+    stringField(name, "nameStatus") === "accepted" ? "accepted" : "synonym";
+  if (
+    stringField(name, "taxonId") !== stringField(crosswalk, "taxonId") ||
+    externalName !== scientificName ||
+    externalRank !== nameRank ||
+    externalStatus?.toLocaleLowerCase("en") !== expectedStatus
+  ) {
+    issues.push({
+      code: "INVALID_TAXONOMY_LINK",
+      recordId: id,
+      message: `Taxonomic name ${id} does not match its external crosswalk name, rank, or status`,
+    });
+  }
+}
+
+function checkSynonymCrosswalk(
+  crosswalk: DatasetRecord,
+  crosswalks: CurrentRecords,
+  id: string,
+  issues: DatasetValidationIssue[],
+): void {
+  const status = stringField(crosswalk, "taxonomicStatus")?.toLocaleLowerCase(
+    "en",
+  );
+  if (status !== "synonym") return;
+  const acceptedId = stringField(crosswalk, "acceptedNameIdentifier");
+  const accepted =
+    acceptedId === undefined
+      ? undefined
+      : [...crosswalks.byId.values()].find(
+          (candidate) =>
+            stringField(
+              asRecord(candidate.externalIdentifier),
+              "identifier",
+            ) === acceptedId,
+        );
+  if (
+    acceptedId === undefined ||
+    accepted === undefined ||
+    !crosswalks.currentIds.has(recordId(accepted)) ||
+    stringField(accepted, "taxonomicStatus")?.toLocaleLowerCase("en") !==
+      "accepted" ||
+    stringField(accepted, "taxonId") !== stringField(crosswalk, "taxonId")
+  ) {
+    issues.push({
+      code: "INVALID_TAXONOMY_LINK",
+      recordId: id,
+      message: `Synonym crosswalk ${id} must resolve to a current accepted crosswalk on the same taxon`,
+    });
+  }
+}
+
+function subjectTaxonIdFor(
+  subject: DatasetRecord | undefined,
+  get: (kind: string, id: string) => DatasetRecord | undefined,
+): string | undefined {
+  const type = stringField(subject, "type");
+  const id = stringField(subject, "id");
+  if (type === undefined || id === undefined) return undefined;
+  if (type === "plant-concept")
+    return stringField(get("plantConcepts", id), "taxonId");
+  if (type === "cultivar-group") {
+    const group = get("cultivarGroups", id);
+    const plantConceptId = stringField(group, "plantConceptId");
+    return stringField(get("plantConcepts", plantConceptId ?? ""), "taxonId");
+  }
+  if (type === "cultivar") {
+    const cultivar = get("cultivars", id);
+    const plantConceptId = stringField(cultivar, "plantConceptId");
+    return stringField(get("plantConcepts", plantConceptId ?? ""), "taxonId");
+  }
+  return undefined;
+}
+
 function checkSubject(
   value: unknown,
   recordId: string,
@@ -641,6 +1027,13 @@ function checkReview(
       code: "INVALID_REVIEW_REFERENCE",
       recordId,
       message: `Review ${reviewId} must have purpose ${expectedPurpose}`,
+    });
+  }
+  if (stringField(review, "status") !== "accepted") {
+    issues.push({
+      code: "INVALID_REVIEW_REFERENCE",
+      recordId,
+      message: `Review ${reviewId} must have status accepted`,
     });
   }
 }

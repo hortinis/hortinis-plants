@@ -23,7 +23,9 @@
     "import:wfo": "pnpm build && node dist/adapters/wfo/cli.js",
     "curate:grow-wfo:drafts": "pnpm build && node dist/curation/grow-wfo-drafts-cli.js",
     "curate:wfo:lookup": "pnpm build && node dist/curation/wfo-lookup-cli.js",
-    "curate:grow-wfo:validate": "pnpm build && node dist/curation/grow-wfo-validation-cli.js"
+    "curate:grow-wfo:validate": "pnpm build && node dist/curation/grow-wfo-validation-cli.js",
+    "curate:grow-wfo:status": "pnpm build && node dist/curation/grow-wfo-status-cli.js",
+    "curate:grow-wfo:show": "pnpm build && node dist/curation/grow-wfo-show-cli.js"
   },
   "dependencies": {
     "ajv": "8.20.0",

@@ -33,6 +33,20 @@ pnpm curate:wfo:lookup --id wfo-0001029216
 The command verifies the tracked WFO source manifest and archive pin before emitting an unreviewed lookup
 proposal with source-qualified locators. It does not modify the tracked authoring collections.
 
+Inspect editorial completion separately from structural validity with:
+
+```sh
+pnpm curate:grow-wfo:status
+pnpm curate:grow-wfo:status -- --json
+pnpm curate:grow-wfo:show -- --source-record 1
+```
+
+`status` reports the identity, subject, context, assertion and C4 gates independently. Pending editorial
+work is reported as `in progress`; invalid authored relationships are `blocked`. The command uses ignored
+draft queues when available and still reports tracked-dataset validity from a clean checkout when they are
+not. `show` joins one GROW source record with generated candidates, current decisions, authored records and
+curation issues. Both commands are read-only.
+
 ## Authoring decisions
 
 For each reviewed WFO outcome, author an external taxonomy crosswalk. Then author a source-name decision
