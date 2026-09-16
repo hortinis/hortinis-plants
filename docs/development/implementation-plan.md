@@ -314,6 +314,12 @@ is available locally.
 
 #### C4.1–C4.8 — GROW/WFO authoring workflow (`in progress`)
 
+Before broad editorial work in C4.6–C4.8, implement the
+[four-source import and integrated curation plan](four-source-curation-plan.md) (`planned`). It adds
+CropGraph and TAXREF, extends WFO reconciliation to both cultivation sources, and generalizes the
+review workflow so all four sources can be curated together. Existing validated C4 capabilities remain
+regression requirements; this planning update does not mark any new importer as implemented.
+
 Implement the [detailed C4 authoring workflow plan](grow-wfo-authoring-workflow-plan.md) in order:
 contracts; draft integrity and pinned WFO lookup; manifest-driven validation; semantic status gates;
 transactional decision application; identity and subject curation; assertion curation; and the repository

@@ -49,3 +49,31 @@ foundation tooling choices are resolved in [the implementation plan](development
 - **in progress:** Before the first production C4 subject record is authored, decide whether any stable
   identifier from the `dev-validation` fixture is deliberately promoted to canonical use. The workflow
   must not reuse fixture identifiers or evidence automatically.
+
+## Four-source import and integrated curation
+
+Implementation sequence and acceptance criteria are in the
+[four-source plan](development/four-source-curation-plan.md). The following choices are `planned` and
+must be recorded before their dependent implementation; proposed defaults are not validated decisions.
+
+- **planned — Source pins and cohort:** Verify TAXREF v18.0 archive members, distribution URL, rights
+  evidence and checksums; confirm the inspected CropGraph commit. Freeze explicit CropGraph source IDs
+  relevant to the full GROW cohort and ADR-0005 MVP, including unmatched or missing exemplar outcomes.
+  Full calendar staging must not make all CropGraph entries mandatory editorial work.
+- **planned — Two-backbone identity policy:** Confirm the catalog display accepted-name authority
+  (proposed: retain WFO as the default, preserve TAXREF's independent accepted-name relationship), and
+  how differing taxonomic concepts are represented. Never assert equivalent crosswalks for a broader
+  or narrower concept merely because its name matches. Define independent per-backbone dispositions.
+- **planned — Authoring contract evolution:** Choose explicit schema versions and migration for generic
+  source/run manifests, taxonomy-target decisions, action-bearing relative-window assertions and
+  comparison dispositions. Preserve old v1 validation, authored identifiers and review history.
+- **planned — CropGraph semantics:** Decide the authoring representation of soil temperature when its
+  germination/transplant role is uncertain, greenhouse versus unheated shelter, `plant_now`, unknown
+  name languages and harvest-duration anchors. Define deterministic temperature precision. Until
+  supported, retain raw candidates and defer the affected assertion, not unrelated crop review.
+- **planned — Geographic transfer and modifiers:** Define evidence/review requirements for accepting
+  North American frost-relative rules in France, and explicit selection/override behavior for base versus
+  climate-modified rules. No US zone-to-frost-date table or coordinate heuristic is France evidence.
+- **planned — Comparison and completion:** Define explicit handling of competing eligible claims for
+  later C5 projection and which accepted limitations allow scoped C4 completion. Preserve all claims;
+  do not average, rank sources implicitly, or call deferred required MVP evidence complete coverage.
