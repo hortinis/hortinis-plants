@@ -762,6 +762,103 @@ async function auditAuthoringLineage(
   );
   if (draftManifestBytes === undefined) return;
   const candidateById = new Map<string, RecordValue>();
+  const identityBySourceKey = new Map<string, RecordValue>();
+  const subjectBySourceKey = new Map<string, RecordValue>();
+  const crosswalkReviewByExternalKey = new Map<string, RecordValue>();
+  const identityQueuePath = join(
+    draftsDirectory,
+    "identity-review-queue.jsonl",
+  );
+  try {
+    for await (const entry of readJsonLines(
+      createReadStream(identityQueuePath),
+    )) {
+      const item = asRecord(entry.value);
+      const candidate = asRecord(item?.taxonomyCandidate);
+      const source = asRecord(candidate?.source);
+      const candidateId = stringField(candidate, "id");
+      const sourceKey = sourceRecordKey(source);
+      if (candidate !== undefined && candidateId !== undefined)
+        candidateById.set(candidateId, candidate);
+      if (sourceKey !== undefined) {
+        if (identityBySourceKey.has(sourceKey)) {
+          addIssue(
+            issues,
+            "DRAFT_LINEAGE",
+            identityQueuePath,
+            `Identity draft repeats source record ${sourceKey}`,
+          );
+        } else if (item !== undefined) {
+          identityBySourceKey.set(sourceKey, item);
+        }
+      }
+    }
+  } catch (error) {
+    addJsonLinesIssue(issues, identityQueuePath, error);
+    return;
+  }
+  const subjectQueuePath = join(
+    draftsDirectory,
+    "subject-mapping-review-queue.jsonl",
+  );
+  try {
+    for await (const entry of readJsonLines(
+      createReadStream(subjectQueuePath),
+    )) {
+      const item = asRecord(entry.value);
+      const sourceKey = tupleKey([
+        "source_grow_edible_plant_database",
+        "source_manifest_grow_epd_2020",
+        "doi:10.15132/10000157",
+        stringField(item, "sourceRecordId"),
+      ]);
+      if (sourceKey !== undefined) {
+        if (subjectBySourceKey.has(sourceKey)) {
+          addIssue(
+            issues,
+            "DRAFT_LINEAGE",
+            subjectQueuePath,
+            `Subject draft repeats source record ${sourceKey}`,
+          );
+        } else if (item !== undefined) {
+          subjectBySourceKey.set(sourceKey, item);
+        }
+      }
+    }
+  } catch (error) {
+    addJsonLinesIssue(issues, subjectQueuePath, error);
+    return;
+  }
+  const crosswalkQueuePath = join(
+    draftsDirectory,
+    "taxonomy-crosswalk-review-queue.jsonl",
+  );
+  try {
+    for await (const entry of readJsonLines(
+      createReadStream(crosswalkQueuePath),
+    )) {
+      const item = asRecord(entry.value);
+      const proposed = asRecord(item?.proposedExternalTaxonomyCrosswalk);
+      const externalKey = externalIdentifierKey(
+        asRecord(proposed?.externalIdentifier),
+      );
+      if (externalKey !== undefined && item !== undefined) {
+        if (crosswalkReviewByExternalKey.has(externalKey)) {
+          addIssue(
+            issues,
+            "DRAFT_LINEAGE",
+            crosswalkQueuePath,
+            `Crosswalk draft repeats external identifier ${externalKey}`,
+          );
+        } else {
+          crosswalkReviewByExternalKey.set(externalKey, item);
+        }
+      }
+    }
+  } catch (error) {
+    addJsonLinesIssue(issues, crosswalkQueuePath, error);
+    return;
+  }
   const assertionQueuePath = join(
     draftsDirectory,
     "assertion-review-queue.jsonl",
@@ -787,6 +884,29 @@ async function auditAuthoringLineage(
   const subjects = currentDecisionBySourceRecord(
     dataset.sourceSubjectMappings ?? [],
     "supersedesMappingId",
+  );
+  auditNameDecisionLineage(
+    dataset.sourceNameDecisions ?? [],
+    identityBySourceKey,
+    new Map(
+      (dataset.externalTaxonomyCrosswalks ?? []).map((crosswalk) => [
+        stringField(crosswalk, "id") ?? "",
+        crosswalk,
+      ]),
+    ),
+    crosswalkReviewByExternalKey,
+    issues,
+  );
+  auditCrosswalkLineage(
+    dataset.externalTaxonomyCrosswalks ?? [],
+    crosswalkReviewByExternalKey,
+    issues,
+  );
+  auditSubjectDecisionLineage(
+    dataset.sourceSubjectMappings ?? [],
+    identityBySourceKey,
+    subjectBySourceKey,
+    issues,
   );
   const geographies = currentDecisionByLocation(
     dataset.sourceGeographyDecisions ?? [],
@@ -903,6 +1023,263 @@ async function auditAuthoringLineage(
       }
     }
   }
+}
+
+function auditNameDecisionLineage(
+  decisions: readonly RecordValue[],
+  identityBySourceKey: ReadonlyMap<string, RecordValue>,
+  crosswalkById: ReadonlyMap<string, RecordValue>,
+  crosswalkReviewByExternalKey: ReadonlyMap<string, RecordValue>,
+  issues: CurationValidationIssue[],
+): void {
+  const superseded = new Set(
+    decisions
+      .map((record) => stringField(record, "supersedesDecisionId"))
+      .filter((id): id is string => id !== undefined),
+  );
+  for (const decision of decisions) {
+    const decisionId = recordId(decision);
+    if (superseded.has(decisionId)) continue;
+    const sourceKey = sourceRecordKey(decision);
+    const identity =
+      sourceKey === undefined ? undefined : identityBySourceKey.get(sourceKey);
+    const candidate = asRecord(identity?.taxonomyCandidate);
+    const candidateSource = asRecord(candidate?.source);
+    if (candidate === undefined || candidateSource === undefined) {
+      addLineageIssue(
+        issues,
+        "source-name-decisions.jsonl",
+        `Source-name decision ${decisionId} does not match a draft identity item`,
+        decisionId,
+      );
+      continue;
+    }
+    for (const field of [
+      "sourceId",
+      "sourceManifestId",
+      "sourceReleaseId",
+      "sourceRecordId",
+    ]) {
+      if (
+        stringField(decision, field) !== stringField(candidateSource, field)
+      ) {
+        addLineageIssue(
+          issues,
+          "source-name-decisions.jsonl",
+          `Source-name decision ${decisionId} does not preserve draft ${field}`,
+          decisionId,
+        );
+      }
+    }
+    if (
+      stringField(decision, "sourceName") !==
+        stringField(candidate, "sourceName") ||
+      stringField(decision, "sourceLocator") !==
+        stringField(candidate, "sourceLocator")
+    ) {
+      addLineageIssue(
+        issues,
+        "source-name-decisions.jsonl",
+        `Source-name decision ${decisionId} does not preserve the draft source name or locator`,
+        decisionId,
+      );
+    }
+    const crosswalkId = stringField(decision, "externalTaxonomyCrosswalkId");
+    const crosswalk =
+      crosswalkId === undefined ? undefined : crosswalkById.get(crosswalkId);
+    if (crosswalkId === undefined) continue;
+    const matchMethod = stringField(crosswalk, "matchMethod");
+    const decisionKind = stringField(decision, "decision");
+    const expectedMethods =
+      decisionKind === "accept-candidate"
+        ? ["exact-name", "exact-synonym"]
+        : decisionKind === "manual-match"
+          ? ["manual"]
+          : decisionKind === "documented-correction"
+            ? ["documented-correction"]
+            : undefined;
+    if (
+      expectedMethods !== undefined &&
+      (matchMethod === undefined || !expectedMethods.includes(matchMethod))
+    ) {
+      addLineageIssue(
+        issues,
+        "source-name-decisions.jsonl",
+        `Source-name decision ${decisionId} has a crosswalk with an incompatible match method`,
+        decisionId,
+      );
+    }
+    if (decisionKind !== "accept-candidate") continue;
+    const alternatives = arrayField(candidate, "alternatives")
+      .map(asRecord)
+      .map((alternative) => asRecord(alternative?.externalIdentifier))
+      .map(externalIdentifierKey)
+      .filter((key): key is string => key !== undefined);
+    const selectedKey = externalIdentifierKey(
+      asRecord(crosswalk?.externalIdentifier),
+    );
+    if (selectedKey === undefined || !alternatives.includes(selectedKey)) {
+      addLineageIssue(
+        issues,
+        "source-name-decisions.jsonl",
+        `Accepted source-name decision ${decisionId} selects a WFO identifier outside its draft candidate`,
+        decisionId,
+      );
+    }
+    if (!crosswalkReviewByExternalKey.has(selectedKey ?? "")) {
+      addLineageIssue(
+        issues,
+        "source-name-decisions.jsonl",
+        `Accepted source-name decision ${decisionId} has no consolidated crosswalk draft`,
+        decisionId,
+      );
+    }
+  }
+}
+
+function auditCrosswalkLineage(
+  crosswalks: readonly RecordValue[],
+  crosswalkReviewByExternalKey: ReadonlyMap<string, RecordValue>,
+  issues: CurationValidationIssue[],
+): void {
+  const superseded = new Set(
+    crosswalks
+      .map((record) => stringField(record, "supersedesCrosswalkId"))
+      .filter((id): id is string => id !== undefined),
+  );
+  for (const crosswalk of crosswalks) {
+    const crosswalkId = recordId(crosswalk);
+    if (superseded.has(crosswalkId)) continue;
+    const externalKey = externalIdentifierKey(
+      asRecord(crosswalk.externalIdentifier),
+    );
+    const draft =
+      externalKey === undefined
+        ? undefined
+        : crosswalkReviewByExternalKey.get(externalKey);
+    if (draft === undefined) {
+      const matchMethod = stringField(crosswalk, "matchMethod");
+      if (matchMethod !== "manual" && matchMethod !== "documented-correction") {
+        addLineageIssue(
+          issues,
+          "external-taxonomy-crosswalks.jsonl",
+          `Crosswalk ${crosswalkId} is not backed by an automatic or manual draft selection`,
+          crosswalkId,
+        );
+      }
+      continue;
+    }
+    const proposed = asRecord(draft.proposedExternalTaxonomyCrosswalk);
+    for (const field of [
+      "externalName",
+      "authorship",
+      "taxonRank",
+      "taxonomicStatus",
+      "acceptedNameIdentifier",
+      "locator",
+    ]) {
+      if (stringField(crosswalk, field) !== stringField(proposed, field)) {
+        addLineageIssue(
+          issues,
+          "external-taxonomy-crosswalks.jsonl",
+          `Crosswalk ${crosswalkId} does not preserve draft WFO field ${field}`,
+          crosswalkId,
+        );
+      }
+    }
+    if (
+      stringField(crosswalk, "matchMethod") !==
+      stringField(draft, "proposedMatchMethod")
+    ) {
+      addLineageIssue(
+        issues,
+        "external-taxonomy-crosswalks.jsonl",
+        `Crosswalk ${crosswalkId} does not preserve the draft match method`,
+        crosswalkId,
+      );
+    }
+  }
+}
+
+function auditSubjectDecisionLineage(
+  decisions: readonly RecordValue[],
+  identityBySourceKey: ReadonlyMap<string, RecordValue>,
+  subjectBySourceKey: ReadonlyMap<string, RecordValue>,
+  issues: CurationValidationIssue[],
+): void {
+  const superseded = new Set(
+    decisions
+      .map((record) => stringField(record, "supersedesMappingId"))
+      .filter((id): id is string => id !== undefined),
+  );
+  for (const decision of decisions) {
+    const decisionId = recordId(decision);
+    if (superseded.has(decisionId)) continue;
+    const sourceKey = sourceRecordKey(decision);
+    const identity =
+      sourceKey === undefined ? undefined : identityBySourceKey.get(sourceKey);
+    const subject =
+      sourceKey === undefined ? undefined : subjectBySourceKey.get(sourceKey);
+    const candidate = asRecord(identity?.taxonomyCandidate);
+    if (subject === undefined || candidate === undefined) {
+      addLineageIssue(
+        issues,
+        "source-subject-mappings.jsonl",
+        `Subject mapping ${decisionId} does not match a draft subject item`,
+        decisionId,
+      );
+      continue;
+    }
+    if (
+      stringField(subject, "sourceRecordId") !==
+        stringField(decision, "sourceRecordId") ||
+      stringField(subject, "sourceLocator") !==
+        stringField(decision, "sourceLocator") ||
+      stringField(subject, "taxonomyCandidateId") !==
+        stringField(candidate, "id")
+    ) {
+      addLineageIssue(
+        issues,
+        "source-subject-mappings.jsonl",
+        `Subject mapping ${decisionId} does not preserve the draft source locator or taxonomy candidate`,
+        decisionId,
+      );
+    }
+  }
+}
+
+function addLineageIssue(
+  issues: CurationValidationIssue[],
+  path: string,
+  message: string,
+  recordId: string,
+): void {
+  issues.push({ code: "CANDIDATE_LINEAGE", path, message, recordId });
+}
+
+function sourceRecordKey(record: RecordValue | undefined): string | undefined {
+  return tupleKey([
+    stringField(record, "sourceId"),
+    stringField(record, "sourceManifestId"),
+    stringField(record, "sourceReleaseId"),
+    stringField(record, "sourceRecordId"),
+  ]);
+}
+
+function externalIdentifierKey(
+  identifier: RecordValue | undefined,
+): string | undefined {
+  return tupleKey([
+    stringField(identifier, "sourceId"),
+    stringField(identifier, "sourceManifestId"),
+    stringField(identifier, "sourceReleaseId"),
+    stringField(identifier, "identifier"),
+  ]);
+}
+
+function arrayField(record: RecordValue | undefined, field: string): unknown[] {
+  const value = record?.[field];
+  return Array.isArray(value) ? value : [];
 }
 
 function currentDecisionBySourceRecord(

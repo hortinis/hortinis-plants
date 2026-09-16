@@ -13,7 +13,9 @@ describe("GROW/WFO transactional decision application", () => {
   it("mints deterministic IDs and publishes a validated transaction", async () => {
     const first = await copyDataset();
     const second = await copyDataset();
-    const draftHash = sha256(await readFile(join(drafts, "draft-manifest.json")));
+    const draftHash = sha256(
+      await readFile(join(drafts, "draft-manifest.json")),
+    );
     const input = {
       schemaVersion: "1.0.0" as const,
       transactionId: "transaction-test",
@@ -21,7 +23,10 @@ describe("GROW/WFO transactional decision application", () => {
       operations: [
         {
           kind: "issue" as const,
-          source: { queueRole: "curation-issues", queueItemId: "issue_subject_mapping_1" },
+          source: {
+            queueRole: "curation-issues",
+            queueItemId: "issue_subject_mapping_1",
+          },
           records: [
             {
               collection: "curation-issues" as const,
@@ -50,9 +55,17 @@ describe("GROW/WFO transactional decision application", () => {
       draftsDirectory: drafts,
       validationApi: api,
     });
+    const repeatResult = await applyGrowWfoDecision(input, {
+      repositoryRoot: root,
+      datasetDirectory: first,
+      draftsDirectory: drafts,
+      validationApi: api,
+    });
     expect(firstResult.datasetSha256).toBe(secondResult.datasetSha256);
     expect(firstResult.created).toBe(1);
     expect(secondResult.created).toBe(1);
+    expect(repeatResult.created).toBe(0);
+    expect(repeatResult.unchanged).toBe(1);
     expect(await readFile(join(first, "curation-issues.jsonl"))).toEqual(
       await readFile(join(second, "curation-issues.jsonl")),
     );
@@ -70,19 +83,287 @@ describe("GROW/WFO transactional decision application", () => {
           operations: [
             {
               kind: "issue",
-              source: { queueRole: "curation-issues", queueItemId: "issue_subject_mapping_1" },
+              source: {
+                queueRole: "curation-issues",
+                queueItemId: "issue_subject_mapping_1",
+              },
               records: [
                 {
                   collection: "curation-issues",
-                  value: { id: "issue_stale", kind: "unresolved-mapping", status: "open", affectedRecordIds: ["1"], reason: "stale" },
+                  value: {
+                    id: "issue_stale",
+                    kind: "unresolved-mapping",
+                    status: "open",
+                    affectedRecordIds: ["1"],
+                    reason: "stale",
+                  },
                 },
               ],
             },
           ],
         },
-        { repositoryRoot: root, datasetDirectory: directory, draftsDirectory: drafts, validationApi: await getCompiledValidationApi() },
+        {
+          repositoryRoot: root,
+          datasetDirectory: directory,
+          draftsDirectory: drafts,
+          validationApi: await getCompiledValidationApi(),
+        },
       ),
     ).rejects.toThrow("stale draft manifest");
+    expect(await snapshot(directory)).toEqual(files);
+  }, 30_000);
+
+  it("applies multiple operations and reports materialized counts", async () => {
+    const directory = await copyDataset();
+    const draftHash = sha256(
+      await readFile(join(drafts, "draft-manifest.json")),
+    );
+    const api = await getCompiledValidationApi();
+    const result = await applyGrowWfoDecision(
+      {
+        schemaVersion: "1.0.0",
+        transactionId: "transaction-multiple-operations",
+        draftManifestSha256: draftHash,
+        operations: [
+          {
+            kind: "issue",
+            source: {
+              queueRole: "curation-issues",
+              queueItemId: "issue_subject_mapping_1",
+            },
+            records: [
+              {
+                collection: "curation-issues",
+                value: {
+                  id: "issue-multiple-a",
+                  kind: "unresolved-mapping",
+                  status: "open",
+                  affectedRecordIds: ["1"],
+                  reason: "First operation",
+                },
+              },
+            ],
+          },
+          {
+            kind: "issue",
+            source: {
+              queueRole: "curation-issues",
+              queueItemId: "issue_subject_mapping_10",
+            },
+            records: [
+              {
+                collection: "curation-issues",
+                value: {
+                  id: "issue-multiple-b",
+                  kind: "unresolved-mapping",
+                  status: "open",
+                  affectedRecordIds: ["10"],
+                  reason: "Second operation",
+                },
+              },
+            ],
+          },
+        ],
+      },
+      {
+        repositoryRoot: root,
+        datasetDirectory: directory,
+        draftsDirectory: drafts,
+        validationApi: api,
+      },
+    );
+    expect(result.created).toBe(2);
+    expect(result.unchanged).toBe(0);
+    expect(
+      (await readFile(join(directory, "curation-issues.jsonl"))).toString(),
+    ).toContain("issue-multiple-a");
+    expect(
+      (await readFile(join(directory, "curation-issues.jsonl"))).toString(),
+    ).toContain("issue-multiple-b");
+  }, 30_000);
+
+  it("rejects source decisions that do not preserve draft lineage", async () => {
+    const directory = await copyDataset();
+    const files = await snapshot(directory);
+    const draftHash = sha256(
+      await readFile(join(drafts, "draft-manifest.json")),
+    );
+    await expect(
+      applyGrowWfoDecision(
+        {
+          schemaVersion: "1.0.0",
+          transactionId: "transaction-lineage",
+          draftManifestSha256: draftHash,
+          operations: [
+            {
+              kind: "taxonomy",
+              source: {
+                queueRole: "identity-review-queue",
+                queueItemId: "identity_review_1",
+              },
+              records: [
+                {
+                  collection: "reviews",
+                  value: {
+                    id: "review-lineage",
+                    purpose: "content",
+                    status: "accepted",
+                    reviewedAt: "2026-09-16T00:00:00Z",
+                    reviewerId: "reviewer-test",
+                  },
+                },
+                {
+                  collection: "source-name-decisions",
+                  value: {
+                    id: "decision-lineage",
+                    sourceId: "source_grow_edible_plant_database",
+                    sourceManifestId: "source_manifest_grow_epd_2020",
+                    sourceReleaseId: "doi:10.15132/10000157",
+                    sourceRecordId: "1",
+                    sourceName: "Wrong name",
+                    sourceLocator:
+                      "plant1.accdb#table=Edible%20plants&record.ID=1",
+                    decision: "reject",
+                    reason: "Test lineage rejection",
+                    reviewId: "review-lineage",
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        {
+          repositoryRoot: root,
+          datasetDirectory: directory,
+          draftsDirectory: drafts,
+          validationApi: await getCompiledValidationApi(),
+        },
+      ),
+    ).rejects.toThrow("CANDIDATE_LINEAGE");
+    expect(await snapshot(directory)).toEqual(files);
+  }, 30_000);
+
+  it("rejects subject decisions that do not preserve draft lineage", async () => {
+    const directory = await copyDataset();
+    const files = await snapshot(directory);
+    const draftHash = sha256(
+      await readFile(join(drafts, "draft-manifest.json")),
+    );
+    await expect(
+      applyGrowWfoDecision(
+        {
+          schemaVersion: "1.0.0",
+          transactionId: "transaction-subject-lineage",
+          draftManifestSha256: draftHash,
+          operations: [
+            {
+              kind: "subject",
+              source: {
+                queueRole: "subject-mapping-review-queue",
+                queueItemId: "subject_mapping_review_1",
+              },
+              records: [
+                {
+                  collection: "reviews",
+                  value: {
+                    id: "review-subject-lineage",
+                    purpose: "content",
+                    status: "accepted",
+                    reviewedAt: "2026-09-16T00:00:00Z",
+                    reviewerId: "reviewer-test",
+                  },
+                },
+                {
+                  collection: "source-subject-mappings",
+                  value: {
+                    id: "mapping-subject-lineage",
+                    sourceId: "source_grow_edible_plant_database",
+                    sourceManifestId: "source_manifest_grow_epd_2020",
+                    sourceReleaseId: "doi:10.15132/10000157",
+                    sourceRecordId: "1",
+                    sourceLocator: "wrong-locator",
+                    decision: "reject",
+                    reason: "Test subject lineage rejection",
+                    reviewId: "review-subject-lineage",
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        {
+          repositoryRoot: root,
+          datasetDirectory: directory,
+          draftsDirectory: drafts,
+          validationApi: await getCompiledValidationApi(),
+        },
+      ),
+    ).rejects.toThrow("CANDIDATE_LINEAGE");
+    expect(await snapshot(directory)).toEqual(files);
+  }, 30_000);
+
+  it("rolls back a transaction when staged cross-record validation fails", async () => {
+    const directory = await copyDataset();
+    const files = await snapshot(directory);
+    const draftHash = sha256(
+      await readFile(join(drafts, "draft-manifest.json")),
+    );
+    await expect(
+      applyGrowWfoDecision(
+        {
+          schemaVersion: "1.0.0",
+          transactionId: "transaction-rollback",
+          draftManifestSha256: draftHash,
+          operations: [
+            {
+              kind: "issue",
+              source: {
+                queueRole: "curation-issues",
+                queueItemId: "issue_subject_mapping_1",
+              },
+              records: [
+                {
+                  collection: "curation-issues",
+                  value: {
+                    id: "issue-rollback-valid",
+                    kind: "unresolved-mapping",
+                    status: "open",
+                    affectedRecordIds: ["1"],
+                    reason: "Should not publish",
+                  },
+                },
+              ],
+            },
+            {
+              kind: "issue",
+              source: {
+                queueRole: "curation-issues",
+                queueItemId: "issue_subject_mapping_10",
+              },
+              records: [
+                {
+                  collection: "curation-issues",
+                  value: {
+                    id: "issue-rollback-invalid",
+                    kind: "missing-evidence",
+                    status: "open",
+                    affectedRecordIds: ["10"],
+                    reason: "Missing reference",
+                    evidenceReferenceIds: ["evidence-does-not-exist"],
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        {
+          repositoryRoot: root,
+          datasetDirectory: directory,
+          draftsDirectory: drafts,
+          validationApi: await getCompiledValidationApi(),
+        },
+      ),
+    ).rejects.toThrow("invalid C4 dataset");
     expect(await snapshot(directory)).toEqual(files);
   }, 30_000);
 });
@@ -96,7 +377,8 @@ async function copyDataset(): Promise<string> {
 
 async function snapshot(directory: string): Promise<Record<string, string>> {
   const result: Record<string, string> = {};
-  for (const file of await readdir(directory)) result[file] = sha256(await readFile(join(directory, file)));
+  for (const file of await readdir(directory))
+    result[file] = sha256(await readFile(join(directory, file)));
   return result;
 }
 

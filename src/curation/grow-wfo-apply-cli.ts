@@ -19,4 +19,7 @@ const result = await applyGrowWfoDecision(parsed as DecisionInput, {
   repositoryRoot: resolve(import.meta.dirname, "../.."),
 });
 if (json) console.log(JSON.stringify(result));
-else console.log(`Applied ${result.transactionId}: ${result.created} created, ${result.unchanged} unchanged.`);
+else
+  console.log(
+    `Applied ${result.transactionId}: ${result.created} created, ${result.unchanged} unchanged.`,
+  );

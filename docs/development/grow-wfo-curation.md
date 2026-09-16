@@ -7,8 +7,9 @@ The first broad catalog curation set uses every record from the pinned GROW 2020
 
 The ordered implementation work required to turn these ignored queues into validated tracked authoring
 records is defined in the
-[GROW/WFO C4 authoring workflow implementation plan](grow-wfo-authoring-workflow-plan.md). Until C4.1–C4.5
-are implemented, the queues are inspection aids and there is no supported automatic promotion step.
+[GROW/WFO C4 authoring workflow implementation plan](grow-wfo-authoring-workflow-plan.md). The queues remain
+inspection aids until a curator supplies explicit reviewed decisions; the transactional `apply` command
+supports that path but never performs automatic editorial acceptance.
 
 ## Generate the review queue
 

@@ -5,12 +5,20 @@
   "operations": [
     {
       "kind": "issue",
-      "source": { "queueRole": "curation-issues", "queueItemId": "issue_fixture" },
+      "source": {
+        "queueRole": "curation-issues",
+        "queueItemId": "issue_fixture"
+      },
       "records": [
         {
           "collection": "curation-issues",
           "mintAlias": "issue",
-          "value": { "kind": "unresolved-mapping", "status": "open", "affectedRecordIds": ["1"], "reason": "Fixture" }
+          "value": {
+            "kind": "unresolved-mapping",
+            "status": "open",
+            "affectedRecordIds": ["1"],
+            "reason": "Fixture"
+          }
         }
       ]
     }

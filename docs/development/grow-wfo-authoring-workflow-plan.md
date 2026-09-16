@@ -270,7 +270,7 @@ and pinned WFO snapshot when those local inputs are available.
 Acceptance: `status` accounts for all 140 GROW source records and all generated assertion candidates
 without treating pending work as invalid data; invalid accepted relationships fail validation.
 
-### C4.5 — Transactional decision application (`in progress`)
+### C4.5 — Transactional decision application (`validated`)
 
 - Define a small explicit decision-input format for taxonomy, subject, geography and assertion actions.
 - Mint stable opaque catalog IDs without deriving them from file paths or array positions.
@@ -278,10 +278,10 @@ without treating pending work as invalid data; invalid accepted relationships fa
 - Canonically sort affected collections and write them atomically.
 - Require explicit supersession and refuse stale drafts or partial transactions.
 
-The initial implementation uses the `decision-input` curation schema, pins the draft manifest, validates
-all supplied records through the repository schemas, stages the full declared dataset, and publishes only
-after staged structural and deep validation succeeds. Remaining work is to expand lineage checks and
-complete failure-injection and multi-action fixture coverage.
+The implementation uses the `decision-input` curation schema, pins the draft manifest, validates all
+supplied records through the repository schemas, checks source-decision lineage against the exact draft
+items, stages the full declared dataset, and publishes only after staged structural and deep validation
+succeeds. Failure-injection, multi-action and repeat-application fixtures cover the transaction boundary.
 
 Acceptance: applying the same decision twice is idempotent or fails clearly without duplicate records;
 failed validation leaves tracked bytes unchanged; two applications to identical starting data produce
