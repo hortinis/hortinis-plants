@@ -1,323 +1,298 @@
-# GROW, WFO, TAXREF and CropGraph import and curation plan
+# Four-source curation main track
 
 - Status: planned
-- Planning date: 2026-09-16
-- Scope: reproducible source staging and one integrated editorial pass across all four sources
+- Planning date: 2026-09-17
+- Scope: reproducible staging, WFO-first identity review, French localization and source-backed cultivation curation
+- Main track: this document replaces the former broad four-source implementation sequence
 - Excludes: automatic acceptance, production publication, climate-grid construction and live recommendations
 
-## Outcome
+## Decisions
 
-A curator opens one crop review packet and sees GROW and CropGraph claims alongside WFO and TAXREF
-identity proposals, French/English name candidates, contexts, rights evidence and unresolved differences.
-They can author the identity, subject, names, contexts and individual assertion decisions in one atomic
-transaction. Shared taxonomy decisions can be reused across packets without merging crop forms.
+This work remains in development. Existing V1 schemas and data are updated in place; no parallel V2 contract
+or legacy-compatibility branch is required.
 
-“One pass” means all relevant evidence is available together before substantive curation starts. It does
-not promise that ambiguous evidence can be resolved immediately: explicit deferrals and missing-source
-limitations remain visible. Adapter reruns never accept data or undo reviewed decisions.
+WFO is the botanical identity backbone and the default source for the catalog display name. TAXREF is primarily
+a French localization and territory/status enrichment source. TAXREF may expose a mapping disagreement, but it
+does not create a second identity-completion gate and does not rewrite a WFO-backed taxon.
 
-This plan extends the existing GROW/WFO workflow rather than building four independent curation silos.
-Its implementation precedes the broad editorial steps C4.6–C4.8 in the existing workflow plan. The
-already validated C4.1–C4.5 capabilities remain requirements and regression coverage.
+GROW and CropGraph are cultivation and horticultural evidence sources. Their source records, crop forms,
+cultivars, actions, timing, geography and rights remain separate until an explicit review decision joins them.
 
-## Scope and source pins
+All generated candidates remain unreviewed. Adapter reruns never accept data, remove authored decisions or
+silently carry approvals across changed inputs.
 
-| Source    | Planned input                                                       | Role                                                                               |
-| --------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| GROW      | Existing pinned 2020 release and source manifest                    | Cultivation claims, common names and source locations                              |
-| WFO       | Existing pinned 2026-06 backbone                                    | Global botanical identity, accepted names and synonyms                             |
-| TAXREF    | Proposed v18.0 archive, published 2025-01-09                        | French taxonomy crosswalks, vernacular names and source-qualified territory status |
-| CropGraph | Commit `e722c3415bcf2773277f3422e13a4de5efd29b48`, calendar fixture | Crop forms, names, frost-relative actions and cultivation candidates               |
+## Source roles and data flow
 
-TAXREF-Web identifies v18.0 as the downloadable release at planning time. Verify archive contents,
-official distribution URL, licence evidence, size and SHA-256 during source preparation. If availability
-requires a different version, record the choice before implementation; do not replace it with live API
-results or an unrecorded mirror. CropGraph's commit is the inspected baseline, not a floating `main` pin.
-Neither new source has a completed repository manifest yet.
-
-Import the full CropGraph calendar into ignored staging for discovery and accounting. Freeze an explicit
-curation scope: retain all 140 GROW records and select CropGraph records relevant to those horticultural
-subjects and the ADR-0005 MVP. Prioritize the 33 MVP concepts and two tomato exemplars in the same workflow.
-Do not require review of all 5,006 CropGraph entries to complete this cohort. Every excluded record must
-have a scope disposition; absent exemplar data must be reported, not invented. The exact selection list
-is a preparation deliverable, with identifiers, rationale and a fingerprint, not an importer heuristic.
-
-Companions, pests, rotation, succession, beneficial insects and GDD model files are later cohorts. The
-initial importer inventories these exclusions but does not expand the MVP or build their contracts.
-
-## Architecture and dependencies
+| Source    | Role                                                                 | First-track output                          |
+| --------- | -------------------------------------------------------------------- | ------------------------------------------- |
+| GROW      | Existing cultivation, common-name and source-location evidence       | Existing source records and candidates      |
+| CropGraph | Crop forms, names, action-bearing windows and cultivation candidates | Raw records, selected cohort and candidates |
+| WFO       | Botanical identity, accepted names and synonyms                      | Identity proposals and taxonomic closure    |
+| TAXREF    | French vernacular names and territory/status enrichment              | Localization proposals linked to WFO review |
 
 ```text
-Pinned GROW resources ──> existing source adapter ──┐
-                                                 ├─> qualified source-name seeds
-Pinned CropGraph calendar ──> new source adapter ──┘           │
-                                                             ├─> WFO reconciliation
-Pinned WFO archive ───────────────────────────────────────────┘
-                                                             │
-Pinned TAXREF archive ──> taxonomy extraction ────────────────> TAXREF reconciliation
-                                                             │
-Reviewed/manual identity proposals + bounded synonym expansion│
-                                                             v
-                    frozen four-source review manifest and crop packets
-                                                             │
-                    explicit decisions ──> transactional apply
-                                                             │
-                    tracked authoring dataset + validation + coverage report
+GROW ───────┐
+            ├─> qualified source-name seeds ─> WFO identity proposals ─> review packets
+CropGraph ──┘                                      │                         │
+                                                   └─> TAXREF localization    │
+                                                                                └─> explicit decisions
+GROW/CropGraph cultivation candidates ───────────────> comparison and review ──> authoring dataset
 ```
 
-Keep one-source adapters on the shared importer runner. Reconciliation and packet generation consume
-multiple pinned outputs and use separate manifests. Every dependency includes release, configuration and
-content fingerprints. Store large archives and generated outputs in ignored `.cache` paths; commit only
-source metadata, small test fixtures, scope configuration and curator-owned authoring records.
+Large archives and generated outputs remain in ignored `.cache` paths. Tracked files are source metadata,
+small fixtures, scope configuration and curator-owned authoring data. The implementation uses Node.js 24,
+TypeScript, pnpm, JSON Schema 2020-12, Ajv and Vitest. No database, mandatory external API or runtime HTTP
+service is introduced.
 
-Use Node.js 24, TypeScript, pnpm, JSON Schema 2020-12, Ajv and Vitest. Stream large ZIP/TSV inputs and
-CropGraph's entries array, using bounded selected-name/ID indexes and multiple passes where necessary.
-Do not add a database, mandatory external API or runtime HTTP service.
+## Ordered implementation tasks
 
-## P1 — Shared contracts and migration design
+Each task has one bounded responsibility and its own acceptance test. Tasks may be implemented in parallel only
+when their listed dependencies are complete.
 
-- Status: planned
-- Dependencies: existing GROW/WFO implementation
+### T1 — Record source-authority decisions
 
-Audit `src/curation/grow-wfo-*`, WFO input types, schema registry and semantic validation for assumptions
-about one source or one taxonomy. The current manifest hardcodes GROW/WFO baseline fields and exactly 17
-collections; some maps use `sourceRecordId` alone. Replace these assumptions deliberately.
+Update the open-questions register and this plan with the WFO-first/TAXREF-localization policy. Define the
+TAXREF outcomes `linked`, `ambiguous`, `not-found` and `concept-disagreement`. A TAXREF disagreement is an
+issue or localization limitation, not a replacement identity.
 
-Required contracts:
+Dependencies: none.
 
-- Qualified source-record key: source, release, record identifier, with the exact manifest reference.
-  Candidate identity additionally names the source field or semantic subrecord. Array positions may be
-  evidence locators but never catalog IDs. Duplicate source slugs/IDs fail; repeated botanical names do not.
-- Generic input-run descriptors, frozen scope descriptor and hashed queue/packet descriptors.
-- Independent reconciliation outcomes for each source record against each taxonomy. A selected WFO
-  interpretation must not hide an unresolved TAXREF interpretation, or vice versa.
-- Preserve existing record-specific name/subject decisions; add separate taxonomy-target decisions where
-  needed so two backbones do not require duplicating or overwriting the same source-name decision.
-- Reviewed crosswalk relation semantics: equivalent botanical concept versus broader/narrower or
-  unresolved relation. The existing crosswalk assumes a shared taxon; do not force unequal concepts into
-  it. Non-equivalent proposals remain issues unless an explicit extended relation contract is approved.
-- Explicit authored action and typed timing for CropGraph windows. Existing `cultivation_window` only
-  supports `harvest`/`establish_outdoors` and absolute calendars; extend the authoring contract through
-  reviewed schemas rather than hiding action data in arbitrary JSON or misusing `sowing_window`.
-- Assertion comparison records/decisions that preserve agreement, conflict, non-comparability and an
-  explicit preferred projection or deferral. No implicit source priority or averaging.
+Acceptance: the source register, field matrix and open questions agree; no dependent task needs to infer which
+taxonomy is authoritative.
 
-Retain one catalog display accepted name per taxon while preserving each backbone's own accepted-name
-relationship. WFO and TAXREF can disagree on names without either source record being rewritten. Confirm
-the display-name policy and non-equivalent concept handling in the open questions register before coding
-their dependent rules.
+### T2 — Add qualified source-record keys
 
-Plan explicit authoring/draft schema version changes. Existing v1 validation remains available; old
-transactions must not be interpreted as new transactions. Migrate the existing authoring directory in
-place to a generic dataset identity unless an explicit later move is documented. Preserve authored IDs,
-reviews, history and decision links. If it is still empty, verify that fact at migration time. Never reset
-populated collections. Keep existing commands as documented compatibility entry points for the old
-workflow; new generic commands must identify their dataset and baseline unambiguously.
+Define one reusable V1 qualified key containing `sourceId`, `sourceManifestId`, `sourceReleaseId` and
+`sourceRecordId`. Add a semantic-subrecord key for source fields, CropGraph windows and nested claims. Add
+canonical TypeScript key helpers and replace bare `sourceRecordId` map keys in curation validation, status,
+show, draft generation and lineage checks.
 
-Acceptance: contract examples cover two sources with the same local record ID, two taxonomy outcomes for
-one record, shared taxa with distinct crop forms, and a versioned migration that preserves existing data.
+Array positions may appear in evidence locators but never in stable IDs. Equal local IDs from different sources
+must coexist; duplicate complete keys must fail.
 
-## P2 — Source preparation and reproducible acquisition
+Dependencies: T1.
 
-- Status: planned
-- Dependencies: P1 source/run contracts
+Acceptance: fixtures cover two sources with local record ID `1`, duplicate complete keys, reordered arrays and
+qualified source-location keys.
 
-Create `data/sources/taxref/` and `data/sources/cropgraph/` with source, licence, manifest and README records.
-Record official URLs, immutable release/commit identifiers, exact resources and members, media types,
-byte sizes, hashes, citation, extraction method and exclusions. Separate download/preparation from offline
-import. Verify resource fingerprints before opening parsers; preserve the previous successful run on error.
+### T3 — Generalize the V1 dataset manifest
 
-CropGraph's calendar declares CC BY 4.0; its code licence is separate. File-level bibliography is acceptable
-input evidence and must be inherited explicitly when an entry has no citation. Preserve entry overrides,
-citation granularity and the complete file bibliography. Do not fabricate per-claim citations. Shared
-rights reviews can cover explicitly enumerated records; file-level declaration alone does not settle
-upstream rights. Unresolved rights prevent consumer eligibility, not inspection of staged candidates.
+Update the current authoring manifest in place. Remove the exact-17-collection constraint, replace named
+GROW/WFO baseline fields with generic typed baseline descriptors, allow new collection roles and enforce unique
+roles, paths and dependency IDs.
 
-TAXREF acquisition must include the selected release's documentation and code lists. Inventory the
-actual archive before fixing member names: taxonomy, vernacular names, external links, change history and
-removed-name mappings may have different formats. No assumption that a WFO link exists in TAXREF.
+Dependencies: T2.
 
-Acceptance: source manifests verify exact local inputs; offline reruns work; unavailable downloads have
-actionable errors; corruption cannot replace a prior successful run.
+Acceptance: a four-source manifest validates; duplicate roles and paths fail; the current tracked collections
+remain representable without renaming their files.
 
-## P3 — CropGraph adapter and field policy
+### T4 — Generalize run, scope and draft descriptors
 
-- Status: planned
-- Dependencies: P1–P2
+Replace named GROW/WFO run fields and fixed reconciliation counts with generic arrays of hashed input, scope,
+queue, packet and output descriptors. Every descriptor records role, schema, path or locator, byte size, count
+and SHA-256 where applicable.
 
-Implement `src/adapters/cropgraph/` and `import:cropgraph`. Emit raw source records, name/subject candidates,
-assertion candidates, exclusions, diagnostics and attribution through the shared runner. The source slug
-is a source identifier, never the new Hortinis identifier. Retain cultivar labels, mixtures and production
-uses separately from scientific-name strings. Do not classify a microgreen as generic mature-crop evidence.
+The existing one-source importer runner remains the common execution boundary; this task changes the contracts
+that consume its outputs.
 
-| Field                                       | Staging and curation treatment                                                                                                                              |
-| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `scientificName`, `commonName`, `aliases`   | Identity/name proposals; preserve raw spelling and language uncertainty                                                                                     |
-| `windows`                                   | Separate candidate per action, anchor and source window; preserve notes and negative offsets                                                                |
-| `last_spring`, `first_fall`                 | Propose `last_spring_frost`, `first_autumn_frost`; document exact vocabulary mapping                                                                        |
-| `start_indoors`, `direct_sow`, `transplant` | Preserve explicit actions; `plant_now` proposes `plant` only after meaning review                                                                           |
-| `growingContext`                            | Retain outdoor/indoor/both/greenhouse; greenhouse does not imply unheated shelter                                                                           |
-| `minSoilTempF`                              | Preserve raw value and convert by `(F - 32) * 5 / 9` under a documented precision policy; do not decide germination versus transplant meaning automatically |
-| `daysToHarvest`                             | Preserve range; defer promotion until sowing/transplant/establishment and harvest target are explicit                                                       |
-| `season`, `zoneRange`                       | Preserve source qualifiers; not numeric frost thresholds or proof of French suitability                                                                     |
-| `climateModifiers`                          | Separate derived proposals with base-window and modifier lineage; weeks convert to days; notes-only modifiers stay notes                                    |
-| `notes`                                     | Retain evidence, surface contradictions; do not automatically extract accepted horticultural facts                                                          |
+Dependencies: T2–T3.
 
-Reordering a source window must not silently change its identity; use a documented semantic/content key
-within the qualified source record and an explicit duplicate policy. Values that change across releases
-produce new candidates and a review diff, never silent updates to accepted assertions.
+Acceptance: one manifest describes GROW, CropGraph, WFO and TAXREF inputs; output and input roles are unique;
+changed bytes change the fingerprint.
 
-Do not import CropGraph's US frost-date table or coordinate climate classifier into France applicability.
-Do not generate calendar dates during import. Preserve the source's North American applicability and
-require a reviewed decision for any wider applicability. Base and modified rules must not both apply
-without explicit selection/override semantics. A modifier affecting the same action in spring and autumn
-must expose both resulting proposals for review.
+### T5 — Extend authored actions and timing in V1
 
-Acceptance: inspected-source fixtures include tomato's numeric/note disagreement, ambiguous soil
-temperature meaning, onion regional/photoperiod notes, absent citations, absent contexts, malformed
-windows, duplicate slugs, cultivar scope and deterministic byte output. All candidates stay unreviewed.
+Extend the authoring assertion and decision schemas to represent CropGraph actions and typed timing. Use the
+existing catalog action vocabulary (`start_indoors`, `direct_sow`, `transplant`, `plant`, `harvest`,
+`establish_outdoors`) and support calendar, relative-day and applicable threshold forms.
 
-## P4 — TAXREF adapter and lookup
+Preserve raw action, mapping method and source timing. Keep `plant_now`, ambiguous soil-temperature meaning and
+unanchored harvest duration deferrable; do not narrow them automatically.
 
-- Status: planned
-- Dependencies: P1–P2
+Dependencies: T1.
 
-Implement `src/adapters/taxref/`, `import:taxref` and a read-only pinned lookup. Stream the official archive;
-preserve `CD_NOM`, `CD_REF`, scientific names/authorship, rank, parentage, vernacular names and documented
-territory/status codes as available. Treat external numeric identifiers as strings. Preserve individual
-name rows and accepted-target links; never replace `CD_NOM` with `CD_REF` and lose the original name.
+Acceptance: positive and negative fixtures cover every supported action, negative frost offsets, ambiguous
+actions and invalid narrowing.
 
-Extract relevant matches, accepted targets, synonyms and genus/family closure. Keep national or overseas
-status as source-qualified information, not a filter that removes potential cultivated-plant matches.
-Preserve metropolitan and other territory distinctions; presence is not cultivation suitability. Missing
-cultivated taxa/cultivars are expected review outcomes, not evidence that the crop cannot exist in Hortinis.
+### T6 — Add assertion comparison contracts
 
-Vernacular strings become language-tagged proposals only according to the documented fields; split lists
-only using verified delimiters, retaining original strings. Do not mark every French name preferred or
-attach a species name automatically to every crop form. Retain external-link and name-change evidence
-where available; retired identifiers require explicit replacement/supersession review.
+Add generated comparison records for `agreement`, `conflict` and `not-comparable`, plus reviewed decisions for
+an explicit preferred assertion, retain-both or defer. Every comparison references qualified candidates and
+preserves both source claims. No averaging or implicit source priority is permitted.
 
-Acceptance: fixtures cover accepted and synonym names, homonyms/authorship, ranks, missing accepted
-targets, parent cycles, duplicate IDs, encoding, vernacular names, status code interpretation and removed
-IDs. Missing required referents or malformed archives fail without publishing partial output.
+Dependencies: T2 and T5.
 
-## P5 — Shared identity reconciliation
+Acceptance: absolute dates and frost-relative windows can be non-comparable; a preference references a specific
+assertion; source ordering cannot affect the result.
 
-- Status: planned
-- Dependencies: P3–P4
+### T7 — Migrate the current V1 authoring dataset
 
-Replace the GROW-only WFO seed interface with qualified seeds from the frozen GROW/CropGraph cohort.
-Reconcile both sources independently against WFO and TAXREF. Compare preserved source names first, then
-record any proposal supported by selected accepted names, synonyms or verified external links. Fingerprint
-the seed set and any bounded expansion; keep evidence of every matching step and terminate cycles.
+Apply the generalized V1 manifest and collection layout in place. Add new empty collections where required and
+preserve existing IDs, reviews, supersession links and file paths. Do not add a permanent V2 reader or legacy
+transaction branch.
 
-Exact matches remain proposals. Rank/authorship conflicts, multiple candidates, mixtures, cultivar-group
-labels, misspellings, synonyms and differing taxonomic concepts produce explicit review outcomes. Fuzzy
-search may assist manual lookup but cannot automatically accept or replace a name. Do not strip cultivar
-or group qualifiers and silently widen a horticultural subject to the resulting species.
+Use a populated synthetic fixture to prove migration behavior even though the tracked collections are currently
+empty. Migration must be deterministic and must refuse unknown or incomplete source references.
 
-Provisional packet grouping may use reconciled taxonomy and explicit scope-selection links. It is not a
-canonical subject merge. Keep unmatched records discoverable and allow a curator to split, join or reassign
-packets with recorded reasons. Preserve a generic plant, its cultivar groups and its cultivars separately.
+Dependencies: T3–T6.
 
-Acceptance: every selected GROW/CropGraph record has outcomes for both backbones, including explicit
-no-match. Shared crosswalk proposals deduplicate only by external source/release/identifier. A match in
-one backbone cannot hide ambiguity or a split/lump disagreement in the other.
+Acceptance: the tracked dataset validates after migration; the populated fixture preserves every authored ID
+and link; no collection is reset or silently omitted.
 
-## P6 — Integrated review packets and transactional decisions
+### T8 — Pin and document CropGraph
 
-- Status: planned
-- Dependencies: P1, P3–P5
+Create CropGraph source, licence, manifest and README metadata. Pin commit `e722c3415bcf2773277f3422e13a4de5efd29b48`,
+record exact resources, checksums, citations, bibliography inheritance and exclusions, and keep code and data
+licensing distinct.
 
-Provide generic `curate:catalog:drafts`, `show`, `status`, `validate` and `apply` commands (planned names,
-not currently available scripts), with explicit dataset/scope parameters and JSON output. Add pinned
-TAXREF lookup alongside WFO lookup. Produce a readable per-packet report and machine-readable transaction
-template; no interactive web service is needed.
+Dependencies: T4.
 
-Each packet must include:
+Acceptance: exact local bytes are verifiable offline; wrong files fail before parsing; excluded datasets and
+rights limitations are explicit.
 
-1. Original records, all provenance and proposed grouping, plus existing authored decisions.
-2. WFO and TAXREF alternatives side by side, ranks, authorship, synonym chains and concept disagreements.
-3. Proposed taxon, crop form/group/cultivar scope, French/English names and explicit missing coverage.
-4. GROW and CropGraph assertions arranged by predicate, action, stage, timing type, geography and system.
-5. Rights/citation context, ambiguities, non-comparable values and proposed normalization details.
-6. Individual accept/reject/defer actions and unresolved issues with reasons; no preselected acceptance.
+### T9 — Pin and document TAXREF
 
-Absolute Bordeaux calendar dates and frost-relative rules are not numeric contradictions until a separate
-climate evaluation makes them comparable. Overlapping values are not automatically corroboration; retain
-possible common upstream sources. Accepted claims from different sources remain separate assertions.
+Inspect and pin the selected TAXREF archive and documentation. Record actual member names, encoding, delimiters,
+vernacular-name fields, territory/status code lists, external links, change history and removed identifiers.
 
-Apply validates the complete prospective dataset and all affected packets before atomic publication.
-Transactions pin the draft, scope and dependency fingerprints and enumerate all affected candidate IDs.
-Batch review must expand into individual decisions with frozen counts/hashes. Preserve idempotence,
-rollback, explicit supersession and global shared-crosswalk consistency. A changed source produces a
-review diff; it never silently carries approvals forward. Content and rights decisions remain separate.
+Dependencies: T4.
 
-Acceptance: one transaction can review a crop across all four sources; a stale/corrupt transaction makes
-no changes; a shared taxon update detects affected packets; rejected/deferred candidates are inspectable.
+Acceptance: required members and exact bytes are verified before parsing; missing documentation or code lists
+fails with an actionable diagnostic.
 
-## P7 — Readiness, coverage and handoff
+### T10 — Implement CropGraph raw staging and scope
 
-- Status: planned
-- Dependencies: P6
+Stream the calendar, validate entries, emit raw source records and diagnostics, detect duplicate slugs and
+inventory excluded files. Then freeze the selected CropGraph cohort with an explicit inclusion/exclusion file,
+rationale and fingerprint. The importer consumes this selection; it does not recreate it heuristically.
 
-Distinguish structural validity, source-audit validity, editorial completion and release eligibility.
-The scoped readiness report must account for every selected source record and candidate and separately
-count records outside scope. Report identity outcomes by backbone, reviewed mappings, localization,
-actions, temperature semantics, cultivar scope, geography/system, unresolved conflicts and rights.
+Dependencies: T8.
 
-Report MVP coverage against 33 generic concepts and two cultivar exemplars; report the full GROW cohort
-and selected CropGraph cohort with their own explicit denominators. Deferred required evidence is not
-complete recommendation coverage. A missing TAXREF match can be an accepted limitation if documented;
-it must not fabricate an external identifier or disappear from the coverage report.
+Acceptance: malformed entries fail deterministically; the full source is accounted for; selected records are
+stable under input reordering; raw output is byte-deterministic.
 
-Required verification:
+### T11 — Emit CropGraph identity and cultivation candidates
 
-- Fixture-only CI: schema conformance, semantic checks, migration, source-ID collisions, two-backbone
-  disagreements, scope boundaries, action/anchor/unit preservation, deterministic reruns and failed-run
-  atomicity. Run repository format, lint, typecheck, Vitest and build checks.
-- Clean-checkout authoring validation without downloads; deep audit against all four local pinned runs.
-- Full local import of pinned sources twice, comparing output hashes/counts and verifying memory remains
-  bounded. Save generated audit reports outside Git; document the commands and outcomes.
-- End-to-end fixture rehearsal for tomato, a brassica crop form, a synonym/name change, an unmatched
-  cultivar and two GROW/CropGraph records sharing a taxon but not a horticultural subject.
-- Read-only full-data packet rehearsal that verifies all sources appear before asking the curator to
-  begin production decisions. Fixtures never supply production IDs or accepted facts automatically.
+Emit qualified candidates for names, aliases, crop forms, cultivars, mixtures, windows, actions, anchors,
+contexts, soil temperatures, harvest ranges, modifiers and notes. Preserve raw values and source notes. Keep
+microgreens, mixtures and cultivar labels separate from generic mature-crop evidence.
 
-Deliver a runbook with acquisition, import order, scope freezing, packet review, apply, validation,
-recovery and release-update procedures. C5 receives reviewed authoring records and unresolved limitations;
-this work does not publish a release. French frost statistics and live weather remain separate climate
-and application work, not prerequisites for reviewing source-native relative rules.
+Do not calculate French dates, infer greenhouse heating, infer action meaning or promote source notes to accepted
+facts. Emit diagnostics for ambiguity and contradictions.
 
-## Suggested implementation batches and effort
+Dependencies: T5, T10.
 
-| Batch | Deliverable                                         | Estimated active developer time |
-| ----- | --------------------------------------------------- | ------------------------------- |
-| P1    | Contracts, compatibility and migration fixtures     | 2–3 days                        |
-| P2–P3 | Source preparation and CropGraph staging            | 2–3 days                        |
-| P4    | TAXREF staging, names and pinned lookup             | 2–3 days                        |
-| P5    | Both-source/both-backbone reconciliation            | 2–3 days                        |
-| P6    | Integrated packets, comparison and atomic decisions | 3–5 days                        |
-| P7    | Coverage, integration audit and runbook             | 1–3 days                        |
+Acceptance: tomato numeric/note disagreement, onion regional notes, ambiguous soil temperature, `plant_now`,
+negative offsets, modifier lineage, absent citations and duplicate slugs all have fixture coverage.
 
-Budget 12–20 active developer days for curation-ready tooling, not completed botanical/horticultural
-curation. This exceeds a standalone TAXREF importer estimate because it replaces source-specific workflow
-assumptions and adds shared review/migration guarantees. Refine after P1 and archive inspection. External
-download outages or unresolved domain decisions can extend elapsed time. Validate the pilot before
-estimating editorial effort for the entire cohort.
+### T12 — Implement TAXREF extraction and localization candidates
 
-## Decisions to resolve before dependent implementation
+Stream required TAXREF members while preserving `CD_NOM`, `CD_REF`, names, authorship, rank, parentage,
+vernacular strings, territory/status codes and identifier changes. Validate duplicates, missing referents,
+cycles and encoding. Emit French localization candidates with original strings, verified language fields,
+territory context and exact locators.
 
-See [the open questions register](../open-questions.md#four-source-import-and-integrated-curation).
-Record the outcome of each there; an importer must not settle them implicitly. Proposed defaults in this
-plan are implementation recommendations, not already validated editorial policy.
+TAXREF records are not used to replace WFO accepted names. Missing cultivated taxa are reported outcomes, not
+evidence that a crop cannot exist.
 
-## Evidence used for planning
+Dependencies: T1 and T9.
 
-- [TAXREF-Web release and citation](https://taxref.mnhn.fr/taxref-web/).
-- [PatriNat official temporary download page](https://www.patrinat.fr/fr/page-temporaire-de-telechargement-des-referentiels-de-donnees-lies-linpn-7353).
-- [TAXREF scope](https://taxref.mnhn.fr/taxref-web/about).
-- [Inspected CropGraph calendar](https://github.com/Cropgraph/cropgraph/blob/e722c3415bcf2773277f3422e13a4de5efd29b48/packages/core/src/data/crop-calendar.json).
-- [CropGraph calendar implementation](https://github.com/Cropgraph/cropgraph/blob/e722c3415bcf2773277f3422e13a4de5efd29b48/packages/core/src/crop-calendar.ts).
-- [CropGraph US frost lookup](https://github.com/Cropgraph/cropgraph/blob/e722c3415bcf2773277f3422e13a4de5efd29b48/packages/core/src/usda-zones.ts).
-- [CropGraph climate classifier](https://github.com/Cropgraph/cropgraph/blob/e722c3415bcf2773277f3422e13a4de5efd29b48/packages/core/src/climate-types.ts).
+Acceptance: fixtures cover accepted/synonym rows, homonyms, missing targets, parent cycles, duplicate IDs,
+vernacular delimiters, encoding and removed identifiers. Malformed archives publish no partial output.
+
+### T13 — Generalize WFO reconciliation for GROW and CropGraph
+
+Replace the GROW-only seed interface with qualified GROW and selected CropGraph source-name seeds. Reconcile
+against WFO using the existing conservative normalization. Preserve accepted, synonym, ambiguous, unplaced,
+unresolved-status and unmatched outcomes. Keep cultivar and crop-form qualifiers visible.
+
+Dependencies: T4, T7, T10–T11.
+
+Acceptance: every selected source-name seed has one WFO outcome, including explicit no-match; existing GROW/WFO
+fixtures remain valid; equal local IDs from different sources remain distinct.
+
+### T14 — Link TAXREF localization to reviewed WFO identity
+
+Use WFO-backed identity proposals as the starting point for TAXREF lookup. Emit `linked`, `ambiguous`,
+`not-found` and `concept-disagreement` outcomes. Attach French-name proposals only to reviewed equivalent
+links, retaining TAXREF identifiers and territory/status evidence.
+
+Dependencies: T12–T13.
+
+Acceptance: missing TAXREF data does not block WFO identity; disagreements become visible issues; localized names
+cannot attach to the wrong crop form automatically.
+
+### T15 — Generate integrated review packets
+
+Generate a frozen, deterministic draft containing original GROW and CropGraph records, WFO identity outcomes,
+TAXREF localization outcomes, cultivation candidates, existing authored decisions, rights evidence, scope
+fingerprints and queue descriptors.
+
+Packet grouping is provisional. Shared taxonomy does not imply a shared horticultural subject.
+
+Dependencies: T4, T6, T7, T11, T13–T14.
+
+Acceptance: unmatched records remain visible; shared taxa can have distinct crop forms; packet membership and
+hashes are deterministic; changed dependencies invalidate the draft.
+
+### T16 — Add comparisons to review packets
+
+Compare GROW and CropGraph candidates by subject proposal, predicate, action, timing, geography and growing
+system. Preserve agreement, conflict and non-comparability, including possible shared upstream evidence.
+
+Dependencies: T6 and T15.
+
+Acceptance: comparison output never discards either source claim or creates an implicit preference.
+
+### T17 — Generalize read-only curation commands
+
+Update draft generation, lookup, show, status and validation for the generalized V1 dataset and packet model.
+Support explicit dataset and scope inputs, human-readable output and JSON output. Distinguish structural
+validity, source-audit validity, localization coverage and editorial completion.
+
+Dependencies: T7 and T15–T16.
+
+Acceptance: clean-checkout structural validation needs no ignored archives; deep validation detects stale runs,
+scopes, queues and packets; missing TAXREF localization does not appear as failed WFO identity.
+
+### T18 — Generalize transactional decision application
+
+Apply identity, subject, localization, context, assertion, comparison and issue decisions atomically. Pin the
+draft, scope, dependencies, packets and candidate sets. Validate the complete prospective dataset, preserve
+supersession and rollback, and expand batch decisions into individual records.
+
+Dependencies: T17.
+
+Acceptance: stale or corrupt input changes no tracked bytes; repeat application is idempotent or clearly
+rejected; rejected and deferred candidates remain inspectable.
+
+### T19 — Add coverage, integration verification and handoff
+
+Report separate denominators for all 140 GROW records, the selected CropGraph cohort, MVP concepts and cultivar
+exemplars. Account for WFO identity, subject scope, TAXREF localization, actions, contexts, rights, conflicts
+and accepted limitations.
+
+Run formatting, lint, typecheck, build, fixture tests, two deterministic local imports, failure-atomicity
+checks, bounded-memory checks and clean-checkout/deep-audit rehearsals. Write the acquisition/import/review/
+recovery runbook and define the handoff boundary to C5.
+
+Dependencies: T18.
+
+Acceptance: every selected source record and candidate is accounted for; repeated runs are byte-identical;
+failed runs preserve the previous successful output; C5 receives only explicit reviewed authoring records.
+
+## Explicit exclusions from this track
+
+- No second TAXREF identity backbone.
+- No V2 schema or permanent legacy compatibility layer.
+- No automatic acceptance of WFO, TAXREF or cultivation candidates.
+- No French climate-date calculation or US zone transfer.
+- No consumer JSONL.gz release construction.
+- No companion, pest, rotation, succession or GDD-model curation beyond inventory and explicit exclusion.
+- No database, editorial HTTP service or mandatory external API.
+
+## Main-track status
+
+The existing GROW/WFO implementation is the starting point and regression base. The former broad P1–P7 plan,
+including its two-backbone identity model and combined source-preparation milestones, is retired. Progress is
+tracked only through T1–T19 in this document.

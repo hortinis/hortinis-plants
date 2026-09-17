@@ -1,6 +1,10 @@
 # GROW/WFO C4 curation workflow
 
-- Status: in progress
+- Status: validated
+
+> Historical GROW/WFO baseline: the active implementation sequence is the
+> [four-source curation main track](four-source-curation-plan.md). This page remains as an operational
+> reference for the validated GROW/WFO workflow and is not a separate roadmap.
 
 The first broad catalog curation set uses every record from the pinned GROW 2020 import and the pinned WFO
 2026-06 reconciliation. It is source-location-qualified and is not a France-specific release profile.

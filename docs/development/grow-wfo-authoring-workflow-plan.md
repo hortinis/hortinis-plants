@@ -1,8 +1,12 @@
 # GROW/WFO C4 authoring workflow implementation plan
 
-- Status: in progress
-- Scope: tracked authoring decisions derived from the pinned GROW 2020 and WFO 2026-06 runs
+- Status: validated
+- Scope: validated authoring workflow primitives derived from the pinned GROW 2020 and WFO 2026-06 runs
 - Excludes: consumer release construction, GitHub publication and automatic editorial acceptance
+
+> Historical implementation baseline: the active work sequence is now the
+> [four-source curation main track](four-source-curation-plan.md). This document describes the validated
+> GROW/WFO workflow primitives retained as regression requirements; its future planned increments are retired.
 
 ## Objective
 
@@ -194,7 +198,7 @@ The C4 gate does not imply `fr-mvp` profile approval or C5 release eligibility.
 
 ## Command surface
 
-The planned non-interactive commands are:
+The validated non-interactive commands are:
 
 ```sh
 pnpm curate:grow-wfo:drafts
@@ -287,41 +291,9 @@ Acceptance: applying the same decision twice is idempotent or fails clearly with
 failed validation leaves tracked bytes unchanged; two applications to identical starting data produce
 identical output bytes except for explicitly supplied review metadata.
 
-### C4.6 — Identity and subject curation milestone (`planned`)
-
-- Review automatic accepted-name and synonym candidates first.
-- Review ambiguous, unmatched and unresolved WFO outcomes using the pinned lookup when needed.
-- Author accepted and synonym taxonomic names plus consolidated crosswalks.
-- Record one source-name decision per GROW record.
-- Map eligible records to reviewed plant concepts, cultivar groups or cultivars.
-- Resolve or accept limitations for remaining identity and subject issues.
-
-Acceptance: identity and subject gates pass; every GROW record is explicitly accounted for; no assertion
-has been promoted merely because its identity or subject was accepted.
-
-### C4.7 — Assertion curation milestone (`planned`)
-
-- Review non-calendar predicates and source scope before calendar windows.
-- Apply the validated temperature-class normalization without inventing numeric thresholds.
-- Keep harvest-duration candidates deferred.
-- Record geography and cultivation-context decisions.
-- Review every calendar candidate record by record, with frozen-set batch assistance where appropriate.
-- Materialize accepted authoring assertions and evidence while retaining rejections and deferrals as
-  decisions.
-
-Acceptance: context and assertion gates pass for the chosen C4 scope; every accepted assertion retains its
-source release, source record, locator, original value, normalization, rights decision and review; no
-ambiguous source action is narrowed.
-
-### C4.8 — Repository gate and handoff to C5 (`planned`)
-
-- Add fixture-only unit and integration tests; basic CI must not download or require the full WFO archive.
-- Run formatting, linting, type-checking, build and tests.
-- Document curator operation, failure recovery, supersession and review expectations.
-- Produce a deterministic C4 coverage report for later C5 profile selection.
-
-Acceptance: a clean checkout validates the tracked dataset and fixtures; a maintainer with the pinned local
-inputs can reproduce the deep audit; C5 receives only validated, explicitly reviewed authoring records.
+The former C4.6–C4.8 editorial milestones are retired. Their future work is decomposed into T13–T19 of the
+[four-source curation main track](four-source-curation-plan.md), which adds CropGraph candidates and TAXREF
+localization while retaining the validated workflow primitives above.
 
 ## Test strategy
 

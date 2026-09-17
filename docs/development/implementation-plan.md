@@ -8,8 +8,8 @@
 - **C0 — Decisions (`validated`):** code/data licences, ShareAlike treatment, the metropolitan-France MVP, cultivar depth, schema ownership, release coordination and sole-maintainer review authority are accepted in ADR-0004 through ADR-0006.
 - **C1 — Foundation (`in progress`):** add schemas, source manifests, importer boundaries, contributor workflow, deterministic build rules and CI checks.
 - **C2 — Contracts (`validated`):** implement separate authoring and consumer schemas for taxon, plant concept, cultivar group, cultivar, localized name, plant fact, source, assertion, context, licence, review, cultivation rule, relationship, geography, manifest and homogeneous JSONL chunks; add complete schema conformance fixtures. Compatibility policy is deferred for Hortinis coordination.
-- **C3 — Sources:** pin WFO, TAXREF and GROW; preserve GROW image exclusions; retain Practical Plants block licences; audit CropGraph citations and geography; implement immutable-locator adapters.
-- **C4 — Curation (`in progress`):** reconcile identities; separate plant concepts from taxa; normalize names, units, contexts and calendar anchors; report unresolved mappings and contradictions; implement the [GROW/WFO authoring workflow](grow-wfo-authoring-workflow-plan.md); curate the MVP.
+- **C3 — Sources:** pin WFO, TAXREF, GROW and CropGraph; preserve source-specific rights and immutable locators; implement the source adapters and staging contracts described by the [four-source curation main track](four-source-curation-plan.md).
+- **C4 — Curation (`in progress`):** follow the [four-source curation main track](four-source-curation-plan.md): WFO-first identity review, TAXREF localization, GROW/CropGraph cultivation candidates, explicit comparisons, transactional decisions and scoped readiness reporting.
 - **C5 — Release:** compile accepted projections into deterministic JSONL.gz chunks; generate manifests, hashes, source manifests and attribution; enforce size, determinism and licence gates; publish manual GitHub Release assets.
 - **C6 — Integration:** test contract acquisition, Dexie import, activation, rollback, quota failure, retired references and cross-runtime recommendation fixtures.
 - **C7 — Optional artifacts (`planned`):** after the first release, specify and build independently licensed image packs with per-image provenance; coordinate a separate `hortinis-climate` repository and artifact without making either one a core catalog dependency.
@@ -285,10 +285,9 @@ the first `fr-mvp` release.
 Production catalog-specific implementation begins after the generic C1 primitives and boundaries are
 validated. The V1 local-validation track may begin after its reduced gate above.
 
-1. **C2 — Domain contracts:** define separate authoring and consumer contracts for taxonomy, plant concepts, cultivar groups and cultivars; localized names; plant facts; contexts and geography; cultivation rules; relationships; provenance, rights and review; release manifests and homogeneous JSONL chunks. Add positive and negative conformance fixtures. Defer compatibility policy and migration fixtures until they are agreed with Hortinis.
-2. **C3 — Concrete sources:** create pinned source manifests and source-specific importers for WFO, TAXREF, GROW and later approved sources.
-3. **C4 — Curation:** reconcile identities, normalize values and contexts, review rights, and report contradictions and unresolved mappings.
-4. **C5 — Release construction and publishing:** compile accepted data into deterministic JSONL.gz chunks, produce release, source, licence and attribution manifests, run build and licence gates, compare two builds, and publish immutable GitHub Release assets.
+1. **C2 — Domain contracts:** define separate authoring and consumer contracts for taxonomy, plant concepts, cultivar groups and cultivars; localized names; plant facts; contexts and geography; cultivation rules; relationships; provenance, rights and review; release manifests and homogeneous JSONL chunks. Add positive and negative conformance fixtures.
+2. **C3/C4 — Four-source main track:** implement the ordered tasks in [four-source-curation-plan.md](four-source-curation-plan.md), beginning with qualified keys and generalized V1 manifests, then source preparation, WFO-first reconciliation, TAXREF localization, integrated packets, decisions and readiness.
+3. **C5 — Release construction and publishing:** compile accepted data into deterministic JSONL.gz chunks, produce release, source, licence and attribution manifests, run build and licence gates, compare two builds, and publish immutable GitHub Release assets.
 
 #### C3.1 — WFO snapshot and GROW name-candidate reconciliation (`in progress`)
 
@@ -312,24 +311,17 @@ covers exact accepted and synonym candidates, ambiguity, unmatched names, malfor
 names and deterministic outcomes. A full-snapshot run is validated separately once the ignored archive
 is available locally.
 
-#### C4.1–C4.8 — GROW/WFO authoring workflow (`in progress`)
+#### C3/C4 — Four-source curation main track (`planned`)
 
-Before broad editorial work in C4.6–C4.8, implement the
-[four-source import and integrated curation plan](four-source-curation-plan.md) (`planned`). It adds
-CropGraph and TAXREF, extends WFO reconciliation to both cultivation sources, and generalizes the
-review workflow so all four sources can be curated together. Existing validated C4 capabilities remain
-regression requirements; this planning update does not mark any new importer as implemented.
+The [four-source curation main track](four-source-curation-plan.md) is now the only active implementation
+sequence for this work. It supersedes the former broad P1–P7 sequence and the planned portion of the
+GROW/WFO workflow document. The existing GROW/WFO implementation remains the regression base and its
+validated read-only, validation and transactional behavior must continue to pass as the shared implementation
+is generalized.
 
-Implement the [detailed C4 authoring workflow plan](grow-wfo-authoring-workflow-plan.md) in order:
-contracts; draft integrity and pinned WFO lookup; manifest-driven validation; semantic status gates;
-transactional decision application; identity and subject curation; assertion curation; and the repository
-handoff gate. Generated queues remain ignored review aids, tracked authoring records remain canonical and
-no C4 command publishes a consumer release.
-
-Acceptance: a clean checkout validates tracked authoring data without the WFO archive; a local deep audit
-verifies it against pinned adapter outputs; every accepted record has explicit provenance, rights and
-review; completion is reported separately from structural validity; C5 receives no inferred or unreviewed
-records.
+The main track updates V1 contracts in place; it does not introduce a V2 schema or a permanent legacy
+compatibility branch. WFO remains the botanical identity backbone. TAXREF supplies French localization and
+territory/status enrichment after WFO review. C5 receives only explicitly reviewed authoring records.
 
 The release manifest is the consumer-facing acquisition entry point. It records catalog and schema versions, profile, minimum consumer version, required and optional artifacts, counts, sizes, hashes and references to metadata. Its schema belongs to C2; producing populated manifests and applying profile, rights, supersession and inheritance gates belongs to C5. Publishing is deliberately excluded from basic CI.
 
@@ -342,6 +334,6 @@ relative, soil-temperature and GDD timings have explicit shapes and units. Every
 positive and negative compiled-registry fixtures, and the tracked validation dataset passes schema plus
 cross-record semantic checks.
 
-The compatibility policy and populated catalog artifact are deliberately outside C2. Version negotiation
-and migration fixtures await Hortinis coordination; consumer projection/build behavior is implemented in
-V1.3/C5.
+The consumer compatibility policy and populated catalog artifact are deliberately outside C2. The active
+four-source track owns in-development V1 contract updates and authoring migration fixtures; consumer
+projection/build behavior remains implemented in V1.3/C5.

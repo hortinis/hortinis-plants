@@ -2,7 +2,7 @@
 
 | Canonical domain                     | Primary source                         | Secondary source                 | Release policy                                                                                           |
 | ------------------------------------ | -------------------------------------- | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Accepted scientific identity         | WFO                                    | TAXREF                           | Core                                                                                                     |
+| Accepted scientific identity         | WFO                                    | —                                | Core; WFO is the botanical identity backbone                                                             |
 | French identity and status           | TAXREF                                 | Editorial review                 | Core                                                                                                     |
 | Common names                         | TAXREF, GROW                           | Editorial review                 | Core with BCP 47 language tags; French and English exercised by the MVP                                  |
 | Trait vocabulary                     | Crop Ontology                          | Catalog registry                 | Core schema                                                                                              |

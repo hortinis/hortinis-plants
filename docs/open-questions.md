@@ -13,7 +13,6 @@ foundation tooling choices are resolved in [the implementation plan](development
 - Community contribution and public editorial workflow.
 - Exact scope, source policy and delivery contract for optional image packs.
 - Climate-cell resolution, sources, reference period and contract in the planned separate `hortinis-climate` repository.
-- Hortinis coordination on schema compatibility guarantees, minimum-consumer enforcement and migration fixtures.
 - Artifact signing and key rotation if a future threat model requires authenticity beyond trusted local selection or authenticated HTTPS.
 
 ## WFO snapshot and taxonomy scope
@@ -45,35 +44,27 @@ foundation tooling choices are resolved in [the implementation plan](development
   them; they must not be silently projected to `start_indoors`, `direct_sow` or a particular shelter type.
 - **validated:** Retain `taxon.scientificName` in the V1 authoring model as a stored convenience value and
   require it to equal the taxon's single active accepted `taxonomic-name`. Reconsider removing the stored
-  value only through a later schema-version decision; C5 must not choose between disagreeing values.
+  value only through a later contract decision; C5 must not choose between disagreeing values.
 - **in progress:** Before the first production C4 subject record is authored, decide whether any stable
   identifier from the `dev-validation` fixture is deliberately promoted to canonical use. The workflow
   must not reuse fixture identifiers or evidence automatically.
 
-## Four-source import and integrated curation
+## Four-source curation main track
 
-Implementation sequence and acceptance criteria are in the
-[four-source plan](development/four-source-curation-plan.md). The following choices are `planned` and
-must be recorded before their dependent implementation; proposed defaults are not validated decisions.
+The [four-source curation main track](development/four-source-curation-plan.md) is now the active
+implementation sequence. The previous two-backbone and schema-version questions are retired.
 
-- **planned — Source pins and cohort:** Verify TAXREF v18.0 archive members, distribution URL, rights
-  evidence and checksums; confirm the inspected CropGraph commit. Freeze explicit CropGraph source IDs
-  relevant to the full GROW cohort and ADR-0005 MVP, including unmatched or missing exemplar outcomes.
-  Full calendar staging must not make all CropGraph entries mandatory editorial work.
-- **planned — Two-backbone identity policy:** Confirm the catalog display accepted-name authority
-  (proposed: retain WFO as the default, preserve TAXREF's independent accepted-name relationship), and
-  how differing taxonomic concepts are represented. Never assert equivalent crosswalks for a broader
-  or narrower concept merely because its name matches. Define independent per-backbone dispositions.
-- **planned — Authoring contract evolution:** Choose explicit schema versions and migration for generic
-  source/run manifests, taxonomy-target decisions, action-bearing relative-window assertions and
-  comparison dispositions. Preserve old v1 validation, authored identifiers and review history.
-- **planned — CropGraph semantics:** Decide the authoring representation of soil temperature when its
-  germination/transplant role is uncertain, greenhouse versus unheated shelter, `plant_now`, unknown
-  name languages and harvest-duration anchors. Define deterministic temperature precision. Until
-  supported, retain raw candidates and defer the affected assertion, not unrelated crop review.
-- **planned — Geographic transfer and modifiers:** Define evidence/review requirements for accepting
-  North American frost-relative rules in France, and explicit selection/override behavior for base versus
-  climate-modified rules. No US zone-to-frost-date table or coordinate heuristic is France evidence.
-- **planned — Comparison and completion:** Define explicit handling of competing eligible claims for
-  later C5 projection and which accepted limitations allow scoped C4 completion. Preserve all claims;
-  do not average, rank sources implicitly, or call deferred required MVP evidence complete coverage.
+- **validated — Authority:** WFO is the botanical identity backbone and default catalog display-name source.
+  TAXREF is primarily a French localization and territory/status enrichment source.
+- **validated — Contract evolution:** update the existing V1 contracts in place; do not create a V2 schema or
+  permanent legacy-compatibility branch while the project remains in development.
+- **planned — Source pins and cohort:** verify TAXREF archive members, rights evidence and checksums; confirm
+  the inspected CropGraph commit; freeze the selected CropGraph cohort with explicit exclusions and a
+  fingerprint.
+- **planned — CropGraph semantics:** preserve ambiguous soil-temperature meaning, greenhouse context,
+  `plant_now`, unknown name languages and harvest-duration anchors as candidates or deferred decisions. Do not
+  infer meanings during import.
+- **planned — Geographic transfer and modifiers:** do not convert North American frost data into French dates;
+  preserve source-relative rules and require explicit review for applicability and base/modifier selection.
+- **planned — Comparisons and completion:** preserve agreement, conflict and non-comparability; require an
+  explicit preferred assertion or deferral; do not average values or apply source priority implicitly.
