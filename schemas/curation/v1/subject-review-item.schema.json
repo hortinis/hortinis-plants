@@ -6,7 +6,6 @@
   "required": [
     "id",
     "reviewState",
-    "sourceRecordId",
     "sourceLocator",
     "taxonomyCandidateId",
     "proposedNextStep"
@@ -14,10 +13,20 @@
   "properties": {
     "id": { "type": "string", "minLength": 1 },
     "reviewState": { "const": "unreviewed" },
+    "sourceRecordKey": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/qualifiedSourceRecordKey"
+    },
     "sourceRecordId": { "type": "string", "minLength": 1 },
     "sourceLocator": { "type": "string", "minLength": 1 },
     "taxonomyCandidateId": { "type": "string", "minLength": 1 },
     "proposedNextStep": { "type": "string", "minLength": 1 }
   },
-  "additionalProperties": true
+  "additionalProperties": true,
+  "anyOf": [
+    {
+      "required": ["sourceRecordKey"],
+      "properties": { "sourceRecordKey": true }
+    },
+    { "required": ["sourceRecordId"], "properties": { "sourceRecordId": true } }
+  ]
 }

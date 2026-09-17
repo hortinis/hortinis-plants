@@ -184,7 +184,7 @@
   "reviewBaseline": {
     "growImporterConfigurationSha256": "6d1ed7b4d1c2816e3ef1502637a8be7697ab672d9c2d654db18257d5bf1223c7",
     "wfoReconciliationConfigurationSha256": "63a591cec4657a91ac9a98bd95a0056a361b8cdf51caa0b60fe84c9594d5635a",
-    "draftManifestSha256": "e9db65974d5b41d229bbbac012f20655d5d71b0a0d060c2704efd4ade5d27793"
+    "draftManifestSha256": "c29a77acdba1d688cdf3aeff3caeb0967593b089dcb9e7adb68d1aa78a1df82d"
   },
   "reviewDraftCommand": "pnpm curate:grow-wfo:drafts"
 }

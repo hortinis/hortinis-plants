@@ -18,6 +18,11 @@ import {
   type DatasetValidationIssue,
   type ValidationDataset,
 } from "./validation-dataset.js";
+import {
+  qualifiedSourceRecordKey as sourceRecordObjectKey,
+  sourceLocationKey as qualifiedSourceLocationKey,
+  sourceRecordKey as qualifiedSourceRecordKey,
+} from "../domain/source-keys.js";
 
 type RecordValue = DatasetRecord;
 type ManifestRole =
@@ -806,12 +811,14 @@ async function auditAuthoringLineage(
       createReadStream(subjectQueuePath),
     )) {
       const item = asRecord(entry.value);
-      const sourceKey = tupleKey([
-        "source_grow_edible_plant_database",
-        "source_manifest_grow_epd_2020",
-        "doi:10.15132/10000157",
-        stringField(item, "sourceRecordId"),
-      ]);
+      const sourceKey =
+        qualifiedSourceRecordKey(item) ??
+        tupleKey([
+          "source_grow_edible_plant_database",
+          "source_manifest_grow_epd_2020",
+          "doi:10.15132/10000157",
+          stringField(item, "sourceRecordId"),
+        ]);
       if (sourceKey !== undefined) {
         if (subjectBySourceKey.has(sourceKey)) {
           addIssue(
@@ -941,7 +948,7 @@ async function auditAuthoringLineage(
       continue;
     }
     if (stringField(decision, "decision") !== "accept") continue;
-    const sourceRecordId = stringField(candidate, "sourceRecordId");
+    const sourceRecordId = qualifiedSourceRecordKey(candidate);
     const subject =
       sourceRecordId === undefined ? undefined : subjects.get(sourceRecordId);
     if (
@@ -970,21 +977,14 @@ async function auditAuthoringLineage(
       ),
     );
     const source = {
-      sourceId: stringField(candidate, "sourceId"),
-      sourceManifestId: stringField(candidate, "sourceManifestId"),
-      sourceReleaseId: stringField(candidate, "sourceReleaseId"),
-      sourceRecordId: stringField(candidate, "sourceRecordId"),
+      key: qualifiedSourceRecordKey(candidate),
       locator: stringField(candidate, "sourceLocator"),
     };
     if (
       !evidence.some(
         (reference) =>
-          source.sourceId === stringField(reference, "sourceId") &&
-          source.sourceManifestId ===
-            stringField(reference, "sourceManifestId") &&
-          source.sourceReleaseId ===
-            stringField(reference, "sourceReleaseId") &&
-          source.sourceRecordId === stringField(reference, "sourceRecordId") &&
+          source.key !== undefined &&
+          source.key === qualifiedSourceRecordKey(reference) &&
           source.locator === stringField(reference, "locator"),
       )
     ) {
@@ -999,12 +999,11 @@ async function auditAuthoringLineage(
     }
     if (stringField(candidate, "predicate") === "calendar_window") {
       const geography = asRecord(asRecord(candidate.applicability)?.geography);
-      const geographyKey = tupleKey([
-        stringField(candidate, "sourceId"),
-        stringField(candidate, "sourceManifestId"),
-        stringField(candidate, "sourceReleaseId"),
-        stringField(geography, "sheetCode"),
-      ]);
+      const candidateKey = sourceRecordObjectKey(candidate);
+      const geographyKey = qualifiedSourceLocationKey({
+        source: candidateKey?.source,
+        sourceLocation: { sheetCode: stringField(geography, "sheetCode") },
+      });
       const geographyDecision =
         geographyKey === undefined ? undefined : geographies.get(geographyKey);
       if (
@@ -1054,22 +1053,16 @@ function auditNameDecisionLineage(
       );
       continue;
     }
-    for (const field of [
-      "sourceId",
-      "sourceManifestId",
-      "sourceReleaseId",
-      "sourceRecordId",
-    ]) {
-      if (
-        stringField(decision, field) !== stringField(candidateSource, field)
-      ) {
-        addLineageIssue(
-          issues,
-          "source-name-decisions.jsonl",
-          `Source-name decision ${decisionId} does not preserve draft ${field}`,
-          decisionId,
-        );
-      }
+    if (
+      qualifiedSourceRecordKey(decision) !==
+      qualifiedSourceRecordKey(candidateSource)
+    ) {
+      addLineageIssue(
+        issues,
+        "source-name-decisions.jsonl",
+        `Source-name decision ${decisionId} does not preserve the draft qualified source-record key`,
+        decisionId,
+      );
     }
     if (
       stringField(decision, "sourceName") !==
@@ -1231,8 +1224,8 @@ function auditSubjectDecisionLineage(
       continue;
     }
     if (
-      stringField(subject, "sourceRecordId") !==
-        stringField(decision, "sourceRecordId") ||
+      qualifiedSourceRecordKey(subject) !==
+        qualifiedSourceRecordKey(decision) ||
       stringField(subject, "sourceLocator") !==
         stringField(decision, "sourceLocator") ||
       stringField(subject, "taxonomyCandidateId") !==
@@ -1258,12 +1251,7 @@ function addLineageIssue(
 }
 
 function sourceRecordKey(record: RecordValue | undefined): string | undefined {
-  return tupleKey([
-    stringField(record, "sourceId"),
-    stringField(record, "sourceManifestId"),
-    stringField(record, "sourceReleaseId"),
-    stringField(record, "sourceRecordId"),
-  ]);
+  return qualifiedSourceRecordKey(record);
 }
 
 function externalIdentifierKey(
@@ -1293,7 +1281,7 @@ function currentDecisionBySourceRecord(
   );
   const result = new Map<string, RecordValue>();
   for (const record of records) {
-    const sourceRecordId = stringField(record, "sourceRecordId");
+    const sourceRecordId = qualifiedSourceRecordKey(record);
     const id = stringField(record, "id");
     if (sourceRecordId !== undefined && id !== undefined && !superseded.has(id))
       result.set(sourceRecordId, record);
@@ -1348,13 +1336,7 @@ function reviewIsAccepted(
 }
 
 function sourceLocationKey(record: RecordValue): string | undefined {
-  const location = asRecord(record.sourceLocation);
-  return tupleKey([
-    stringField(record, "sourceId"),
-    stringField(record, "sourceManifestId"),
-    stringField(record, "sourceReleaseId"),
-    stringField(location, "sheetCode"),
-  ]);
+  return qualifiedSourceLocationKey(record);
 }
 
 function tupleKey(values: readonly (string | undefined)[]): string | undefined {

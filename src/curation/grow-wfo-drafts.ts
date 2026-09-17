@@ -29,6 +29,11 @@ import {
   WFO_SOURCE_RELEASE_ID,
 } from "../adapters/wfo/constants.js";
 import { fileURLToPath } from "node:url";
+import {
+  qualifiedSourceRecordKey,
+  type QualifiedSourceRecordKey,
+  serializeQualifiedSourceRecordKey,
+} from "../domain/source-keys.js";
 
 type RecordValue = Readonly<Record<string, unknown>>;
 
@@ -184,27 +189,26 @@ export async function generateGrowWfoDrafts(
 
   const taxonBySourceRecord = new Map<string, RecordValue>();
   for (const candidate of taxonCandidates) {
-    const source = asRecord(candidate.source);
-    const sourceRecordId = stringField(source, "sourceRecordId");
-    if (sourceRecordId === undefined)
-      throw new Error("WFO taxon candidate has no sourceRecordId");
-    if (taxonBySourceRecord.has(sourceRecordId))
+    const sourceRecordKey = requiredSourceRecordKey(candidate.source);
+    const serializedKey = serializeQualifiedSourceRecordKey(sourceRecordKey);
+    if (taxonBySourceRecord.has(serializedKey))
       throw new Error(
-        `WFO taxon candidates repeat source record ${sourceRecordId}`,
+        `WFO taxon candidates repeat source record ${serializedKey}`,
       );
-    taxonBySourceRecord.set(sourceRecordId, candidate);
+    taxonBySourceRecord.set(serializedKey, candidate);
   }
 
   const identityQueue = sourceRecords
     .map((record) => {
-      const sourceRecordId = requiredString(record, "sourceRecordId");
-      const candidate = taxonBySourceRecord.get(sourceRecordId);
+      const sourceRecordKey = requiredSourceRecordKey(record);
+      const serializedKey = serializeQualifiedSourceRecordKey(sourceRecordKey);
+      const candidate = taxonBySourceRecord.get(serializedKey);
       if (candidate === undefined)
         throw new Error(
-          `GROW source record ${sourceRecordId} has no WFO candidate`,
+          `GROW source record ${serializedKey} has no WFO candidate`,
         );
       return {
-        id: `identity_review_${sourceRecordId}`,
+        id: draftId("identity_review", sourceRecordKey),
         reviewState: "unreviewed",
         sourceRecord: record,
         taxonomyCandidate: candidate,
@@ -215,17 +219,18 @@ export async function generateGrowWfoDrafts(
 
   const subjectQueue = sourceRecords
     .map((record) => {
-      const sourceRecordId = requiredString(record, "sourceRecordId");
+      const sourceRecordKey = requiredSourceRecordKey(record);
+      const serializedKey = serializeQualifiedSourceRecordKey(sourceRecordKey);
       const fields = asRecord(record.fields);
       return {
-        id: `subject_mapping_review_${sourceRecordId}`,
+        id: draftId("subject_mapping_review", sourceRecordKey),
         reviewState: "unreviewed",
-        sourceRecordId,
+        sourceRecordKey,
         sourceLocator: requiredString(record, "sourceLocator"),
         sourceScientificName: stringField(fields, "Full taxonomic name"),
         sourceCommonName: stringField(fields, "Common name"),
         taxonomyCandidateId: requiredString(
-          taxonBySourceRecord.get(sourceRecordId),
+          taxonBySourceRecord.get(serializedKey),
           "id",
         ),
         proposedNextStep: "decide-new-or-existing-hortinis-subject",
@@ -251,11 +256,13 @@ export async function generateGrowWfoDrafts(
         reason: taxonomyIssueReason(candidate),
       })),
     ...sourceRecords.map((record) => ({
-      id: `issue_subject_mapping_${requiredString(record, "sourceRecordId")}`,
+      id: draftId("issue_subject_mapping", requiredSourceRecordKey(record)),
       kind: "unresolved-mapping",
       status: "open",
       reviewState: "unreviewed",
-      affectedRecordIds: [requiredString(record, "sourceRecordId")],
+      affectedRecordIds: [
+        serializeQualifiedSourceRecordKey(requiredSourceRecordKey(record)),
+      ],
       reason:
         "No reviewed GROW source-record-to-Hortinis-subject mapping has been authored.",
     })),
@@ -707,21 +714,22 @@ function assertSourceCandidateCoverage(
 ): void {
   const sourceById = new Map(
     sourceRecords.map((record) => [
-      requiredString(record, "sourceRecordId"),
+      serializeQualifiedSourceRecordKey(requiredSourceRecordKey(record)),
       record,
     ]),
   );
   const seen = new Set<string>();
   for (const candidate of candidates) {
     const source = asRecord(candidate.source);
-    const sourceRecordId = requiredString(source, "sourceRecordId");
-    const record = sourceById.get(sourceRecordId);
-    if (record === undefined || seen.has(sourceRecordId)) {
+    const sourceRecordKey = requiredSourceRecordKey(source);
+    const serializedKey = serializeQualifiedSourceRecordKey(sourceRecordKey);
+    const record = sourceById.get(serializedKey);
+    if (record === undefined || seen.has(serializedKey)) {
       throw new Error(
-        `WFO candidate source-record coverage is invalid for ${sourceRecordId}`,
+        `WFO candidate source-record coverage is invalid for ${serializedKey}`,
       );
     }
-    seen.add(sourceRecordId);
+    seen.add(serializedKey);
     const fields = asRecord(record.fields);
     if (
       requiredString(source, "sourceLocator") !==
@@ -730,7 +738,7 @@ function assertSourceCandidateCoverage(
         requiredString(fields, "Full taxonomic name")
     ) {
       throw new Error(
-        `WFO candidate does not match GROW source record ${sourceRecordId}`,
+        `WFO candidate does not match GROW source record ${serializedKey}`,
       );
     }
   }
@@ -936,7 +944,7 @@ function consolidateCrosswalkDrafts(
       readonly proposalRoles: Set<string>;
       readonly methods: Set<string>;
       readonly candidateIds: Set<string>;
-      readonly sourceRecordIds: Set<string>;
+      readonly sourceRecordKeys: Set<string>;
       readonly sourceNames: Set<string>;
       readonly acceptedNameIdentifiers: Set<string>;
     }
@@ -973,7 +981,16 @@ function consolidateCrosswalkDrafts(
       proposedMatchMethod:
         draft.methods.size === 1 ? [...draft.methods][0] : "review-required",
       requiredBeforeAuthoring: "mint-or-select-reviewed-hortinis-taxon-id",
-      referringSourceRecordIds: [...draft.sourceRecordIds].sort(compareStrings),
+      referringSourceRecordKeys: [...draft.sourceRecordKeys]
+        .map((key) => parseSourceRecordKey(key))
+        .sort((left, right) =>
+          serializeQualifiedSourceRecordKey(left).localeCompare(
+            serializeQualifiedSourceRecordKey(right),
+          ),
+        ),
+      referringSourceRecordIds: [...draft.sourceRecordKeys]
+        .map((key) => parseSourceRecordKey(key).recordId)
+        .sort(compareStrings),
       sourceTaxonomyCandidateIds: [...draft.candidateIds].sort(compareStrings),
       sourceNames: [...draft.sourceNames].sort(compareStrings),
       proposedExternalTaxonomyCrosswalk: {
@@ -1005,7 +1022,7 @@ function addCrosswalkDraft(
       readonly proposalRoles: Set<string>;
       readonly methods: Set<string>;
       readonly candidateIds: Set<string>;
-      readonly sourceRecordIds: Set<string>;
+      readonly sourceRecordKeys: Set<string>;
       readonly sourceNames: Set<string>;
       readonly acceptedNameIdentifiers: Set<string>;
     }
@@ -1033,7 +1050,7 @@ function addCrosswalkDraft(
       proposalRoles: new Set(),
       methods: new Set(),
       candidateIds: new Set(),
-      sourceRecordIds: new Set(),
+      sourceRecordKeys: new Set(),
       sourceNames: new Set(),
       acceptedNameIdentifiers: new Set(),
     };
@@ -1052,8 +1069,10 @@ function addCrosswalkDraft(
   if (proposalRole === "matched-synonym") draft.methods.add("exact-synonym");
   if (proposalRole === "matched-accepted-name") draft.methods.add("exact-name");
   draft.candidateIds.add(requiredString(candidate, "id"));
-  draft.sourceRecordIds.add(
-    requiredString(asRecord(candidate.source), "sourceRecordId"),
+  draft.sourceRecordKeys.add(
+    serializeQualifiedSourceRecordKey(
+      requiredSourceRecordKey(candidate.source),
+    ),
   );
   draft.sourceNames.add(requiredString(candidate, "sourceName"));
   const acceptedNameIdentifier = stringField(row, "acceptedNameIdentifier");
@@ -1127,6 +1146,43 @@ function asRecord(value: unknown): RecordValue | undefined {
   return value !== null && typeof value === "object" && !Array.isArray(value)
     ? (value as RecordValue)
     : undefined;
+}
+
+function requiredSourceRecordKey(value: unknown) {
+  const key = qualifiedSourceRecordKey(value);
+  if (key === undefined) {
+    const record = asRecord(value);
+    const recordId = stringField(record, "sourceRecordId");
+    if (recordId !== undefined)
+      return {
+        source: {
+          sourceId: GROW_SOURCE_ID,
+          sourceManifestId: EXPECTED_GROW_MANIFEST_ID,
+          sourceReleaseId: EXPECTED_GROW_RELEASE_ID,
+        },
+        recordId,
+      };
+    throw new Error(
+      "Source record is missing a complete qualified source-record key",
+    );
+  }
+  return key;
+}
+
+function parseSourceRecordKey(value: string): QualifiedSourceRecordKey {
+  const parsed: unknown = JSON.parse(value);
+  if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed))
+    throw new Error("Invalid serialized qualified source-record key");
+  const key = qualifiedSourceRecordKey({ sourceRecordKey: parsed });
+  if (key === undefined)
+    throw new Error("Invalid serialized qualified source-record key");
+  return key;
+}
+
+function draftId(prefix: string, key: QualifiedSourceRecordKey): string {
+  if (key.source.sourceId === GROW_SOURCE_ID)
+    return `${prefix}_${key.recordId}`;
+  return `${prefix}_${sha256(Buffer.from(serializeQualifiedSourceRecordKey(key))).slice(0, 24)}`;
 }
 
 function arrayField(record: RecordValue, key: string): readonly unknown[] {

@@ -49,7 +49,7 @@ service is introduced.
 Each task has one bounded responsibility and its own acceptance test. Tasks may be implemented in parallel only
 when their listed dependencies are complete.
 
-### T1 — Record source-authority decisions
+### T1 — Record source-authority decisions (`validated`)
 
 Update the open-questions register and this plan with the WFO-first/TAXREF-localization policy. Define the
 TAXREF outcomes `linked`, `ambiguous`, `not-found` and `concept-disagreement`. A TAXREF disagreement is an
@@ -60,10 +60,11 @@ Dependencies: none.
 Acceptance: the source register, field matrix and open questions agree; no dependent task needs to infer which
 taxonomy is authoritative.
 
-### T2 — Add qualified source-record keys
+### T2 — Add qualified source-record keys (`validated`)
 
-Define one reusable V1 qualified key containing `sourceId`, `sourceManifestId`, `sourceReleaseId` and
-`sourceRecordId`. Add a semantic-subrecord key for source fields, CropGraph windows and nested claims. Add
+Define one reusable V1 qualified key containing a nested `source` release key (`sourceId`,
+`sourceManifestId`, `sourceReleaseId`) and `recordId`. Add a separate release-qualified source-location key
+with `locationId`, plus a semantic-subrecord key for source fields, CropGraph windows and nested claims. Add
 canonical TypeScript key helpers and replace bare `sourceRecordId` map keys in curation validation, status,
 show, draft generation and lineage checks.
 

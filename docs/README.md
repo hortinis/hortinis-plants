@@ -9,6 +9,7 @@ Use the charter for scope, the model and provenance pages for data rules, the co
 - [Source register](sources/source-register.md)
 - [Source field matrix](sources/source-field-matrix.md)
 - [WFO snapshot and GROW name reconciliation](development/source-adapter-guide.md#wfo-snapshot-and-grow-name-reconciliation)
+- [Qualified source keys](development/source-keys.md)
 - [Licence policy](licensing/licensing-policy.md)
 - [Artifact format](contracts/artifact-format.md)
 - [Catalog V1 consumer contracts](contracts/catalog-v1.md)

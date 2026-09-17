@@ -61,8 +61,8 @@ taxonomic rows, diagnostics and a deterministic run manifest. A WFO release upda
 reviewed crosswalks through explicit curation; it never silently carries or changes an accepted catalog
 identity.
 
-For later reconciliation, a reviewer records a source-name decision against the preserved GROW
-`sourceRecordId` and locator. If accepted, that decision references a reviewed WFO crosswalk keyed by
+For later reconciliation, a reviewer records a source-name decision against the preserved, release-qualified
+GROW source-record key and locator. If accepted, that decision references a reviewed WFO crosswalk keyed by
 WFO source, release and identifier. A separate source-subject mapping then links the GROW record to a
 Hortinis plant concept, cultivar group or cultivar when that horticultural identity is reviewed. The
 taxonomy crosswalk alone never performs that subject mapping and never merges crop forms. Unmatched,

@@ -2,6 +2,12 @@ import {
   isValidGerminationProfile,
   isValidTemperatureProfile,
 } from "../domain/temperature-profile.js";
+import {
+  qualifiedSourceRecordKey,
+  sourceLocationKey as qualifiedSourceLocationKey,
+  sourceRecordKey as serializedSourceRecordKey,
+  type QualifiedSourceRecordKey,
+} from "../domain/source-keys.js";
 
 export interface DatasetValidationIssue {
   readonly code:
@@ -314,23 +320,27 @@ export function validateValidationDataset(
 
   for (const record of dataset.evidence) {
     const id = recordId(record);
-    const sourceId = stringField(record, "sourceId");
+    const sourceKey: QualifiedSourceRecordKey | undefined =
+      qualifiedSourceRecordKey(record);
+    const sourceIdValue =
+      sourceKey?.source.sourceId ?? stringField(record, "sourceId");
     const licenceId = stringField(asRecord(record.rights), "licenceId");
     const rightsReviewId = stringField(asRecord(record.rights), "reviewId");
-    if (sourceId !== undefined && (dataset.sources?.length ?? 0) > 0) {
-      missing(id, "sources", sourceId);
+    if (sourceIdValue !== undefined && (dataset.sources?.length ?? 0) > 0) {
+      missing(id, "sources", sourceIdValue);
     }
     if (licenceId !== undefined && (dataset.licences?.length ?? 0) > 0) {
       missing(id, "licences", licenceId);
     }
     if (
       dataset.sourceManifestId !== undefined &&
-      stringField(record, "sourceManifestId") !== dataset.sourceManifestId
+      (sourceKey?.source.sourceManifestId ??
+        stringField(record, "sourceManifestId")) !== dataset.sourceManifestId
     ) {
       issues.push({
         code: "MISSING_REFERENCE",
         recordId: id,
-        message: `Evidence references source manifest ${stringField(record, "sourceManifestId") ?? "<missing>"}, expected ${dataset.sourceManifestId}`,
+        message: `Evidence references source manifest ${sourceKey?.source.sourceManifestId ?? stringField(record, "sourceManifestId") ?? "<missing>"}, expected ${dataset.sourceManifestId}`,
       });
     }
     if (rightsReviewId !== undefined) {
@@ -532,7 +542,10 @@ export function validateValidationDataset(
   function checkAllowedSourceManifest(record: DatasetRecord, id: string): void {
     const allowed = dataset.sourceManifestIds;
     if (allowed === undefined) return;
+    const recordKey: QualifiedSourceRecordKey | undefined =
+      qualifiedSourceRecordKey(record);
     const sourceManifestId =
+      recordKey?.source.sourceManifestId ??
       stringField(record, "sourceManifestId") ??
       stringField(asRecord(record.externalIdentifier), "sourceManifestId");
     if (sourceManifestId === undefined || !allowed.includes(sourceManifestId)) {
@@ -816,7 +829,8 @@ function currentRecords(
     }
     if (current.length > 0) {
       const record = current[0]!;
-      if (recordKey.includes("\u0000")) byExternalKey.set(recordKey, record);
+      if (kind === "externalTaxonomyCrosswalks")
+        byExternalKey.set(recordKey, record);
       if (kind !== "externalTaxonomyCrosswalks")
         bySourceKey.set(recordKey, record);
     }
@@ -835,22 +849,11 @@ function externalIdentifierKey(value: unknown): string | undefined {
 }
 
 function sourceRecordKey(record: DatasetRecord): string | undefined {
-  return tupleKey([
-    stringField(record, "sourceId"),
-    stringField(record, "sourceManifestId"),
-    stringField(record, "sourceReleaseId"),
-    stringField(record, "sourceRecordId"),
-  ]);
+  return serializedSourceRecordKey(record);
 }
 
 function sourceLocationKey(record: DatasetRecord): string | undefined {
-  const location = asRecord(record.sourceLocation);
-  return tupleKey([
-    stringField(record, "sourceId"),
-    stringField(record, "sourceManifestId"),
-    stringField(record, "sourceReleaseId"),
-    stringField(location, "locator"),
-  ]);
+  return qualifiedSourceLocationKey(record);
 }
 
 function tupleKey(values: readonly (string | undefined)[]): string | undefined {

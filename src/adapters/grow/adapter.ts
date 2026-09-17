@@ -209,7 +209,21 @@ export async function importGrowSource(
         );
 
       for (const value of extraction.plants)
-        yield { output: "source-records", value };
+        yield {
+          output: "source-records",
+          value: {
+            sourceRecordKey: {
+              source: {
+                sourceId: GROW_SOURCE_ID,
+                sourceManifestId,
+                sourceReleaseId,
+              },
+              recordId: value.sourceRecordId,
+            },
+            sourceLocator: value.sourceLocator,
+            fields: value.fields,
+          },
+        };
       for (const value of extraction.locations)
         yield { output: "locations", value };
       for (const value of extraction.calendarWindows)
@@ -286,7 +300,17 @@ function toImportDiagnostic(
     message: diagnostic.message,
     ...(diagnostic.sourceRecordId === undefined
       ? {}
-      : { sourceRecordId: diagnostic.sourceRecordId }),
+      : {
+          sourceRecordKey: {
+            source: {
+              sourceId: GROW_SOURCE_ID,
+              sourceManifestId,
+              sourceReleaseId,
+            },
+            recordId: diagnostic.sourceRecordId,
+          },
+          sourceRecordId: diagnostic.sourceRecordId,
+        }),
     ...(diagnostic.sourceLocator === undefined
       ? {}
       : { sourceLocator: diagnostic.sourceLocator }),
@@ -429,6 +453,14 @@ function buildCandidates(
       const locator = `${plant.sourceLocator}&field=${encodeURIComponent(field)}`;
       candidates.push({
         id: stableId("candidate", `${locator}|${predicate}`),
+        sourceRecordKey: {
+          source: {
+            sourceId: GROW_SOURCE_ID,
+            sourceManifestId,
+            sourceReleaseId,
+          },
+          recordId: plant.sourceRecordId,
+        },
         sourceId: GROW_SOURCE_ID,
         sourceManifestId,
         sourceReleaseId,
@@ -613,6 +645,14 @@ function buildCandidates(
     };
     candidates.push({
       id: stableId("candidate", `${window.sourceLocator}|calendar_window`),
+      sourceRecordKey: {
+        source: {
+          sourceId: GROW_SOURCE_ID,
+          sourceManifestId,
+          sourceReleaseId,
+        },
+        recordId: window.sourceRecordId,
+      },
       sourceId: GROW_SOURCE_ID,
       sourceManifestId,
       sourceReleaseId,

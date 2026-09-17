@@ -4,20 +4,13 @@
   "title": "Reviewed source record to catalog subject mapping",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "id",
-    "sourceId",
-    "sourceManifestId",
-    "sourceReleaseId",
-    "sourceRecordId",
-    "sourceLocator",
-    "decision",
-    "reason",
-    "reviewId"
-  ],
+  "required": ["id", "sourceLocator", "decision", "reason", "reviewId"],
   "properties": {
     "id": {
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "sourceRecordKey": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/qualifiedSourceRecordKey"
     },
     "sourceId": {
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
@@ -52,6 +45,28 @@
     }
   },
   "allOf": [
+    {
+      "anyOf": [
+        {
+          "required": ["sourceRecordKey"],
+          "properties": { "sourceRecordKey": true }
+        },
+        {
+          "required": [
+            "sourceId",
+            "sourceManifestId",
+            "sourceReleaseId",
+            "sourceRecordId"
+          ],
+          "properties": {
+            "sourceId": true,
+            "sourceManifestId": true,
+            "sourceReleaseId": true,
+            "sourceRecordId": true
+          }
+        }
+      ]
+    },
     {
       "if": {
         "properties": { "decision": { "const": "map" } },

@@ -5,6 +5,10 @@ import {
 } from "./grow-wfo-validation.js";
 import { readGrowWfoDrafts } from "./grow-wfo-status.js";
 import type { DatasetRecord, ValidationDataset } from "./validation-dataset.js";
+import {
+  qualifiedSourceRecordKey,
+  serializeQualifiedSourceRecordKey,
+} from "../domain/source-keys.js";
 
 type RecordValue = DatasetRecord;
 
@@ -60,9 +64,7 @@ export async function showGrowWfoRecord(
     throw new Error("The tracked C4 authoring dataset could not be loaded");
   const drafts = await readGrowWfoDrafts(draftsDirectory);
   const identityReview = drafts.identityItems.find(
-    (item) =>
-      stringField(asRecord(item.sourceRecord), "sourceRecordId") ===
-      sourceRecordId,
+    (item) => recordId(asRecord(item.sourceRecord)) === sourceRecordId,
   );
   if (identityReview === undefined)
     throw new Error(
@@ -76,12 +78,10 @@ export async function showGrowWfoRecord(
     );
   const taxonomyCandidate = asRecord(identityReview.taxonomyCandidate);
   const subjectReview = drafts.subjectItems.find(
-    (item) => stringField(item, "sourceRecordId") === sourceRecordId,
+    (item) => recordId(item) === sourceRecordId,
   );
   const assertionReviews = drafts.assertionItems.filter(
-    (item) =>
-      stringField(asRecord(item.sourceCandidate), "sourceRecordId") ===
-      sourceRecordId,
+    (item) => recordId(asRecord(item.sourceCandidate)) === sourceRecordId,
   );
 
   const candidateIds = new Set(
@@ -196,6 +196,12 @@ export async function showGrowWfoRecord(
       const affected = stringArray(issue.affectedRecordIds);
       return (
         affected.includes(sourceRecordId) ||
+        (qualifiedSourceRecordKey(sourceRecord) !== undefined &&
+          affected.includes(
+            serializeQualifiedSourceRecordKey(
+              qualifiedSourceRecordKey(sourceRecord)!,
+            ),
+          )) ||
         assertionReviews.some((review) =>
           affected.includes(
             stringField(asRecord(review.sourceCandidate), "id") ?? "",
@@ -240,9 +246,12 @@ function filterBySourceRecord(
   records: readonly RecordValue[],
   sourceRecordId: string,
 ): RecordValue[] {
-  return records.filter(
-    (record) => stringField(record, "sourceRecordId") === sourceRecordId,
-  );
+  return records.filter((record) => recordId(record) === sourceRecordId);
+}
+
+function recordId(record: RecordValue | undefined): string | undefined {
+  const key = qualifiedSourceRecordKey(record);
+  return key?.recordId ?? stringField(record, "sourceRecordId");
 }
 
 function findSubject(

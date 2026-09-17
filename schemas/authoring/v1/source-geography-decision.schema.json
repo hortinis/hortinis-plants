@@ -4,19 +4,13 @@
   "title": "Reviewed source geography decision",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "id",
-    "sourceId",
-    "sourceManifestId",
-    "sourceReleaseId",
-    "sourceLocation",
-    "decision",
-    "reason",
-    "reviewId"
-  ],
+  "required": ["id", "sourceLocation", "decision", "reason", "reviewId"],
   "properties": {
     "id": {
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "sourceLocationKey": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/qualifiedSourceLocationKey"
     },
     "sourceId": {
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
@@ -61,6 +55,22 @@
     }
   },
   "allOf": [
+    {
+      "anyOf": [
+        {
+          "required": ["sourceLocationKey"],
+          "properties": { "sourceLocationKey": true }
+        },
+        {
+          "required": ["sourceId", "sourceManifestId", "sourceReleaseId"],
+          "properties": {
+            "sourceId": true,
+            "sourceManifestId": true,
+            "sourceReleaseId": true
+          }
+        }
+      ]
+    },
     {
       "if": {
         "properties": { "decision": { "const": "map" } },

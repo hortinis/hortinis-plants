@@ -11,6 +11,7 @@ import {
   type LoadedCurationDataset,
 } from "./grow-wfo-validation.js";
 import type { DatasetRecord } from "./validation-dataset.js";
+import { sourceRecordKey as qualifiedSourceRecordKey } from "../domain/source-keys.js";
 
 type RecordValue = DatasetRecord;
 
@@ -191,12 +192,12 @@ function calculateCompletionStatus(
   );
   const currentNames = currentByKey(
     dataset.sourceNameDecisions ?? [],
-    sourceRecordIdKey,
+    qualifiedSourceRecordKey,
     "supersedesDecisionId",
   );
   const currentSubjects = currentByKey(
     dataset.sourceSubjectMappings ?? [],
-    sourceRecordIdKey,
+    qualifiedSourceRecordKey,
     "supersedesMappingId",
   );
   const currentAssertions = currentByKey(
@@ -211,11 +212,11 @@ function calculateCompletionStatus(
   );
 
   const identityCompleted = drafts.sourceRecords.filter((record) => {
-    const decision = currentNames.get(sourceRecordIdKey(record) ?? "");
+    const decision = currentNames.get(qualifiedSourceRecordKey(record) ?? "");
     if (!reviewAccepted(decision, reviews)) return false;
     return (
       stringField(decision, "decision") !== "unresolved" ||
-      acceptedLimitations.has(stringField(record, "sourceRecordId") ?? "")
+      acceptedLimitations.has(qualifiedSourceRecordKey(record) ?? "")
     );
   });
   const identityGate = gate(
@@ -225,29 +226,27 @@ function calculateCompletionStatus(
   );
 
   const subjectRows = drafts.subjectItems.filter((item) => {
-    const decision = currentSubjects.get(
-      stringField(item, "sourceRecordId") ?? "",
-    );
+    const decision = currentSubjects.get(qualifiedSourceRecordKey(item) ?? "");
     return reviewAccepted(decision, reviews);
   });
   const mapped = subjectRows.filter(
     (item) =>
       stringField(
-        currentSubjects.get(stringField(item, "sourceRecordId") ?? ""),
+        currentSubjects.get(qualifiedSourceRecordKey(item) ?? ""),
         "decision",
       ) === "map",
   ).length;
   const rejected = subjectRows.filter(
     (item) =>
       stringField(
-        currentSubjects.get(stringField(item, "sourceRecordId") ?? ""),
+        currentSubjects.get(qualifiedSourceRecordKey(item) ?? ""),
         "decision",
       ) === "reject",
   ).length;
   const deferred = subjectRows.filter(
     (item) =>
       stringField(
-        currentSubjects.get(stringField(item, "sourceRecordId") ?? ""),
+        currentSubjects.get(qualifiedSourceRecordKey(item) ?? ""),
         "decision",
       ) === "defer",
   ).length;
@@ -391,12 +390,6 @@ function currentByKey(
       result.set(recordKey, record);
   }
   return result;
-}
-
-function sourceRecordIdKey(
-  record: RecordValue | undefined,
-): string | undefined {
-  return stringField(record, "sourceRecordId");
 }
 
 function candidateIdKey(record: RecordValue | undefined): string | undefined {

@@ -11,12 +11,28 @@ export interface WfoSnapshotRecord {
   readonly rowNumber: number;
 }
 
-export interface GrowNameRecord {
-  readonly sourceRecordId: string;
-  readonly sourceLocator: string;
-  readonly scientificName: string;
+export interface SourceRecordKey {
+  readonly source: {
+    readonly sourceId: string;
+    readonly sourceManifestId: string;
+    readonly sourceReleaseId: string;
+  };
+  readonly recordId: string;
 }
 
+export type GrowNameRecord =
+  | {
+      readonly sourceRecordKey: SourceRecordKey;
+      readonly sourceRecordId?: string;
+      readonly sourceLocator: string;
+      readonly scientificName: string;
+    }
+  | {
+      readonly sourceRecordId: string;
+      readonly sourceRecordKey?: SourceRecordKey;
+      readonly sourceLocator: string;
+      readonly scientificName: string;
+    };
 export type TaxonMatchOutcome =
   | "candidate-accepted"
   | "candidate-synonym"
@@ -59,10 +75,8 @@ export interface WfoTaxonMatchAlternative {
 export interface TaxonMatchCandidate {
   readonly id: string;
   readonly source: {
-    readonly sourceId: string;
-    readonly sourceManifestId: string;
-    readonly sourceReleaseId: string;
-    readonly sourceRecordId: string;
+    readonly sourceRecordKey: SourceRecordKey;
+    readonly sourceRecordId?: string;
     readonly sourceLocator: string;
   };
   readonly snapshot: {
@@ -105,7 +119,7 @@ export interface WfoTaxonomicOutputRecord {
 }
 
 export interface GrowImportRecord {
-  readonly sourceRecordId: string;
+  readonly sourceRecordKey: SourceRecordKey;
   readonly sourceLocator: string;
   readonly fields: Readonly<Record<string, unknown>>;
 }
@@ -115,6 +129,7 @@ export interface WfoDiagnostic {
   readonly code: string;
   readonly message: string;
   readonly sourceRecordId?: string;
+  readonly sourceRecordKey?: SourceRecordKey;
   readonly sourceLocator?: string;
   readonly originalValue?: unknown;
   readonly details?: Readonly<Record<string, unknown>>;

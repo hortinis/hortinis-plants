@@ -50,10 +50,19 @@ export interface GrowCalendarWindow {
 
 export interface GrowCandidate {
   readonly id: string;
-  readonly sourceId: string;
-  readonly sourceManifestId: string;
-  readonly sourceReleaseId: string;
-  readonly sourceRecordId: string;
+  readonly sourceRecordKey: {
+    readonly source: {
+      readonly sourceId: string;
+      readonly sourceManifestId: string;
+      readonly sourceReleaseId: string;
+    };
+    readonly recordId: string;
+  };
+  /** Deprecated aliases retained at the in-memory adapter boundary. */
+  readonly sourceId?: string;
+  readonly sourceManifestId?: string;
+  readonly sourceReleaseId?: string;
+  readonly sourceRecordId?: string;
   readonly sourceLocator: string;
   readonly licenceId: string;
   readonly licenceDecision: "eligible";

@@ -45,6 +45,7 @@ import type {
   WfoTaxonMatchAlternative,
 } from "./types.js";
 import { readJsonLines } from "../../serialization/json-lines.js";
+import { serializeQualifiedSourceRecordKey } from "../../domain/source-keys.js";
 import { serializeCanonicalJson } from "../../serialization/canonical-json.js";
 import { validate, type ValidationApi } from "../../schema/validation-api.js";
 
@@ -488,7 +489,11 @@ async function readGrowNames(path: string): Promise<GrowNameRecord[]> {
   const seenIds = new Set<string>();
   for await (const entry of readJsonLines(createReadStream(path))) {
     const record = objectValue<GrowImportRecord>(entry.value);
-    const sourceRecordId = stringValue(record.sourceRecordId, "sourceRecordId");
+    const sourceRecordKey = record.sourceRecordKey;
+    const sourceRecordId = stringValue(
+      sourceRecordKey?.recordId,
+      "sourceRecordKey.recordId",
+    );
     const sourceLocator = stringValue(record.sourceLocator, "sourceLocator");
     const sourceName = record.fields?.["Full taxonomic name"];
     if (typeof sourceName !== "string" || sourceName.trim().length === 0) {
@@ -500,13 +505,22 @@ async function readGrowNames(path: string): Promise<GrowNameRecord[]> {
       throw new Error(`GROW source-record output repeats ID ${sourceRecordId}`);
     }
     seenIds.add(sourceRecordId);
-    names.push({ sourceRecordId, sourceLocator, scientificName: sourceName });
+    names.push({
+      sourceRecordKey,
+      sourceRecordId,
+      sourceLocator,
+      scientificName: sourceName,
+    });
   }
   if (names.length === 0) throw new Error("GROW source-record output is empty");
   return names.sort((left, right) =>
-    left.sourceRecordId.localeCompare(right.sourceRecordId, "en", {
-      numeric: true,
-    }),
+    (left.sourceRecordKey?.recordId ?? left.sourceRecordId ?? "").localeCompare(
+      right.sourceRecordKey?.recordId ?? right.sourceRecordId ?? "",
+      "en",
+      {
+        numeric: true,
+      },
+    ),
   );
 }
 
@@ -631,6 +645,14 @@ export function createTaxonMatchCandidates(
   snapshotSha256: string,
 ): TaxonMatchCandidate[] {
   return growNames.map((grow) => {
+    const sourceRecordKey = grow.sourceRecordKey ?? {
+      source: {
+        sourceId: growSource.sourceId,
+        sourceManifestId: growSource.sourceManifestId,
+        sourceReleaseId: growSource.sourceReleaseId,
+      },
+      recordId: grow.sourceRecordId ?? "",
+    };
     const comparisonName = normalizeScientificName(grow.scientificName);
     const rows = matchesByName.get(comparisonName) ?? [];
     const alternatives = rows.map((row) =>
@@ -639,14 +661,12 @@ export function createTaxonMatchCandidates(
     const outcome = determineOutcome(rows, selectedRows);
     return {
       id: stableId(
-        `taxon_match_${grow.sourceRecordId}`,
-        `${growSource.sourceManifestId}|${growSource.sourceReleaseId}|${grow.sourceRecordId}|${wfoSource.sourceReleaseId}`,
+        `taxon_match_${sourceRecordKey.recordId}`,
+        `${serializeQualifiedSourceRecordKey(sourceRecordKey)}|${wfoSource.sourceReleaseId}`,
       ),
       source: {
-        sourceId: growSource.sourceId,
-        sourceManifestId: growSource.sourceManifestId,
-        sourceReleaseId: growSource.sourceReleaseId,
-        sourceRecordId: grow.sourceRecordId,
+        sourceRecordKey,
+        sourceRecordId: sourceRecordKey.recordId,
         sourceLocator: grow.sourceLocator,
       },
       snapshot: {
@@ -789,7 +809,8 @@ function createDiagnostics(
       kind: "unresolved-mapping",
       code: codeByOutcome[candidate.outcome],
       message: outcomeMessage(candidate.outcome),
-      sourceRecordId: source.sourceRecordId,
+      sourceRecordKey: source.sourceRecordKey,
+      sourceRecordId: source.sourceRecordKey.recordId,
       sourceLocator: source.sourceLocator,
       originalValue: candidate.sourceName,
       details: {

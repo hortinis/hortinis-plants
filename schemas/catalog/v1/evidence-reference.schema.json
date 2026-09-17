@@ -4,18 +4,13 @@
   "title": "Hortinis catalog evidence reference",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "id",
-    "sourceId",
-    "sourceManifestId",
-    "sourceReleaseId",
-    "sourceRecordId",
-    "locator",
-    "rights"
-  ],
+  "required": ["id", "locator", "rights"],
   "properties": {
     "id": {
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "sourceRecordKey": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/qualifiedSourceRecordKey"
     },
     "sourceId": {
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
@@ -53,5 +48,25 @@
         }
       }
     }
-  }
+  },
+  "anyOf": [
+    {
+      "required": ["sourceRecordKey"],
+      "properties": { "sourceRecordKey": true }
+    },
+    {
+      "required": [
+        "sourceId",
+        "sourceManifestId",
+        "sourceReleaseId",
+        "sourceRecordId"
+      ],
+      "properties": {
+        "sourceId": true,
+        "sourceManifestId": true,
+        "sourceReleaseId": true,
+        "sourceRecordId": true
+      }
+    }
+  ]
 }
