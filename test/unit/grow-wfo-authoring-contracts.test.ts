@@ -146,4 +146,39 @@ describe("GROW/WFO C4 authoring contracts", () => {
       expect(value.id, dependency.path).toBe(dependency.id);
     }
   });
+
+  it("accepts a four-source manifest without requiring a fixed collection count", async () => {
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as Record<
+      string,
+      unknown
+    >;
+    const dependencies = manifest.dependencies as Array<
+      Record<string, unknown>
+    >;
+    const sourceManifest = dependencies.find(
+      (dependency) => dependency.role === "source-manifest",
+    );
+    expect(sourceManifest).toBeDefined();
+    const fourSourceManifest = {
+      ...manifest,
+      dependencies: [
+        ...dependencies,
+        {
+          ...sourceManifest,
+          id: "source_manifest_cropgraph_fixture",
+          path: "data/sources/grow/source-manifest.json",
+        },
+        {
+          ...sourceManifest,
+          id: "source_manifest_taxref_fixture",
+          path: "data/sources/wfo/source-manifest.json",
+        },
+      ],
+    };
+    const api = await getCompiledValidationApi();
+
+    expect(api.validate(manifestSchemaId, fourSourceManifest)).toEqual({
+      valid: true,
+    });
+  });
 });

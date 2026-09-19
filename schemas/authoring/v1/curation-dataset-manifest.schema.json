@@ -29,8 +29,7 @@
     "scope": { "type": "string", "minLength": 1 },
     "collections": {
       "type": "array",
-      "minItems": 17,
-      "maxItems": 17,
+      "minItems": 1,
       "items": { "$ref": "#/$defs/collection" }
     },
     "dependencies": {
@@ -43,25 +42,7 @@
   },
   "$defs": {
     "collectionRole": {
-      "enum": [
-        "taxa",
-        "taxonomic-names",
-        "plant-concepts",
-        "cultivar-groups",
-        "cultivars",
-        "localized-names",
-        "geographic-contexts",
-        "cultivation-contexts",
-        "evidence-references",
-        "reviews",
-        "external-taxonomy-crosswalks",
-        "source-name-decisions",
-        "source-subject-mappings",
-        "source-geography-decisions",
-        "source-assertion-decisions",
-        "assertions",
-        "curation-issues"
-      ]
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
     },
     "collection": {
       "type": "object",
@@ -112,21 +93,22 @@
       }
     },
     "reviewBaseline": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/baselineDescriptor" }
+    },
+    "baselineDescriptor": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "growImporterConfigurationSha256",
-        "wfoReconciliationConfigurationSha256",
-        "draftManifestSha256"
-      ],
+      "required": ["role", "type", "sha256"],
       "properties": {
-        "growImporterConfigurationSha256": {
-          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/sha256"
+        "role": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
         },
-        "wfoReconciliationConfigurationSha256": {
-          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/sha256"
+        "type": {
+          "enum": ["configuration", "manifest", "scope"]
         },
-        "draftManifestSha256": {
+        "sha256": {
           "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/sha256"
         }
       }

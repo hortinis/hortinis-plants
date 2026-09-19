@@ -25,27 +25,8 @@ import {
 } from "../domain/source-keys.js";
 
 type RecordValue = DatasetRecord;
-type ManifestRole =
-  | "taxa"
-  | "taxonomic-names"
-  | "plant-concepts"
-  | "cultivar-groups"
-  | "cultivars"
-  | "localized-names"
-  | "geographic-contexts"
-  | "cultivation-contexts"
-  | "evidence-references"
-  | "reviews"
-  | "external-taxonomy-crosswalks"
-  | "source-name-decisions"
-  | "source-subject-mappings"
-  | "source-geography-decisions"
-  | "source-assertion-decisions"
-  | "assertions"
-  | "curation-issues";
-
 interface CollectionDescriptor {
-  readonly role: ManifestRole;
+  readonly role: string;
   readonly path: string;
   readonly format: "jsonl";
   readonly schemaId: string;
@@ -65,11 +46,13 @@ interface DependencyDescriptor {
 interface CurationManifest {
   readonly collections: readonly CollectionDescriptor[];
   readonly dependencies: readonly DependencyDescriptor[];
-  readonly reviewBaseline: {
-    readonly growImporterConfigurationSha256: string;
-    readonly wfoReconciliationConfigurationSha256: string;
-    readonly draftManifestSha256: string;
-  };
+  readonly reviewBaseline: readonly BaselineDescriptor[];
+}
+
+interface BaselineDescriptor {
+  readonly role: string;
+  readonly type: "configuration" | "manifest" | "scope";
+  readonly sha256: string;
 }
 
 interface DraftOutputDescriptor {
@@ -144,7 +127,7 @@ export interface GrowWfoValidationResult {
 const manifestSchemaId =
   "urn:hortinis:plants:schema:authoring:v1:curation-dataset-manifest";
 
-const collectionSchemaIds: Readonly<Record<ManifestRole, string>> = {
+const collectionSchemaIds: Readonly<Record<string, string>> = {
   taxa: "urn:hortinis:plants:schema:v1:taxon",
   "taxonomic-names": "urn:hortinis:plants:schema:v1:taxonomic-name",
   "plant-concepts": "urn:hortinis:plants:schema:v1:plant-concept",
@@ -167,6 +150,9 @@ const collectionSchemaIds: Readonly<Record<ManifestRole, string>> = {
     "urn:hortinis:plants:schema:authoring:v1:source-assertion-decision",
   assertions: "urn:hortinis:plants:schema:authoring:v1:assertion",
   "curation-issues": "urn:hortinis:plants:schema:authoring:v1:curation-issue",
+  "plant-facts": "urn:hortinis:plants:schema:v1:plant-fact",
+  "cultivation-rules": "urn:hortinis:plants:schema:v1:cultivation-rule",
+  relationships: "urn:hortinis:plants:schema:v1:relationship",
 };
 
 const dependencySchemaIds: Readonly<
@@ -201,9 +187,7 @@ const draftOutputPaths: Readonly<Record<string, string>> = {
   "curation-issues": "curation-issues.jsonl",
 };
 
-const roleToDatasetField: Readonly<
-  Record<ManifestRole, keyof ValidationDataset>
-> = {
+const roleToDatasetField: Readonly<Record<string, keyof ValidationDataset>> = {
   taxa: "taxa",
   "taxonomic-names": "taxonomicNames",
   "plant-concepts": "plantConcepts",
@@ -221,6 +205,9 @@ const roleToDatasetField: Readonly<
   "source-assertion-decisions": "sourceAssertionDecisions",
   assertions: "assertions",
   "curation-issues": "curationIssues",
+  "plant-facts": "facts",
+  "cultivation-rules": "rules",
+  relationships: "relationships",
 };
 
 /** Load and validate the tracked C4 authoring dataset without writing anything. */
@@ -253,9 +240,23 @@ export async function validateGrowWfoDataset(
   const collections = manifest.collections;
   const roles = new Set<string>();
   const paths = new Set<string>();
+  const baselineRoles = new Set<string>();
   const recordsByField = new Map<keyof ValidationDataset, RecordValue[]>();
   const locations = new Map<string, RecordLocation>();
   let loadedAllCollections = true;
+
+  for (const baseline of manifest.reviewBaseline) {
+    if (baselineRoles.has(baseline.role)) {
+      addIssue(
+        issues,
+        "DUPLICATE_BASELINE_ROLE",
+        manifestPath,
+        `Review baseline role ${baseline.role} is declared more than once`,
+      );
+      loadedAllCollections = false;
+    }
+    baselineRoles.add(baseline.role);
+  }
 
   for (const descriptor of collections) {
     const path = descriptor.path;
@@ -282,6 +283,27 @@ export async function validateGrowWfoDataset(
     }
     paths.add(path);
     const expectedSchemaId = collectionSchemaIds[descriptor.role];
+    if (expectedSchemaId === undefined) {
+      addIssue(
+        issues,
+        "UNSUPPORTED_COLLECTION_ROLE",
+        manifestPath,
+        `Collection role ${descriptor.role} is not supported by this validator`,
+      );
+      loadedAllCollections = false;
+      continue;
+    }
+    const datasetField = roleToDatasetField[descriptor.role];
+    if (datasetField === undefined) {
+      addIssue(
+        issues,
+        "UNSUPPORTED_COLLECTION_ROLE",
+        manifestPath,
+        `Collection role ${descriptor.role} has no dataset projection`,
+      );
+      loadedAllCollections = false;
+      continue;
+    }
     if (descriptor.schemaId !== expectedSchemaId) {
       if (
         !schemaIsKnown(validationApi, descriptor.schemaId, manifestPath, issues)
@@ -310,7 +332,7 @@ export async function validateGrowWfoDataset(
       continue;
     }
     const records: RecordValue[] = [];
-    recordsByField.set(roleToDatasetField[descriptor.role], records);
+    recordsByField.set(datasetField, records);
     try {
       for await (const entry of readJsonLines(
         createReadStream(collectionPath),
@@ -362,7 +384,9 @@ export async function validateGrowWfoDataset(
       localizedNames: recordsByField.get("localizedNames") ?? [],
       geographicContexts: recordsByField.get("geographicContexts") ?? [],
       contexts: recordsByField.get("contexts") ?? [],
-      rules: [],
+      facts: recordsByField.get("facts") ?? [],
+      rules: recordsByField.get("rules") ?? [],
+      relationships: recordsByField.get("relationships") ?? [],
       evidence: recordsByField.get("evidence") ?? [],
       reviews: recordsByField.get("reviews") ?? [],
       assertions: recordsByField.get("assertions") ?? [],
@@ -569,14 +593,42 @@ async function auditDrafts(
   )
     return;
   const draft = draftValue as DraftManifest;
-  const baseline = manifest.reviewBaseline;
+  const baselineByRole = new Map(
+    manifest.reviewBaseline.map((descriptor) => [descriptor.role, descriptor]),
+  );
+  const requiredBaseline = (
+    role: string,
+    type: BaselineDescriptor["type"],
+  ): BaselineDescriptor | undefined => {
+    const descriptor = baselineByRole.get(role);
+    if (descriptor === undefined) {
+      addIssue(
+        issues,
+        "MISSING_BASELINE_DESCRIPTOR",
+        "dataset-manifest.json",
+        `Review baseline does not declare ${role}`,
+      );
+      return undefined;
+    }
+    if (descriptor.type !== type) {
+      addIssue(
+        issues,
+        "BASELINE_DESCRIPTOR_TYPE_MISMATCH",
+        "dataset-manifest.json",
+        `Review baseline ${role} must have type ${type}`,
+      );
+      return undefined;
+    }
+    return descriptor;
+  };
+  const draftBaseline = requiredBaseline("draft-manifest", "manifest");
   const draftHash = sha256(draftBytes);
-  if (draftHash !== baseline.draftManifestSha256) {
+  if (draftBaseline !== undefined && draftHash !== draftBaseline.sha256) {
     addIssue(
       issues,
       "DRAFT_MANIFEST_DRIFT",
       draftManifestPath,
-      `Draft manifest checksum ${draftHash} does not match ${baseline.draftManifestSha256}`,
+      `Draft manifest checksum ${draftHash} does not match ${draftBaseline.sha256}`,
     );
   }
   const outputRoles = new Set<string>();
@@ -681,9 +733,14 @@ async function auditDrafts(
       );
     }
   }
+  const growConfiguration = requiredBaseline(
+    "grow-importer-configuration",
+    "configuration",
+  );
   if (
+    growConfiguration !== undefined &&
     draft.inputs.growImporterRun.configurationSha256 !==
-    baseline.growImporterConfigurationSha256
+      growConfiguration.sha256
   ) {
     addIssue(
       issues,
@@ -692,9 +749,14 @@ async function auditDrafts(
       "GROW importer configuration differs from the tracked review baseline",
     );
   }
+  const wfoConfiguration = requiredBaseline(
+    "wfo-reconciliation-configuration",
+    "configuration",
+  );
   if (
+    wfoConfiguration !== undefined &&
     draft.inputs.wfoReconciliationRun.configurationSha256 !==
-    baseline.wfoReconciliationConfigurationSha256
+      wfoConfiguration.sha256
   ) {
     addIssue(
       issues,

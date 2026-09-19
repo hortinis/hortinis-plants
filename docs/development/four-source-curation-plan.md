@@ -76,7 +76,7 @@ Dependencies: T1.
 Acceptance: fixtures cover two sources with local record ID `1`, duplicate complete keys, reordered arrays and
 qualified source-location keys.
 
-### T3 — Generalize the V1 dataset manifest
+### T3 — Generalize the V1 dataset manifest (`validated`)
 
 Update the current authoring manifest in place. Remove the exact-17-collection constraint, replace named
 GROW/WFO baseline fields with generic typed baseline descriptors, allow new collection roles and enforce unique

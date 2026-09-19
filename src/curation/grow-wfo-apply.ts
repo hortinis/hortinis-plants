@@ -304,11 +304,11 @@ export async function datasetFingerprint(
 async function readCollections(
   directory: string,
   descriptors: readonly {
-    readonly role: CollectionRole;
+    readonly role: string;
     readonly path: string;
   }[],
-): Promise<Map<CollectionRole, RecordValue[]>> {
-  const result = new Map<CollectionRole, RecordValue[]>();
+): Promise<Map<string, RecordValue[]>> {
+  const result = new Map<string, RecordValue[]>();
   for (const descriptor of descriptors) {
     const records: RecordValue[] = [];
     for await (const entry of readJsonLines(
@@ -333,9 +333,9 @@ async function readQueue(
 
 async function stageDataset(
   source: string,
-  collections: ReadonlyMap<CollectionRole, readonly RecordValue[]>,
+  collections: ReadonlyMap<string, readonly RecordValue[]>,
   descriptors: readonly {
-    readonly role: CollectionRole;
+    readonly role: string;
     readonly path: string;
   }[],
 ): Promise<string> {

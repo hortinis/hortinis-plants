@@ -47,8 +47,9 @@ duplicate current decisions, invalid supersession, or any failed relationship ch
 
 The manifest declares all curator-owned JSON Lines collections and checksummed tracked source metadata.
 The collections are intentionally zero-byte files until an explicit decision is applied. Its review
-baseline pins the GROW and WFO configuration hashes plus the SHA-256 of the canonical draft manifest. The
-draft manifest also verifies each queue's schema, record count, byte size and SHA-256.
+baseline pins typed configuration and draft-manifest descriptors, including the GROW and WFO configuration
+hashes plus the SHA-256 of the canonical draft manifest. The draft manifest also verifies each queue's schema,
+record count, byte size and SHA-256.
 
 After review, record decisions in the JSON Lines collections named by `dataset-manifest.json`. Decision
 outcome, review status and supersession are separate: the newer record links to the older record it
