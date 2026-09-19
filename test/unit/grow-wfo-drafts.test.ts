@@ -43,7 +43,7 @@ describe("GROW/WFO C4 draft generation", () => {
       const manifest = JSON.parse(
         await readFile(join(first, "draft-manifest.json"), "utf8"),
       ) as {
-        outputs: {
+        queues: {
           path: string;
           sha256: string;
           byteSize: number;
@@ -58,7 +58,7 @@ describe("GROW/WFO C4 draft generation", () => {
           manifest,
         ),
       ).toEqual({ valid: true });
-      for (const output of manifest.outputs) {
+      for (const output of manifest.queues) {
         const bytes = await readFile(join(first, output.path));
         expect(bytes.byteLength).toBe(output.byteSize);
         expect(createHash("sha256").update(bytes).digest("hex")).toBe(
@@ -134,6 +134,26 @@ describe("GROW/WFO C4 draft generation", () => {
       expect(identity).toHaveLength(4);
       expect(identity.map((item) => item.id)).toContain("identity_review_1");
       expect(identity.map((item) => item.id)).toContain("identity_review_2");
+    } finally {
+      await rm(fixture.root, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects duplicate generic reconciliation input roles", async () => {
+    const fixture = await createFixture();
+    try {
+      const manifestPath = join(
+        fixture.wfoRun,
+        "reconciliation-run-manifest.json",
+      );
+      const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
+        inputs: Array<Record<string, unknown>>;
+      };
+      manifest.inputs[1]!.role = manifest.inputs[0]!.role;
+      await writeFile(manifestPath, canonicalJsonLine(manifest));
+      await expect(
+        generate(fixture, join(fixture.root, "drafts")),
+      ).rejects.toThrow("repeats input role");
     } finally {
       await rm(fixture.root, { recursive: true, force: true });
     }
@@ -329,63 +349,83 @@ async function createFixture(): Promise<Fixture> {
 
   const wfoCandidates = buildWfoCandidates(sourceRows, archiveBytes);
   const wfoOutputs = [
-    await writeOutput(
-      wfoRun,
-      "taxon-match-candidates.jsonl",
-      "auxiliary",
-      wfoCandidates,
-      "urn:hortinis:plants:schema:v1:taxon-match-candidate",
-      false,
-    ),
-    await writeOutput(
-      wfoRun,
-      "wfo-taxonomic-records.jsonl",
-      "auxiliary",
-      [],
-      "urn:hortinis:plants:schema:v1:wfo-taxonomic-record",
-      false,
-    ),
-    await writeOutput(
-      wfoRun,
-      "diagnostics.jsonl",
-      "diagnostics",
-      [],
-      "urn:hortinis:plants:schema:v1:import-diagnostic",
-      false,
-    ),
+    {
+      role: "taxon-match-candidates",
+      ...(await writeOutput(
+        wfoRun,
+        "taxon-match-candidates.jsonl",
+        "auxiliary",
+        wfoCandidates,
+        "urn:hortinis:plants:schema:v1:taxon-match-candidate",
+        false,
+      )),
+    },
+    {
+      role: "wfo-taxonomic-records",
+      ...(await writeOutput(
+        wfoRun,
+        "wfo-taxonomic-records.jsonl",
+        "auxiliary",
+        [],
+        "urn:hortinis:plants:schema:v1:wfo-taxonomic-record",
+        false,
+      )),
+    },
+    {
+      role: "diagnostics",
+      ...(await writeOutput(
+        wfoRun,
+        "diagnostics.jsonl",
+        "diagnostics",
+        [],
+        "urn:hortinis:plants:schema:v1:import-diagnostic",
+        false,
+      )),
+    },
   ];
   const wfoConfiguration = { fixture: true };
   const wfoRunManifest = {
     schemaVersion: "1.0.0",
     job: { name: "grow-wfo-taxonomy-reconciliation", version: "0.1.0" },
-    sourceManifests: [
-      {
-        id: "source_manifest_grow_epd_2020",
-        sha256: hash("sha256", growSourceBytes),
-      },
-      {
-        id: "source_manifest_wfo_plant_list_2026_06",
-        sha256: hash("sha256", wfoSourceBytes),
-      },
-    ].sort((left, right) => compare(left.id, right.id)),
     inputs: [
       {
+        role: "source-manifest-grow",
+        id: "source_manifest_grow_epd_2020",
+        locator: "data/sources/grow/source-manifest.json",
+        schemaId: "urn:hortinis:plants:schema:v1:source-manifest",
+        sha256: hash("sha256", growSourceBytes),
+        byteSize: growSourceBytes.byteLength,
+      },
+      {
+        role: "source-manifest-wfo",
+        id: "source_manifest_wfo_plant_list_2026_06",
+        locator: "data/sources/wfo/source-manifest.json",
+        schemaId: "urn:hortinis:plants:schema:v1:source-manifest",
+        sha256: hash("sha256", wfoSourceBytes),
+        byteSize: wfoSourceBytes.byteLength,
+      },
+      {
+        role: "wfo-source-snapshot",
         locator: WFO_ARCHIVE_LOCATOR,
+        schemaId: "urn:hortinis:plants:schema:v1:source-snapshot",
         sha256: hash("sha256", archiveBytes),
         byteSize: archiveBytes.byteLength,
-        role: "source-snapshot",
       },
       {
+        role: "grow-importer-run-manifest",
         locator: "grow-import-run:importer-run-manifest.json",
+        schemaId: "urn:hortinis:plants:schema:v1:importer-run-manifest",
         sha256: hash("sha256", growRunBytes),
         byteSize: growRunBytes.byteLength,
-        role: "importer-output",
+        configurationSha256: growRunManifest.configurationSha256,
       },
       {
+        role: "grow-source-records",
         locator: "grow-import-run:source-records.jsonl",
+        schemaId: "urn:hortinis:plants:schema:v1:source-record",
         sha256: growOutputs[0]!.sha256,
         byteSize: growOutputs[0]!.byteSize,
-        role: "importer-output",
+        recordCount: sourceRows.length,
       },
     ],
     configuration: wfoConfiguration,
@@ -395,19 +435,11 @@ async function createFixture(): Promise<Fixture> {
     ),
     tools: { node: "v24.0.0" },
     outputs: wfoOutputs,
-    counts: {
-      growRecords: sourceRows.length,
-      uniqueInputNames: 3,
-      candidateAccepted: 3,
-      candidateSynonym: 1,
-      ambiguous: 0,
-      unplaced: 0,
-      unresolvedStatus: 0,
-      unmatched: 0,
-      wfoRowsScanned: 4,
-      selectedWfoRecords: 0,
-      unresolvedMappings: 0,
-    },
+    counts: [
+      { role: "candidate-accepted", count: 3 },
+      { role: "candidate-synonym", count: 1 },
+      { role: "grow-records", count: sourceRows.length },
+    ],
   };
   await writeFile(
     join(wfoRun, "reconciliation-run-manifest.json"),
@@ -659,10 +691,6 @@ function field(value: unknown, key: string): unknown {
 
 function array(value: unknown): unknown[] {
   return Array.isArray(value) ? value : [];
-}
-
-function compare(left: string, right: string): number {
-  return left < right ? -1 : left > right ? 1 : 0;
 }
 
 function createStoredZip(filename: string, data: Buffer): Buffer {

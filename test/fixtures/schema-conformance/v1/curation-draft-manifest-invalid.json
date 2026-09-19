@@ -1,34 +1,18 @@
 {
   "schemaVersion": "1.0.0",
-  "kind": "not-a-c4-draft",
+  "kind": "",
   "reviewState": "unreviewed",
-  "inputs": {
-    "growImporterRun": {
+  "inputs": [
+    {
+      "role": "fixture-input",
+      "locator": "fixture://input",
       "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "configurationSha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
-    },
-    "wfoReconciliationRun": {
-      "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-      "configurationSha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
-    },
-    "growSourceManifest": {
-      "id": "source_manifest_grow_epd_2020",
-      "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
-    },
-    "wfoSourceManifest": {
-      "id": "source_manifest_wfo_plant_list_2026_06",
-      "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-    },
-    "wfoSnapshotSha256": "1111111111111111111111111111111111111111111111111111111111111111"
-  },
-  "counts": {
-    "sourceRecords": 0,
-    "identityReviewItems": 0,
-    "subjectMappingReviewItems": 0,
-    "assertionReviewItems": 0,
-    "taxonomyCrosswalkReviewItems": 0,
-    "geographicContextReviewItems": 0,
-    "openCurationIssues": 0
-  },
-  "outputs": []
+      "byteSize": 0
+    }
+  ],
+  "scopes": [],
+  "queues": [],
+  "packets": [],
+  "outputs": [],
+  "counts": []
 }

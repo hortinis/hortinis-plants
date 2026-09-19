@@ -7,6 +7,7 @@ import {
   readFile,
   rename,
   rm,
+  stat,
   writeFile,
 } from "node:fs/promises";
 import { dirname, isAbsolute, join, resolve } from "node:path";
@@ -55,7 +56,7 @@ export interface GrowWfoDraftOptions {
 
 export interface GrowWfoDraftResult {
   readonly outputDirectory: string;
-  readonly counts: Readonly<Record<string, number>>;
+  readonly counts: readonly { readonly role: string; readonly count: number }[];
 }
 
 /**
@@ -332,40 +333,70 @@ export async function generateGrowWfoDrafts(
       }),
     );
 
-    const counts = {
-      sourceRecords: sourceRecords.length,
-      identityReviewItems: identityQueue.length,
-      subjectMappingReviewItems: subjectQueue.length,
-      assertionReviewItems: assertionQueue.length,
-      taxonomyCrosswalkReviewItems: crosswalkQueue.length,
-      geographicContextReviewItems: geographyQueue.length,
-      openCurationIssues: issueQueue.length,
-    };
+    const countValues: readonly [string, number][] = [
+      ["source-records", sourceRecords.length],
+      ["identity-review-items", identityQueue.length],
+      ["subject-mapping-review-items", subjectQueue.length],
+      ["assertion-review-items", assertionQueue.length],
+      ["taxonomy-crosswalk-review-items", crosswalkQueue.length],
+      ["geographic-context-review-items", geographyQueue.length],
+      ["open-curation-issues", issueQueue.length],
+    ];
+    const counts = countValues
+      .map(([role, count]) => ({ role, count }))
+      .sort((left, right) => left.role.localeCompare(right.role));
+    const wfoSnapshotStats = await stat(wfoSnapshotPath);
+    const inputs = [
+      {
+        role: "grow-importer-run-manifest",
+        locator: "grow-import-run:importer-run-manifest.json",
+        schemaId: "urn:hortinis:plants:schema:v1:importer-run-manifest",
+        sha256: sha256(growRunBytes),
+        byteSize: growRunBytes.byteLength,
+        configurationSha256: stringField(growManifest, "configurationSha256"),
+      },
+      {
+        role: "wfo-reconciliation-run-manifest",
+        locator: "wfo-reconciliation-run:reconciliation-run-manifest.json",
+        schemaId:
+          "urn:hortinis:plants:schema:v1:taxonomy-reconciliation-manifest",
+        sha256: sha256(wfoRunBytes),
+        byteSize: wfoRunBytes.byteLength,
+        configurationSha256: stringField(wfoManifest, "configurationSha256"),
+      },
+      {
+        role: "source-manifest-grow",
+        id: requiredString(growSourceManifest, "id"),
+        locator: "data/sources/grow/source-manifest.json",
+        schemaId: "urn:hortinis:plants:schema:v1:source-manifest",
+        sha256: sha256(growSourceBytes),
+        byteSize: growSourceBytes.byteLength,
+      },
+      {
+        role: "source-manifest-wfo",
+        id: requiredString(wfoSourceManifest, "id"),
+        locator: "data/sources/wfo/source-manifest.json",
+        schemaId: "urn:hortinis:plants:schema:v1:source-manifest",
+        sha256: sha256(wfoSourceBytes),
+        byteSize: wfoSourceBytes.byteLength,
+      },
+      {
+        role: "wfo-source-snapshot",
+        locator: "wfo-snapshot:_DwC_backbone_R.zip",
+        sha256: await hashFileSha256(wfoSnapshotPath),
+        byteSize: wfoSnapshotStats.size,
+      },
+    ].sort((left, right) => left.role.localeCompare(right.role));
     const draftManifest = {
       schemaVersion: "1.0.0",
-      kind: "grow-wfo-c4-review-drafts",
+      kind: "curation-review-drafts",
       reviewState: "unreviewed",
-      inputs: {
-        growImporterRun: {
-          sha256: sha256(growRunBytes),
-          configurationSha256: stringField(growManifest, "configurationSha256"),
-        },
-        wfoReconciliationRun: {
-          sha256: sha256(wfoRunBytes),
-          configurationSha256: stringField(wfoManifest, "configurationSha256"),
-        },
-        growSourceManifest: {
-          id: requiredString(growSourceManifest, "id"),
-          sha256: sha256(growSourceBytes),
-        },
-        wfoSourceManifest: {
-          id: requiredString(wfoSourceManifest, "id"),
-          sha256: sha256(wfoSourceBytes),
-        },
-        wfoSnapshotSha256: await hashFileSha256(wfoSnapshotPath),
-      },
+      inputs,
+      scopes: [],
+      queues: outputs.sort((a, b) => a.path.localeCompare(b.path)),
+      packets: [],
+      outputs: [],
       counts,
-      outputs: outputs.sort((a, b) => a.path.localeCompare(b.path)),
     };
     assertSchema(
       validationApi,
@@ -446,7 +477,7 @@ async function verifyGrowRun(
     throw new Error("GROW importer run references a different source manifest");
   }
   assertConfigurationDigest(run, "GROW importer run");
-  await verifyDeclaredOutputs(run, runDirectory, validationApi, "GROW");
+  await verifyDeclaredOutputs(run, runDirectory, validationApi, "GROW", false);
 
   const sourceResources = arrayField(sourceManifest, "resources");
   const declaredInputs = arrayField(run, "inputs");
@@ -536,12 +567,27 @@ async function verifyWfoRun(
     throw new Error("WFO reconciliation manifest identifies the wrong job");
   }
   assertConfigurationDigest(run, "WFO reconciliation run");
-  await verifyDeclaredOutputs(run, runDirectory, validationApi, "WFO");
-  const sourceManifests = arrayField(run, "sourceManifests").map(asRecord);
+  await verifyDeclaredOutputs(run, runDirectory, validationApi, "WFO", true);
+  const countRoles = new Set<string>();
+  for (const value of arrayField(run, "counts")) {
+    const count = asRecord(value);
+    const role = requiredString(count, "role");
+    if (countRoles.has(role)) {
+      throw new Error(`WFO reconciliation run repeats count role ${role}`);
+    }
+    countRoles.add(role);
+  }
+  const sourceManifestInputs = arrayField(run, "inputs")
+    .map(asRecord)
+    .filter(
+      (input): input is RecordValue =>
+        stringField(input, "schemaId") ===
+        "urn:hortinis:plants:schema:v1:source-manifest",
+    );
   const expectedSources = [wfoSourceManifest, growSourceManifest];
   for (const expected of expectedSources) {
     const id = requiredString(expected, "id");
-    const ref = sourceManifests.find(
+    const ref = sourceManifestInputs.find(
       (entry) => stringField(entry, "id") === id,
     );
     const sourceBytes =
@@ -557,13 +603,21 @@ async function verifyWfoRun(
       );
     }
   }
-  if (sourceManifests.length !== expectedSources.length) {
+  if (sourceManifestInputs.length !== expectedSources.length) {
     throw new Error(
-      "WFO reconciliation run declares unexpected source manifests",
+      "WFO reconciliation run declares unexpected source-manifest inputs",
     );
   }
 
   const inputs = arrayField(run, "inputs").map(asRecord);
+  const inputRoles = new Set<string>();
+  for (const input of inputs) {
+    const role = requiredString(input, "role");
+    if (inputRoles.has(role)) {
+      throw new Error(`WFO reconciliation run repeats input role ${role}`);
+    }
+    inputRoles.add(role);
+  }
   const archiveInput = inputs.find(
     (input) => stringField(input, "locator") === WFO_ARCHIVE_LOCATOR,
   );
@@ -642,14 +696,21 @@ async function verifyDeclaredOutputs(
   directory: string,
   validationApi: ValidationApi,
   label: string,
+  enforceRoleUniqueness: boolean,
 ): Promise<void> {
   const outputs = arrayField(run, "outputs");
   const seen = new Set<string>();
+  const seenRoles = new Set<string>();
   for (const value of outputs) {
     const output = asRecord(value);
     if (output === undefined)
       throw new Error(`${label} run has a malformed output descriptor`);
     const path = requiredString(output, "path");
+    const role = requiredString(output, "role");
+    if (enforceRoleUniqueness && seenRoles.has(role)) {
+      throw new Error(`${label} run repeats output role ${role}`);
+    }
+    seenRoles.add(role);
     if (!isSafeRelativePath(path) || seen.has(path)) {
       throw new Error(
         `${label} run has an unsafe or duplicate output path ${path}`,

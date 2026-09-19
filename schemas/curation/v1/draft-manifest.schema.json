@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:hortinis:plants:schema:curation:v1:draft-manifest",
-  "title": "GROW/WFO generated curation draft manifest",
+  "title": "Hortinis generated curation draft manifest",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -9,121 +9,103 @@
     "kind",
     "reviewState",
     "inputs",
-    "counts",
-    "outputs"
+    "scopes",
+    "queues",
+    "packets",
+    "outputs",
+    "counts"
   ],
   "properties": {
     "schemaVersion": { "const": "1.0.0" },
-    "kind": { "const": "grow-wfo-c4-review-drafts" },
+    "kind": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
     "reviewState": { "const": "unreviewed" },
     "inputs": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "growImporterRun",
-        "wfoReconciliationRun",
-        "growSourceManifest",
-        "wfoSourceManifest",
-        "wfoSnapshotSha256"
-      ],
-      "properties": {
-        "growImporterRun": { "$ref": "#/$defs/runInput" },
-        "wfoReconciliationRun": { "$ref": "#/$defs/runInput" },
-        "growSourceManifest": { "$ref": "#/$defs/sourceManifest" },
-        "wfoSourceManifest": { "$ref": "#/$defs/sourceManifest" },
-        "wfoSnapshotSha256": {
-          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/sha256"
-        }
-      }
-    },
-    "counts": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "sourceRecords",
-        "identityReviewItems",
-        "subjectMappingReviewItems",
-        "assertionReviewItems",
-        "taxonomyCrosswalkReviewItems",
-        "geographicContextReviewItems",
-        "openCurationIssues"
-      ],
-      "properties": {
-        "sourceRecords": { "type": "integer", "minimum": 0 },
-        "identityReviewItems": { "type": "integer", "minimum": 0 },
-        "subjectMappingReviewItems": { "type": "integer", "minimum": 0 },
-        "assertionReviewItems": { "type": "integer", "minimum": 0 },
-        "taxonomyCrosswalkReviewItems": { "type": "integer", "minimum": 0 },
-        "geographicContextReviewItems": { "type": "integer", "minimum": 0 },
-        "openCurationIssues": { "type": "integer", "minimum": 0 }
-      }
-    },
-    "outputs": {
       "type": "array",
-      "minItems": 6,
-      "items": { "$ref": "#/$defs/output" }
-    }
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/input" }
+    },
+    "scopes": { "type": "array", "items": { "$ref": "#/$defs/artifact" } },
+    "queues": { "type": "array", "items": { "$ref": "#/$defs/artifact" } },
+    "packets": { "type": "array", "items": { "$ref": "#/$defs/artifact" } },
+    "outputs": { "type": "array", "items": { "$ref": "#/$defs/artifact" } },
+    "counts": { "type": "array", "items": { "$ref": "#/$defs/count" } }
   },
   "$defs": {
-    "runInput": {
+    "input": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["sha256", "configurationSha256"],
+      "required": ["role", "locator", "sha256", "byteSize"],
       "properties": {
+        "role": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+        },
+        "id": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+        },
+        "locator": { "type": "string", "minLength": 1 },
+        "schemaId": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:"
+        },
         "sha256": {
           "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/sha256"
         },
+        "byteSize": { "type": "integer", "minimum": 0 },
+        "recordCount": { "type": "integer", "minimum": 0 },
         "configurationSha256": {
           "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/sha256"
         }
       }
     },
-    "sourceManifest": {
+    "artifact": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "sha256"],
-      "properties": {
-        "id": {
-          "$ref": "urn:hortinis:plants:schema:v1:source-manifest#/$defs/sourceManifestId"
-        },
-        "sha256": {
-          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/sha256"
-        }
-      }
-    },
-    "output": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "role",
-        "path",
-        "mediaType",
-        "schemaId",
-        "sha256",
-        "byteSize",
-        "recordCount"
-      ],
+      "required": ["role", "sha256", "byteSize"],
       "properties": {
         "role": {
-          "enum": [
-            "identity-review-queue",
-            "subject-mapping-review-queue",
-            "assertion-review-queue",
-            "taxonomy-crosswalk-review-queue",
-            "geographic-context-review-queue",
-            "curation-issues"
-          ]
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
         },
         "path": {
           "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/safeRelativePath"
         },
-        "mediaType": { "const": "application/jsonl" },
-        "schemaId": { "type": "string", "minLength": 1 },
+        "locator": { "type": "string", "minLength": 1 },
+        "mediaType": { "type": "string", "minLength": 1 },
+        "schemaId": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:"
+        },
         "sha256": {
           "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/sha256"
         },
         "byteSize": { "type": "integer", "minimum": 0 },
         "recordCount": { "type": "integer", "minimum": 0 }
+      },
+      "anyOf": [
+        {
+          "required": ["path"],
+          "properties": {
+            "path": {
+              "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/safeRelativePath"
+            }
+          }
+        },
+        {
+          "required": ["locator"],
+          "properties": { "locator": { "type": "string", "minLength": 1 } }
+        }
+      ]
+    },
+    "count": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "count"],
+      "properties": {
+        "role": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+        },
+        "count": { "type": "integer", "minimum": 0 }
       }
     }
   }

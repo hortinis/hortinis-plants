@@ -53,14 +53,17 @@ const WFO_SOURCE_MANIFEST_PATH = "data/sources/wfo/source-manifest.json";
 const GROW_SOURCE_MANIFEST_PATH = "data/sources/grow/source-manifest.json";
 const RECONCILIATION_OUTPUTS = [
   {
+    role: "taxon-match-candidates",
     path: "taxon-match-candidates.jsonl",
     schemaId: TAXON_MATCH_CANDIDATE_SCHEMA,
   },
   {
+    role: "wfo-taxonomic-records",
     path: "wfo-taxonomic-records.jsonl",
     schemaId: WFO_TAXONOMIC_RECORD_SCHEMA,
   },
   {
+    role: "diagnostics",
     path: "diagnostics.jsonl",
     schemaId: IMPORT_DIAGNOSTIC_SCHEMA,
   },
@@ -115,7 +118,9 @@ interface GrowRunManifest {
     readonly sha256?: unknown;
     readonly byteSize?: unknown;
     readonly recordCount?: unknown;
+    readonly schemaId?: unknown;
   }[];
+  readonly configurationSha256?: unknown;
 }
 
 interface SourceInfo {
@@ -307,30 +312,47 @@ export async function importWfoSnapshot(
     );
   const diagnostics = createDiagnostics(candidates);
 
-  const sourceManifests = [wfoSource, growSource]
-    .map((source) => ({
-      id: source.manifest.id as string,
-      sha256: source.sha256,
-    }))
-    .sort((left, right) => left.id.localeCompare(right.id));
   const inputs = [
     {
+      role: `source-manifest-${growSource.manifest.id as string}`,
+      id: growSource.manifest.id as string,
+      locator: GROW_SOURCE_MANIFEST_PATH,
+      schemaId: SOURCE_MANIFEST_SCHEMA,
+      sha256: growSource.sha256,
+      byteSize: growSource.manifestBytes.byteLength,
+    },
+    {
+      role: `source-manifest-${wfoSource.manifest.id as string}`,
+      id: wfoSource.manifest.id as string,
+      locator: WFO_SOURCE_MANIFEST_PATH,
+      schemaId: SOURCE_MANIFEST_SCHEMA,
+      sha256: wfoSource.sha256,
+      byteSize: wfoSource.manifestBytes.byteLength,
+    },
+    {
+      role: "wfo-source-snapshot",
       locator: WFO_ARCHIVE_LOCATOR,
+      schemaId: "urn:hortinis:plants:schema:v1:source-snapshot",
       sha256: snapshotMetadata.sha256,
       byteSize: snapshotMetadata.byteSize,
-      role: "source-snapshot",
     },
     {
+      role: "grow-importer-run-manifest",
       locator: "grow-import-run:importer-run-manifest.json",
+      schemaId: "urn:hortinis:plants:schema:v1:importer-run-manifest",
       sha256: hashBuffer(growRunManifestBytes),
       byteSize: growRunManifestBytes.byteLength,
-      role: "importer-output",
+      configurationSha256: growRunManifest.configurationSha256 as string,
     },
     {
+      role: "grow-source-records",
       locator: `grow-import-run:${growRecordsOutput.path}`,
       sha256: growRecordsMetadata.sha256,
       byteSize: growRecordsMetadata.byteSize,
-      role: "importer-output",
+      recordCount: growRecordsOutput.recordCount as number,
+      ...(growRecordsOutput.schemaId === undefined
+        ? {}
+        : { schemaId: growRecordsOutput.schemaId }),
     },
   ];
   const configuration = {
@@ -354,7 +376,6 @@ export async function importWfoSnapshot(
   const manifest = {
     schemaVersion: "1.0.0",
     job: { name: "grow-wfo-taxonomy-reconciliation", version: "0.1.0" },
-    sourceManifests,
     inputs,
     configuration,
     configurationSha256: hashBuffer(serializeCanonicalJson(configuration)),
@@ -851,29 +872,34 @@ function buildCounts(
   diagnostics: readonly WfoDiagnostic[],
   taxonomicRecords: readonly WfoTaxonomicOutputRecord[],
   wfoRowsScanned: number,
-): Record<string, number> {
+): readonly { readonly role: string; readonly count: number }[] {
   const byOutcome = (outcome: TaxonMatchOutcome) =>
     candidates.filter((candidate) => candidate.outcome === outcome).length;
-  return {
-    growRecords: growNames.length,
-    uniqueInputNames: new Set(
-      growNames.map((item) => normalizeScientificName(item.scientificName)),
-    ).size,
-    candidateAccepted: byOutcome("candidate-accepted"),
-    candidateSynonym: byOutcome("candidate-synonym"),
-    ambiguous: byOutcome("ambiguous"),
-    unplaced: byOutcome("unplaced"),
-    unresolvedStatus: byOutcome("unresolved-status"),
-    unmatched: byOutcome("unmatched"),
-    wfoRowsScanned,
-    selectedWfoRecords: taxonomicRecords.length,
-    unresolvedMappings: diagnostics.length,
-  };
+  const values: readonly [string, number][] = [
+    ["grow-records", growNames.length],
+    [
+      "unique-input-names",
+      new Set(
+        growNames.map((item) => normalizeScientificName(item.scientificName)),
+      ).size,
+    ],
+    ["candidate-accepted", byOutcome("candidate-accepted")],
+    ["candidate-synonym", byOutcome("candidate-synonym")],
+    ["ambiguous", byOutcome("ambiguous")],
+    ["unplaced", byOutcome("unplaced")],
+    ["unresolved-status", byOutcome("unresolved-status")],
+    ["unmatched", byOutcome("unmatched")],
+    ["wfo-rows-scanned", wfoRowsScanned],
+    ["selected-wfo-records", taxonomicRecords.length],
+    ["unresolved-mappings", diagnostics.length],
+  ];
+  return values.map(([role, count]) => ({ role, count }));
 }
 
 async function writeRun(
   outputDirectory: string,
   outputs: readonly {
+    readonly role: string;
     readonly path: string;
     readonly schemaId: string;
     readonly records: readonly unknown[];
@@ -895,7 +921,9 @@ async function writeRun(
         validationApi,
       );
       outputDescriptors.push({
+        role: output.role,
         path: output.path,
+        mediaType: "application/jsonl",
         schemaId: output.schemaId,
         ...result,
       });
@@ -995,6 +1023,7 @@ function findGrowRecordsOutput(run: GrowRunManifest): {
   readonly sha256: string;
   readonly byteSize?: number;
   readonly recordCount?: number;
+  readonly schemaId?: string;
 } {
   const output = run.outputs?.find(
     (item) => item.path === "source-records.jsonl",
@@ -1014,6 +1043,9 @@ function findGrowRecordsOutput(run: GrowRunManifest): {
       : {}),
     ...(typeof output.recordCount === "number"
       ? { recordCount: output.recordCount }
+      : {}),
+    ...(typeof output.schemaId === "string"
+      ? { schemaId: output.schemaId }
       : {}),
   };
 }

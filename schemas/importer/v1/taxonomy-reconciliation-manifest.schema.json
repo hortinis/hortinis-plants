@@ -7,7 +7,6 @@
   "required": [
     "schemaVersion",
     "job",
-    "sourceManifests",
     "inputs",
     "configuration",
     "configurationSha256",
@@ -28,39 +27,10 @@
         }
       }
     },
-    "sourceManifests": {
-      "type": "array",
-      "minItems": 2,
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["id", "sha256"],
-        "properties": {
-          "id": {
-            "$ref": "urn:hortinis:plants:schema:v1:source-manifest#/$defs/sourceManifestId"
-          },
-          "sha256": {
-            "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/sha256"
-          }
-        }
-      }
-    },
     "inputs": {
       "type": "array",
       "minItems": 2,
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["locator", "sha256", "byteSize", "role"],
-        "properties": {
-          "locator": { "type": "string", "minLength": 1 },
-          "sha256": {
-            "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/sha256"
-          },
-          "byteSize": { "type": "integer", "minimum": 0 },
-          "role": { "enum": ["source-snapshot", "importer-output"] }
-        }
-      }
+      "items": { "$ref": "#/$defs/input" }
     },
     "configuration": {
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/jsonValue"
@@ -79,48 +49,68 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["path", "schemaId", "sha256", "byteSize", "recordCount"],
+        "required": ["path", "role", "sha256", "byteSize"],
         "properties": {
           "path": {
             "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/safeRelativePath"
           },
-          "schemaId": { "type": "string", "minLength": 1 },
+          "role": {
+            "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+          },
+          "schemaId": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:"
+          },
           "sha256": {
             "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/sha256"
           },
           "byteSize": { "type": "integer", "minimum": 0 },
-          "recordCount": { "type": "integer", "minimum": 0 }
+          "recordCount": { "type": "integer", "minimum": 0 },
+          "mediaType": { "type": "string", "minLength": 1 }
         }
       }
     },
     "counts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/count" }
+    }
+  },
+  "$defs": {
+    "input": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "growRecords",
-        "uniqueInputNames",
-        "candidateAccepted",
-        "candidateSynonym",
-        "ambiguous",
-        "unplaced",
-        "unresolvedStatus",
-        "unmatched",
-        "wfoRowsScanned",
-        "selectedWfoRecords",
-        "unresolvedMappings"
-      ],
+      "required": ["role", "locator", "sha256", "byteSize"],
       "properties": {
-        "growRecords": { "type": "integer", "minimum": 0 },
-        "uniqueInputNames": { "type": "integer", "minimum": 0 },
-        "candidateAccepted": { "type": "integer", "minimum": 0 },
-        "candidateSynonym": { "type": "integer", "minimum": 0 },
-        "ambiguous": { "type": "integer", "minimum": 0 },
-        "unplaced": { "type": "integer", "minimum": 0 },
-        "unresolvedStatus": { "type": "integer", "minimum": 0 },
-        "unmatched": { "type": "integer", "minimum": 0 },
-        "wfoRowsScanned": { "type": "integer", "minimum": 0 },
-        "selectedWfoRecords": { "type": "integer", "minimum": 0 },
-        "unresolvedMappings": { "type": "integer", "minimum": 0 }
+        "role": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+        },
+        "id": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+        },
+        "locator": { "type": "string", "minLength": 1 },
+        "schemaId": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:"
+        },
+        "sha256": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/sha256"
+        },
+        "byteSize": { "type": "integer", "minimum": 0 },
+        "recordCount": { "type": "integer", "minimum": 0 },
+        "configurationSha256": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/sha256"
+        }
+      }
+    },
+    "count": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "count"],
+      "properties": {
+        "role": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+        },
+        "count": { "type": "integer", "minimum": 0 }
       }
     }
   }

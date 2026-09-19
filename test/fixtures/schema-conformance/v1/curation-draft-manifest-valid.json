@@ -1,36 +1,70 @@
 {
   "schemaVersion": "1.0.0",
-  "kind": "grow-wfo-c4-review-drafts",
+  "kind": "curation-review-drafts",
   "reviewState": "unreviewed",
-  "inputs": {
-    "growImporterRun": {
+  "inputs": [
+    {
+      "role": "grow-importer-run-manifest",
+      "locator": "grow-import-run:importer-run-manifest.json",
+      "schemaId": "urn:hortinis:plants:schema:v1:importer-run-manifest",
       "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "byteSize": 1,
       "configurationSha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
     },
-    "wfoReconciliationRun": {
+    {
+      "role": "wfo-reconciliation-run-manifest",
+      "locator": "wfo-reconciliation-run:reconciliation-run-manifest.json",
+      "schemaId": "urn:hortinis:plants:schema:v1:taxonomy-reconciliation-manifest",
       "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "byteSize": 1,
       "configurationSha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
     },
-    "growSourceManifest": {
+    {
+      "role": "source-manifest-grow",
       "id": "source_manifest_grow_epd_2020",
-      "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+      "locator": "data/sources/grow/source-manifest.json",
+      "schemaId": "urn:hortinis:plants:schema:v1:source-manifest",
+      "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "byteSize": 1
     },
-    "wfoSourceManifest": {
+    {
+      "role": "source-manifest-wfo",
       "id": "source_manifest_wfo_plant_list_2026_06",
-      "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      "locator": "data/sources/wfo/source-manifest.json",
+      "schemaId": "urn:hortinis:plants:schema:v1:source-manifest",
+      "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "byteSize": 1
     },
-    "wfoSnapshotSha256": "1111111111111111111111111111111111111111111111111111111111111111"
-  },
-  "counts": {
-    "sourceRecords": 1,
-    "identityReviewItems": 1,
-    "subjectMappingReviewItems": 1,
-    "assertionReviewItems": 1,
-    "taxonomyCrosswalkReviewItems": 1,
-    "geographicContextReviewItems": 1,
-    "openCurationIssues": 0
-  },
-  "outputs": [
+    {
+      "role": "source-manifest-cropgraph",
+      "id": "source_manifest_cropgraph_fixture",
+      "locator": "data/sources/cropgraph/source-manifest.json",
+      "schemaId": "urn:hortinis:plants:schema:v1:source-manifest",
+      "sha256": "1212121212121212121212121212121212121212121212121212121212121212",
+      "byteSize": 1
+    },
+    {
+      "role": "source-manifest-taxref",
+      "id": "source_manifest_taxref_fixture",
+      "locator": "data/sources/taxref/source-manifest.json",
+      "schemaId": "urn:hortinis:plants:schema:v1:source-manifest",
+      "sha256": "1313131313131313131313131313131313131313131313131313131313131313",
+      "byteSize": 1
+    },
+    {
+      "role": "wfo-source-snapshot",
+      "locator": "wfo-snapshot:_DwC_backbone_R.zip",
+      "sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "byteSize": 1
+    }
+  ],
+  "scopes": [],
+  "packets": [],
+  "counts": [
+    { "role": "source-records", "count": 1 },
+    { "role": "identity-review-items", "count": 1 }
+  ],
+  "queues": [
     {
       "role": "identity-review-queue",
       "path": "identity-review-queue.jsonl",
@@ -85,5 +119,6 @@
       "byteSize": 0,
       "recordCount": 0
     }
-  ]
+  ],
+  "outputs": []
 }

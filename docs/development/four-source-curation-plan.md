@@ -87,7 +87,7 @@ Dependencies: T2.
 Acceptance: a four-source manifest validates; duplicate roles and paths fail; the current tracked collections
 remain representable without renaming their files.
 
-### T4 — Generalize run, scope and draft descriptors
+### T4 — Generalize run, scope and draft descriptors (`validated`)
 
 Replace named GROW/WFO run fields and fixed reconciliation counts with generic arrays of hashed input, scope,
 queue, packet and output descriptors. Every descriptor records role, schema, path or locator, byte size, count

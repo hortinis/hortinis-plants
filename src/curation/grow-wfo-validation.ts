@@ -55,37 +55,31 @@ interface BaselineDescriptor {
   readonly sha256: string;
 }
 
-interface DraftOutputDescriptor {
+interface DraftArtifactDescriptor {
   readonly role: string;
-  readonly path: string;
-  readonly mediaType: "application/jsonl";
-  readonly schemaId: string;
+  readonly path?: string;
+  readonly locator?: string;
+  readonly mediaType?: string;
+  readonly schemaId?: string;
   readonly sha256: string;
   readonly byteSize: number;
-  readonly recordCount: number;
+  readonly recordCount?: number;
 }
 
 interface DraftManifest {
-  readonly inputs: {
-    readonly growImporterRun: {
-      readonly sha256: string;
-      readonly configurationSha256: string;
-    };
-    readonly wfoReconciliationRun: {
-      readonly sha256: string;
-      readonly configurationSha256: string;
-    };
-    readonly growSourceManifest: {
-      readonly id: string;
-      readonly sha256: string;
-    };
-    readonly wfoSourceManifest: {
-      readonly id: string;
-      readonly sha256: string;
-    };
-    readonly wfoSnapshotSha256: string;
-  };
-  readonly outputs: readonly DraftOutputDescriptor[];
+  readonly inputs: readonly {
+    readonly role: string;
+    readonly id?: string;
+    readonly locator: string;
+    readonly schemaId?: string;
+    readonly sha256: string;
+    readonly byteSize: number;
+    readonly configurationSha256?: string;
+  }[];
+  readonly scopes: readonly DraftArtifactDescriptor[];
+  readonly queues: readonly DraftArtifactDescriptor[];
+  readonly packets: readonly DraftArtifactDescriptor[];
+  readonly outputs: readonly DraftArtifactDescriptor[];
 }
 
 export interface CurationValidationIssue {
@@ -632,7 +626,13 @@ async function auditDrafts(
     );
   }
   const outputRoles = new Set<string>();
-  for (const output of draft.outputs) {
+  const outputPaths = new Set<string>();
+  const artifacts = [
+    ...draft.queues.map((descriptor) => ({ kind: "queue", descriptor })),
+    ...draft.packets.map((descriptor) => ({ kind: "packet", descriptor })),
+    ...draft.outputs.map((descriptor) => ({ kind: "output", descriptor })),
+  ];
+  for (const { kind, descriptor: output } of artifacts) {
     if (outputRoles.has(output.role)) {
       addIssue(
         issues,
@@ -643,9 +643,23 @@ async function auditDrafts(
       continue;
     }
     outputRoles.add(output.role);
-    const expectedSchemaId = draftOutputSchemas[output.role];
-    const expectedPath = draftOutputPaths[output.role];
-    if (expectedSchemaId === undefined || expectedPath === undefined) {
+    if (output.path !== undefined && outputPaths.has(output.path)) {
+      addIssue(
+        issues,
+        "DUPLICATE_DRAFT_OUTPUT_PATH",
+        draftManifestPath,
+        `Draft ${kind} path ${output.path} is declared more than once`,
+      );
+    }
+    if (output.path !== undefined) outputPaths.add(output.path);
+    const expectedSchemaId =
+      kind === "queue" ? draftOutputSchemas[output.role] : undefined;
+    const expectedPath =
+      kind === "queue" ? draftOutputPaths[output.role] : undefined;
+    if (
+      kind === "queue" &&
+      (expectedSchemaId === undefined || expectedPath === undefined)
+    ) {
       addIssue(
         issues,
         "UNKNOWN_DRAFT_OUTPUT_ROLE",
@@ -654,7 +668,10 @@ async function auditDrafts(
       );
       continue;
     }
-    if (output.path !== expectedPath || output.schemaId !== expectedSchemaId) {
+    if (
+      kind === "queue" &&
+      (output.path !== expectedPath || output.schemaId !== expectedSchemaId)
+    ) {
       addIssue(
         issues,
         "DRAFT_OUTPUT_DESCRIPTOR_MISMATCH",
@@ -662,6 +679,7 @@ async function auditDrafts(
         `Draft output ${output.role} must declare ${expectedPath} and ${expectedSchemaId}`,
       );
     }
+    if (output.path === undefined) continue;
     const path = await safePath(
       draftsDirectory,
       output.path,
@@ -686,15 +704,16 @@ async function auditDrafts(
     let count = 0;
     try {
       for await (const entry of readJsonLines(createReadStream(path), {
-        schemaId: output.schemaId,
-        validationApi,
+        ...(output.schemaId === undefined
+          ? {}
+          : { schemaId: output.schemaId, validationApi }),
       }))
         count = entry.lineNumber;
     } catch (error) {
       addJsonLinesIssue(issues, output.path, error);
       continue;
     }
-    if (count !== output.recordCount) {
+    if (output.recordCount !== undefined && count !== output.recordCount) {
       addIssue(
         issues,
         "DRAFT_OUTPUT_COUNT_MISMATCH",
@@ -713,25 +732,63 @@ async function auditDrafts(
       );
   }
 
+  const inputByRole = new Map<string, DraftManifest["inputs"][number]>();
+  const inputLocators = new Set<string>();
+  for (const input of draft.inputs) {
+    if (inputByRole.has(input.role)) {
+      addIssue(
+        issues,
+        "DUPLICATE_DRAFT_INPUT_ROLE",
+        draftManifestPath,
+        `Draft input role ${input.role} is declared more than once`,
+      );
+    }
+    inputByRole.set(input.role, input);
+    if (inputLocators.has(input.locator)) {
+      addIssue(
+        issues,
+        "DUPLICATE_DRAFT_INPUT_LOCATOR",
+        draftManifestPath,
+        `Draft input locator ${input.locator} is declared more than once`,
+      );
+    }
+    inputLocators.add(input.locator);
+  }
   const dependencyByRole = new Map(
     manifest.dependencies.map((dependency) => [
       dependency.role + ":" + dependency.id,
       dependency,
     ]),
   );
-  for (const input of [
-    draft.inputs.growSourceManifest,
-    draft.inputs.wfoSourceManifest,
-  ]) {
+  for (const input of draft.inputs.filter(
+    (candidate) =>
+      candidate.role.startsWith("source-manifest-") && candidate.id,
+  )) {
     const dependency = dependencyByRole.get("source-manifest:" + input.id);
-    if (dependency === undefined || dependency.sha256 !== input.sha256) {
+    if (
+      dependency === undefined ||
+      dependency.sha256 !== input.sha256 ||
+      dependency.path !== input.locator
+    ) {
       addIssue(
         issues,
         "DRAFT_SOURCE_MANIFEST_DRIFT",
         draftManifestPath,
-        `Draft source manifest ${input.id} is not the tracked dependency`,
+        `Draft source manifest ${input.id ?? input.role} is not the tracked dependency`,
       );
     }
+  }
+  const growRunInput = inputByRole.get("grow-importer-run-manifest");
+  const wfoRunInput = inputByRole.get("wfo-reconciliation-run-manifest");
+  const snapshotInput = inputByRole.get("wfo-source-snapshot");
+  if (growRunInput === undefined || wfoRunInput === undefined) {
+    addIssue(
+      issues,
+      "MISSING_DRAFT_INPUT",
+      draftManifestPath,
+      "Draft must declare importer and reconciliation run manifest inputs",
+    );
+    return;
   }
   const growConfiguration = requiredBaseline(
     "grow-importer-configuration",
@@ -739,8 +796,7 @@ async function auditDrafts(
   );
   if (
     growConfiguration !== undefined &&
-    draft.inputs.growImporterRun.configurationSha256 !==
-      growConfiguration.sha256
+    growRunInput.configurationSha256 !== growConfiguration.sha256
   ) {
     addIssue(
       issues,
@@ -755,8 +811,7 @@ async function auditDrafts(
   );
   if (
     wfoConfiguration !== undefined &&
-    draft.inputs.wfoReconciliationRun.configurationSha256 !==
-      wfoConfiguration.sha256
+    wfoRunInput.configurationSha256 !== wfoConfiguration.sha256
   ) {
     addIssue(
       issues,
@@ -771,7 +826,7 @@ async function auditDrafts(
         join(repositoryRoot, ".cache/import-runs/grow/latest"),
       "importer-run-manifest.json",
     ),
-    draft.inputs.growImporterRun.sha256,
+    growRunInput.sha256,
     "urn:hortinis:plants:schema:v1:importer-run-manifest",
     validationApi,
     issues,
@@ -782,7 +837,7 @@ async function auditDrafts(
         join(repositoryRoot, ".cache/import-runs/wfo/latest"),
       "reconciliation-run-manifest.json",
     ),
-    draft.inputs.wfoReconciliationRun.sha256,
+    wfoRunInput.sha256,
     "urn:hortinis:plants:schema:v1:taxonomy-reconciliation-manifest",
     validationApi,
     issues,
@@ -793,7 +848,7 @@ async function auditDrafts(
   );
   try {
     const snapshotHash = await hashFile(snapshotPath);
-    if (snapshotHash !== draft.inputs.wfoSnapshotSha256) {
+    if (snapshotInput === undefined || snapshotHash !== snapshotInput.sha256) {
       addIssue(
         issues,
         "WFO_SNAPSHOT_DRIFT",

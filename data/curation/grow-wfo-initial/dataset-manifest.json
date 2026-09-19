@@ -195,7 +195,7 @@
     {
       "role": "draft-manifest",
       "type": "manifest",
-      "sha256": "c29a77acdba1d688cdf3aeff3caeb0967593b089dcb9e7adb68d1aa78a1df82d"
+      "sha256": "5d68abd5befed5644dd001a8701deb97d169f0289e5a09aaf706784ddc9cf4dc"
     }
   ],
   "reviewDraftCommand": "pnpm curate:grow-wfo:drafts"

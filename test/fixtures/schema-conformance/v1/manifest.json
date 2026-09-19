@@ -761,8 +761,8 @@
       "expected": {
         "valid": false,
         "errors": [
-          { "instancePath": "/kind", "keyword": "const" },
-          { "instancePath": "/outputs", "keyword": "minItems" }
+          { "instancePath": "/kind", "keyword": "minLength" },
+          { "instancePath": "/kind", "keyword": "pattern" }
         ]
       }
     },

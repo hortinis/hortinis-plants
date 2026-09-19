@@ -1,28 +1,37 @@
 {
   "schemaVersion": "1.0.0",
   "job": { "name": "grow-wfo-taxonomy-reconciliation", "version": "0.1.0" },
-  "sourceManifests": [
-    {
-      "id": "source_manifest_grow_epd_2020",
-      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-    },
-    {
-      "id": "source_manifest_wfo_plant_list_2026_06",
-      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
-    }
-  ],
   "inputs": [
     {
+      "role": "source-manifest-grow",
+      "id": "source_manifest_grow_epd_2020",
+      "locator": "data/sources/grow/source-manifest.json",
+      "schemaId": "urn:hortinis:plants:schema:v1:source-manifest",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "byteSize": 10
+    },
+    {
+      "role": "source-manifest-wfo",
+      "id": "source_manifest_wfo_plant_list_2026_06",
+      "locator": "data/sources/wfo/source-manifest.json",
+      "schemaId": "urn:hortinis:plants:schema:v1:source-manifest",
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "byteSize": 10
+    },
+    {
+      "role": "wfo-source-snapshot",
       "locator": "https://example.test/wfo.zip",
       "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
       "byteSize": 100,
-      "role": "source-snapshot"
+      "schemaId": "urn:hortinis:plants:schema:v1:source-snapshot"
     },
     {
+      "role": "grow-source-records",
       "locator": "grow-import-run:source-records.jsonl",
       "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
       "byteSize": 50,
-      "role": "importer-output"
+      "schemaId": "urn:hortinis:plants:schema:v1:source-record",
+      "recordCount": 1
     }
   ],
   "configuration": {},
@@ -31,23 +40,15 @@
   "outputs": [
     {
       "path": "taxon-match-candidates.jsonl",
+      "role": "taxon-match-candidates",
       "schemaId": "urn:hortinis:plants:schema:v1:taxon-match-candidate",
       "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
       "byteSize": 80,
       "recordCount": 1
     }
   ],
-  "counts": {
-    "growRecords": 1,
-    "uniqueInputNames": 1,
-    "candidateAccepted": 1,
-    "candidateSynonym": 0,
-    "ambiguous": 0,
-    "unplaced": 0,
-    "unresolvedStatus": 0,
-    "unmatched": 0,
-    "wfoRowsScanned": 2,
-    "selectedWfoRecords": 2,
-    "unresolvedMappings": 0
-  }
+  "counts": [
+    { "role": "candidate-accepted", "count": 1 },
+    { "role": "grow-records", "count": 1 }
+  ]
 }
