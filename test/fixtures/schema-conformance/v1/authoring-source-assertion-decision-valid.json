@@ -7,8 +7,20 @@
   "reviewId": "review-assertion-1",
   "assertionId": "assertion-grow-calendar-1",
   "contextId": "context-italy-outdoor-establishment",
+  "sourceAction": "outdoor_sowing_or_planting",
+  "sourceTiming": {
+    "start": "05-15",
+    "end": "06-16",
+    "anchor": "source-calendar"
+  },
+  "mappingMethod": "combined-action-preserved",
   "projectionIntent": {
     "type": "cultivation-rule",
-    "action": "establish_outdoors"
+    "action": "establish_outdoors",
+    "timing": {
+      "type": "calendar-date-window",
+      "start": { "month": 5, "day": 15 },
+      "end": { "month": 6, "day": 16 }
+    }
   }
 }

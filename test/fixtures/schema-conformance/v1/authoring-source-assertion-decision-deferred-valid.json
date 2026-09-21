@@ -1,0 +1,11 @@
+{
+  "id": "assertion-decision-cropgraph-plant-now",
+  "sourceCandidateId": "candidate-cropgraph-plant-now",
+  "draftManifestSha256": "70ea61f87b9b8ca0ca5e272f1e5a0d2fb3afb63bdd88b15994e10e781239ac1a",
+  "decision": "defer",
+  "reason": "The source response is dynamic and does not state a stable authored action.",
+  "reviewId": "review-assertion-1",
+  "sourceAction": "plant_now",
+  "sourceTiming": { "asOf": "2026-09-20", "location": "source-native" },
+  "deferralReason": "dynamic-plant-now"
+}

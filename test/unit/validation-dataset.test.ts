@@ -418,5 +418,85 @@ describe("V1.2 validation dataset", () => {
     ).toContainEqual(
       expect.objectContaining({ code: "DUPLICATE_COMPOSITE_KEY" }),
     );
+
+    const cultivationDataset = {
+      ...c4Dataset,
+      assertions: [
+        ...c4Dataset.assertions,
+        {
+          id: "assertion_cultivation_example",
+          subject: { type: "plant-concept", id: "plant_example" },
+          predicate: "cultivation_window",
+          value: {
+            action: "direct_sow",
+            timing: {
+              type: "relative-day-window",
+              anchor: "last_spring_frost",
+              startOffsetDays: -28,
+              endOffsetDays: -14,
+            },
+            sourceAction: "direct_sow",
+            sourceTiming: {
+              anchor: "last_spring_frost",
+              startOffsetDays: -28,
+              endOffsetDays: -14,
+            },
+            mappingMethod: "identity",
+          },
+          contextId: "context_example",
+          evidenceReferenceIds: [],
+          reviewId: "review_content_example",
+        },
+      ],
+      sourceAssertionDecisions: [
+        ...c4Dataset.sourceAssertionDecisions!,
+        {
+          id: "assertion_decision_cultivation_example",
+          sourceCandidateId: "candidate_cultivation_example",
+          draftManifestSha256:
+            "70ea61f87b9b8ca0ca5e272f1e5a0d2fb3afb63bdd88b15994e10e781239ac1a",
+          decision: "accept",
+          reason: "Accept the source-native action.",
+          reviewId: "review_content_example",
+          assertionId: "assertion_cultivation_example",
+          contextId: "context_example",
+          sourceAction: "direct_sow",
+          sourceTiming: {
+            anchor: "last_spring_frost",
+            startOffsetDays: -28,
+            endOffsetDays: -14,
+          },
+          mappingMethod: "identity",
+          projectionIntent: {
+            type: "cultivation-rule",
+            action: "direct_sow",
+            timing: {
+              type: "relative-day-window",
+              anchor: "last_spring_frost",
+              startOffsetDays: -28,
+              endOffsetDays: -14,
+            },
+          },
+        },
+      ],
+    };
+    expect(validateValidationDataset(cultivationDataset)).toEqual([]);
+    expect(
+      validateValidationDataset({
+        ...cultivationDataset,
+        sourceAssertionDecisions:
+          cultivationDataset.sourceAssertionDecisions.map((decision) =>
+            decision.id === "assertion_decision_cultivation_example"
+              ? {
+                  ...decision,
+                  sourceAction: "sow_or_transplant",
+                  mappingMethod: "normalized-source-timing",
+                }
+              : decision,
+          ),
+      }),
+    ).toContainEqual(
+      expect.objectContaining({ code: "INVALID_ACTION_MAPPING" }),
+    );
   });
 });

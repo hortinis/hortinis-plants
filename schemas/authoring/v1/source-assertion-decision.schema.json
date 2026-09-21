@@ -33,13 +33,37 @@
     "contextId": {
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
     },
+    "sourceAction": { "type": "string", "minLength": 1 },
+    "sourceTiming": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/jsonValue"
+    },
+    "mappingMethod": {
+      "enum": [
+        "identity",
+        "combined-action-preserved",
+        "normalized-source-timing"
+      ]
+    },
+    "deferralReason": {
+      "enum": [
+        "dynamic-plant-now",
+        "ambiguous-action",
+        "ambiguous-soil-temperature",
+        "missing-timing-anchor"
+      ]
+    },
     "projectionIntent": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["type", "action"],
+      "required": ["type", "action", "timing"],
       "properties": {
         "type": { "const": "cultivation-rule" },
-        "action": { "enum": ["harvest", "establish_outdoors"] }
+        "action": {
+          "$ref": "urn:hortinis:plants:schema:v1:cultivation-rule#/$defs/action"
+        },
+        "timing": {
+          "$ref": "urn:hortinis:plants:schema:v1:cultivation-rule#/$defs/timing"
+        }
       }
     },
     "supersedesDecisionId": {
@@ -62,6 +86,38 @@
           "contextId": false,
           "projectionIntent": false
         }
+      }
+    },
+    {
+      "if": {
+        "required": ["projectionIntent"]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "sourceAction": true,
+          "sourceTiming": true,
+          "mappingMethod": true,
+          "deferralReason": false
+        },
+        "required": ["sourceAction", "sourceTiming", "mappingMethod"]
+      }
+    },
+    {
+      "if": {
+        "required": ["deferralReason"]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "sourceAction": true,
+          "sourceTiming": true,
+          "decision": { "const": "defer" },
+          "projectionIntent": false,
+          "assertionId": false,
+          "contextId": false
+        },
+        "required": ["sourceAction", "sourceTiming"]
       }
     }
   ]

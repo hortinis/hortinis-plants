@@ -8,6 +8,7 @@ import {
   sourceRecordKey as serializedSourceRecordKey,
   type QualifiedSourceRecordKey,
 } from "../domain/source-keys.js";
+import { serializeCanonicalJson } from "../serialization/canonical-json.js";
 
 export interface DatasetValidationIssue {
   readonly code:
@@ -27,6 +28,9 @@ export interface DatasetValidationIssue {
     | "MULTIPLE_SUCCESSORS"
     | "INVALID_CALENDAR_VALUE"
     | "INVALID_VALUE_RANGE"
+    | "INVALID_ACTION_MAPPING"
+    | "INVALID_DECISION_PROJECTION"
+    | "INVALID_DEFERRAL"
     | "INVALID_TEMPERATURE_PROFILE"
     | "INVALID_GERMINATION_PROFILE";
   readonly recordId: string;
@@ -531,9 +535,15 @@ export function validateValidationDataset(
             recordId: id,
             message: `Accepted decision context ${contextId ?? "<missing>"} does not match assertion ${assertionId}`,
           });
+          checkDecisionProjection(record, assertion, id, issues);
+        } else {
+          checkDecisionProjection(record, assertion, id, issues);
         }
       }
       if (contextId !== undefined) missing(id, "contexts", contextId);
+    }
+    if (stringField(record, "deferralReason") !== undefined) {
+      checkDeferral(record, id, issues);
     }
   }
 
@@ -1173,6 +1183,11 @@ function checkFactValue(
   ) {
     checkRuleValue({ id, timing: value }, issues);
   }
+  if (predicate === "cultivation_window") {
+    const cultivation = asRecord(value);
+    checkRuleValue({ id, timing: cultivation?.timing }, issues);
+    checkActionMapping(cultivation, id, issues);
+  }
   if (
     predicate === "growing_temperature" &&
     !isValidTemperatureProfile(value)
@@ -1239,6 +1254,175 @@ function checkFactValue(
         message: "The value minimum exceeds its maximum.",
       });
     }
+  }
+}
+
+function checkActionMapping(
+  value: Record<string, unknown> | undefined,
+  id: string,
+  issues: DatasetValidationIssue[],
+): void {
+  if (value === undefined) return;
+  const sourceAction = stringField(value, "sourceAction");
+  const action = stringField(value, "action");
+  const mappingMethod = stringField(value, "mappingMethod");
+  if (sourceAction === undefined || action === undefined) return;
+  if (sourceAction === "plant_now") {
+    issues.push({
+      code: "INVALID_ACTION_MAPPING",
+      recordId: id,
+      message: "The dynamic plant_now action must remain deferred.",
+    });
+  } else if (
+    ["sow_or_transplant", "indoors_or_undercover"].includes(sourceAction) &&
+    !(
+      mappingMethod === "combined-action-preserved" &&
+      action === "establish_outdoors"
+    )
+  ) {
+    issues.push({
+      code: "INVALID_ACTION_MAPPING",
+      recordId: id,
+      message: `The ambiguous ${sourceAction} action cannot be narrowed automatically.`,
+    });
+  } else if (mappingMethod === "identity" && sourceAction !== action) {
+    issues.push({
+      code: "INVALID_ACTION_MAPPING",
+      recordId: id,
+      message: `Identity action mapping changes ${sourceAction} to ${action}.`,
+    });
+  } else if (
+    mappingMethod === "combined-action-preserved" &&
+    action !== "establish_outdoors"
+  ) {
+    issues.push({
+      code: "INVALID_ACTION_MAPPING",
+      recordId: id,
+      message:
+        "A combined sowing-or-transplant action may only map to establish_outdoors.",
+    });
+  }
+}
+
+function checkDecisionProjection(
+  decision: DatasetRecord,
+  assertion: DatasetRecord,
+  id: string,
+  issues: DatasetValidationIssue[],
+): void {
+  const projection = asRecord(decision.projectionIntent);
+  if (projection === undefined) return;
+  const value = asRecord(assertion.value);
+  const action = stringField(value, "action");
+  const projectionAction = stringField(projection, "action");
+  if (action !== projectionAction) {
+    issues.push({
+      code: "INVALID_DECISION_PROJECTION",
+      recordId: id,
+      message: `Projection action ${projectionAction ?? "<missing>"} does not match assertion action ${action ?? "<missing>"}.`,
+    });
+  }
+  if (!jsonEqual(projection.timing, value?.timing)) {
+    issues.push({
+      code: "INVALID_DECISION_PROJECTION",
+      recordId: id,
+      message:
+        "Projection timing does not match the authored assertion timing.",
+    });
+  }
+  const sourceAction = stringField(decision, "sourceAction");
+  const assertionSourceAction = stringField(value, "sourceAction");
+  if (sourceAction !== assertionSourceAction) {
+    issues.push({
+      code: "INVALID_DECISION_PROJECTION",
+      recordId: id,
+      message:
+        "Decision source action does not match the authored source action.",
+    });
+  }
+  if (!jsonEqual(decision.sourceTiming, value?.sourceTiming)) {
+    issues.push({
+      code: "INVALID_DECISION_PROJECTION",
+      recordId: id,
+      message:
+        "Decision source timing does not match the authored source timing.",
+    });
+  }
+  const mappingMethod = stringField(decision, "mappingMethod");
+  if (sourceAction === "plant_now") {
+    issues.push({
+      code: "INVALID_ACTION_MAPPING",
+      recordId: id,
+      message: "The dynamic plant_now action must remain deferred.",
+    });
+  } else if (
+    ["sow_or_transplant", "indoors_or_undercover"].includes(
+      sourceAction ?? "",
+    ) &&
+    !(
+      mappingMethod === "combined-action-preserved" &&
+      projectionAction === "establish_outdoors"
+    )
+  ) {
+    issues.push({
+      code: "INVALID_ACTION_MAPPING",
+      recordId: id,
+      message: `The ambiguous ${sourceAction} action cannot be narrowed automatically.`,
+    });
+  } else if (mappingMethod === "identity" && sourceAction !== action) {
+    issues.push({
+      code: "INVALID_ACTION_MAPPING",
+      recordId: id,
+      message: `Identity action mapping changes ${sourceAction ?? "<missing>"} to ${action ?? "<missing>"}.`,
+    });
+  } else if (
+    mappingMethod === "combined-action-preserved" &&
+    projectionAction !== "establish_outdoors"
+  ) {
+    issues.push({
+      code: "INVALID_ACTION_MAPPING",
+      recordId: id,
+      message:
+        "A combined sowing-or-transplant action may only map to establish_outdoors.",
+    });
+  }
+}
+
+function jsonEqual(left: unknown, right: unknown): boolean {
+  try {
+    const leftBytes = serializeCanonicalJson(left);
+    const rightBytes = serializeCanonicalJson(right);
+    return (
+      leftBytes.byteLength === rightBytes.byteLength &&
+      leftBytes.every((byte, index) => byte === rightBytes[index])
+    );
+  } catch {
+    return false;
+  }
+}
+
+function checkDeferral(
+  decision: DatasetRecord,
+  id: string,
+  issues: DatasetValidationIssue[],
+): void {
+  const reason = stringField(decision, "deferralReason");
+  const sourceAction = stringField(decision, "sourceAction");
+  if (reason === "dynamic-plant-now" && sourceAction !== "plant_now") {
+    issues.push({
+      code: "INVALID_DEFERRAL",
+      recordId: id,
+      message:
+        "The dynamic-plant-now deferral reason requires the plant_now source action.",
+    });
+  }
+  if (reason === "ambiguous-action" && sourceAction === "plant_now") {
+    issues.push({
+      code: "INVALID_DEFERRAL",
+      recordId: id,
+      message:
+        "The plant_now source action must use the dynamic-plant-now deferral reason.",
+    });
   }
 }
 

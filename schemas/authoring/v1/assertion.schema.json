@@ -95,17 +95,29 @@
           "value": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["action", "timing"],
+            "required": [
+              "action",
+              "timing",
+              "sourceAction",
+              "sourceTiming",
+              "mappingMethod"
+            ],
             "properties": {
-              "action": { "enum": ["harvest", "establish_outdoors"] },
+              "action": {
+                "$ref": "urn:hortinis:plants:schema:v1:cultivation-rule#/$defs/action"
+              },
               "timing": {
-                "oneOf": [
-                  {
-                    "$ref": "urn:hortinis:plants:schema:v1:cultivation-rule#/$defs/calendarMonthWindow"
-                  },
-                  {
-                    "$ref": "urn:hortinis:plants:schema:v1:cultivation-rule#/$defs/calendarDateWindow"
-                  }
+                "$ref": "urn:hortinis:plants:schema:v1:cultivation-rule#/$defs/timing"
+              },
+              "sourceAction": { "type": "string", "minLength": 1 },
+              "sourceTiming": {
+                "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/jsonValue"
+              },
+              "mappingMethod": {
+                "enum": [
+                  "identity",
+                  "combined-action-preserved",
+                  "normalized-source-timing"
                 ]
               }
             }

@@ -8,7 +8,10 @@
       "type": "calendar-date-window",
       "start": { "month": 5, "day": 15 },
       "end": { "month": 6, "day": 16 }
-    }
+    },
+    "sourceAction": "outdoor_sowing_or_planting",
+    "sourceTiming": { "start": "05-15", "end": "06-16" },
+    "mappingMethod": "combined-action-preserved"
   },
   "contextId": "context-italy-outdoor-establishment",
   "evidenceReferenceIds": ["evidence-grow-calendar-1"],

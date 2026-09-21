@@ -27,6 +27,23 @@
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
     },
     "action": {
+      "$ref": "#/$defs/action"
+    },
+    "timing": {
+      "$ref": "#/$defs/timing"
+    },
+    "supersedesRuleIds": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/optionalIdentifierList"
+    },
+    "evidenceReferenceIds": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/identifierList"
+    },
+    "reviewId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    }
+  },
+  "$defs": {
+    "action": {
       "type": "string",
       "enum": [
         "start_indoors",
@@ -46,17 +63,6 @@
         { "$ref": "#/$defs/growingDegreeDayThreshold" }
       ]
     },
-    "supersedesRuleIds": {
-      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/optionalIdentifierList"
-    },
-    "evidenceReferenceIds": {
-      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/identifierList"
-    },
-    "reviewId": {
-      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
-    }
-  },
-  "$defs": {
     "monthDay": {
       "type": "object",
       "additionalProperties": false,

@@ -576,6 +576,42 @@
       }
     },
     {
+      "id": "authoring-cultivation-start-indoors-valid",
+      "schemaId": "urn:hortinis:plants:schema:authoring:v1:assertion",
+      "fixture": "authoring-cultivation-start-indoors-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "authoring-cultivation-direct-sow-valid",
+      "schemaId": "urn:hortinis:plants:schema:authoring:v1:assertion",
+      "fixture": "authoring-cultivation-direct-sow-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "authoring-cultivation-transplant-valid",
+      "schemaId": "urn:hortinis:plants:schema:authoring:v1:assertion",
+      "fixture": "authoring-cultivation-transplant-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "authoring-cultivation-plant-valid",
+      "schemaId": "urn:hortinis:plants:schema:authoring:v1:assertion",
+      "fixture": "authoring-cultivation-plant-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "authoring-cultivation-harvest-valid",
+      "schemaId": "urn:hortinis:plants:schema:authoring:v1:assertion",
+      "fixture": "authoring-cultivation-harvest-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "authoring-cultivation-establish-outdoors-valid",
+      "schemaId": "urn:hortinis:plants:schema:authoring:v1:assertion",
+      "fixture": "authoring-cultivation-establish-outdoors-valid.json",
+      "expected": { "valid": true }
+    },
+    {
       "id": "importer-run-manifest-valid",
       "schemaId": "urn:hortinis:plants:schema:v1:importer-run-manifest",
       "fixture": "importer-run-manifest-valid.json",
@@ -679,6 +715,12 @@
         "valid": false,
         "errors": [{ "instancePath": "/decision", "keyword": "enum" }]
       }
+    },
+    {
+      "id": "authoring-source-assertion-decision-deferred-valid",
+      "schemaId": "urn:hortinis:plants:schema:authoring:v1:source-assertion-decision",
+      "fixture": "authoring-source-assertion-decision-deferred-valid.json",
+      "expected": { "valid": true }
     },
     {
       "id": "catalog-taxonomic-name-valid",

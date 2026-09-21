@@ -101,7 +101,7 @@ Dependencies: T2–T3.
 Acceptance: one manifest describes GROW, CropGraph, WFO and TAXREF inputs; output and input roles are unique;
 changed bytes change the fingerprint.
 
-### T5 — Extend authored actions and timing in V1
+### T5 — Extend authored actions and timing in V1 (`validated`)
 
 Extend the authoring assertion and decision schemas to represent CropGraph actions and typed timing. Use the
 existing catalog action vocabulary (`start_indoors`, `direct_sow`, `transplant`, `plant`, `harvest`,

@@ -24,6 +24,11 @@ Timing is one of five explicitly typed forms:
 - `growing-degree-day-threshold`: threshold in `Cel.d`, explicit base temperature in `Cel`, fixed
   `daily-mean` method and stated accumulation anchor.
 
+Authored action decisions retain the source action and timing before projection. A source-native action is
+mapped by an explicit method, and the projection must retain the typed timing exactly. `plant_now`,
+ambiguous soil-temperature meaning and harvest durations without an anchor are not narrowed into a rule;
+they remain deferred.
+
 Calendar-month and calendar-date windows remain different values. Start/end order may describe a window
 crossing year-end. Validation must reject impossible month/day pairs (including February 30), even though
 JSON Schema alone checks only the individual month and day ranges. GDD method is not guessed from a source;

@@ -1,0 +1,24 @@
+{
+  "id": "assertion-cultivation-direct-sow",
+  "subject": { "type": "plant-concept", "id": "plant-bean" },
+  "predicate": "cultivation_window",
+  "value": {
+    "action": "direct_sow",
+    "timing": {
+      "type": "relative-day-window",
+      "anchor": "last_spring_frost",
+      "startOffsetDays": -28,
+      "endOffsetDays": -14
+    },
+    "sourceAction": "direct_sow",
+    "sourceTiming": {
+      "anchor": "last_spring_frost",
+      "startOffsetDays": -28,
+      "endOffsetDays": -14
+    },
+    "mappingMethod": "identity"
+  },
+  "contextId": "context-outdoor",
+  "evidenceReferenceIds": ["evidence-cultivation-direct-sow"],
+  "reviewId": "review-cultivation"
+}

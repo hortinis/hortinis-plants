@@ -1,0 +1,19 @@
+{
+  "id": "assertion-cultivation-plant",
+  "subject": { "type": "plant-concept", "id": "plant-potato" },
+  "predicate": "cultivation_window",
+  "value": {
+    "action": "plant",
+    "timing": {
+      "type": "soil-temperature-threshold",
+      "operator": "at-least",
+      "temperature": { "value": 10, "unit": "Cel" }
+    },
+    "sourceAction": "plant",
+    "sourceTiming": { "soilTemperature": 10, "unit": "C" },
+    "mappingMethod": "normalized-source-timing"
+  },
+  "contextId": "context-outdoor",
+  "evidenceReferenceIds": ["evidence-cultivation-plant"],
+  "reviewId": "review-cultivation"
+}

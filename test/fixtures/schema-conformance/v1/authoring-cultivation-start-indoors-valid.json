@@ -1,0 +1,19 @@
+{
+  "id": "assertion-cultivation-start-indoors",
+  "subject": { "type": "plant-concept", "id": "plant-tomato" },
+  "predicate": "cultivation_window",
+  "value": {
+    "action": "start_indoors",
+    "timing": {
+      "type": "calendar-month-window",
+      "startMonth": 1,
+      "endMonth": 3
+    },
+    "sourceAction": "start_indoors",
+    "sourceTiming": { "startMonth": 1, "endMonth": 3 },
+    "mappingMethod": "identity"
+  },
+  "contextId": "context-outdoor",
+  "evidenceReferenceIds": ["evidence-cultivation-start-indoors"],
+  "reviewId": "review-cultivation"
+}

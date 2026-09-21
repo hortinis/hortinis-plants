@@ -1,0 +1,21 @@
+{
+  "id": "assertion-cultivation-harvest",
+  "subject": { "type": "plant-concept", "id": "plant-tomato" },
+  "predicate": "cultivation_window",
+  "value": {
+    "action": "harvest",
+    "timing": {
+      "type": "growing-degree-day-threshold",
+      "threshold": { "value": 1200, "unit": "Cel.d" },
+      "baseTemperature": { "value": 10, "unit": "Cel" },
+      "method": "daily-mean",
+      "accumulationAnchor": "transplanting"
+    },
+    "sourceAction": "harvest",
+    "sourceTiming": { "gdd": 1200, "baseTemperature": 10 },
+    "mappingMethod": "normalized-source-timing"
+  },
+  "contextId": "context-outdoor",
+  "evidenceReferenceIds": ["evidence-cultivation-harvest"],
+  "reviewId": "review-cultivation"
+}

@@ -30,6 +30,11 @@ claims until the source and context support one explicit catalog action. In part
 units. Qualitative values remain qualitative when conversion is not defensible. Never infer a range from a
 category or fill a missing bound.
 
+Action-bearing `cultivation_window` assertions use the catalog action vocabulary and may retain the source
+action, source timing and mapping method alongside the typed value. `identity` mappings must preserve the
+source action; a combined sowing-or-transplant claim may only map to `establish_outdoors`. Dynamic
+`plant_now`, ambiguous actions and unanchored timing remain deferred decisions.
+
 ## Temperature profiles
 
 Temperature values use Celsius (`Cel`) and include only source-supported members:
