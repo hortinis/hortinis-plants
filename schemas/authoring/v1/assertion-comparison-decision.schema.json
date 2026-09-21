@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:authoring:v1:assertion-comparison-decision",
+  "title": "Reviewed decision for a source assertion comparison",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "comparisonId",
+    "draftManifestSha256",
+    "decision",
+    "reason",
+    "reviewId"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "comparisonId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "draftManifestSha256": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/sha256"
+    },
+    "decision": {
+      "enum": ["prefer-assertion", "retain-both", "defer"]
+    },
+    "reason": { "type": "string", "minLength": 1 },
+    "reviewId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "preferredAssertion": { "$ref": "#/$defs/assertionReference" },
+    "supersedesDecisionId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    }
+  },
+  "$defs": {
+    "assertionReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidateId", "sourceClaimKey"],
+      "properties": {
+        "candidateId": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+        },
+        "sourceClaimKey": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/semanticSubrecordKey"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "decision": { "const": "prefer-assertion" } },
+        "required": ["decision"]
+      },
+      "then": {
+        "required": ["preferredAssertion"],
+        "properties": { "preferredAssertion": true }
+      },
+      "else": {
+        "not": { "required": ["preferredAssertion"] },
+        "properties": { "preferredAssertion": true }
+      }
+    }
+  ]
+}

@@ -4,6 +4,16 @@ An authored assertion is one claim about one subject in one context. It has a st
 explicit value, context ID, evidence-reference IDs and a content-review ID. Assertions belong to
 `schemas/authoring/v1`; they are curation inputs, not the consumer projection schema.
 
+Generated assertion comparisons preserve two source assertion candidates as separate qualified claims. A
+comparison records only `agreement`, `conflict` or `not-comparable`; it never stores an averaged or otherwise
+resolved value. Candidate order is canonicalized by the qualified semantic source key, so the result cannot
+depend on whether GROW or CropGraph was supplied first. Calendar dates and frost-relative windows may therefore
+remain `not-comparable` without converting either source claim.
+
+A comparison decision is a separate reviewed authoring record. `prefer-assertion` identifies one exact qualified
+candidate, while `retain-both` and `defer` contain no implicit preference. Source priority is never inferred from
+the comparison or from input ordering.
+
 Each evidence reference preserves its source ID, pinned source-manifest ID, source release, source record,
 locator, rights decision, licence reference and separate rights-review reference. If a value was normalized,
 the original source value and normalization method are retained. The authored assertion's review ID points

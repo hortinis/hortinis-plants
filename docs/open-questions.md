@@ -66,5 +66,6 @@ implementation sequence. The previous two-backbone and schema-version questions 
   infer meanings during import.
 - **planned — Geographic transfer and modifiers:** do not convert North American frost data into French dates;
   preserve source-relative rules and require explicit review for applicability and base/modifier selection.
-- **planned — Comparisons and completion:** preserve agreement, conflict and non-comparability; require an
-  explicit preferred assertion or deferral; do not average values or apply source priority implicitly.
+- **validated — Comparison contract:** preserve agreement, conflict and non-comparability; require an explicit
+  preferred assertion, retain-both decision or deferral; do not average values or apply source priority
+  implicitly. Packet matching and completion coverage remain planned for T16 and T19.

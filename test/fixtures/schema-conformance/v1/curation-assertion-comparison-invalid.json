@@ -1,0 +1,24 @@
+{
+  "id": "comparison-invalid",
+  "reviewState": "unreviewed",
+  "outcome": "conflict",
+  "candidates": [
+    {
+      "candidateId": "candidate-1",
+      "sourceClaimKey": {
+        "sourceRecordKey": {
+          "source": {
+            "sourceId": "source_grow",
+            "sourceManifestId": "source_manifest_grow_2020",
+            "sourceReleaseId": "2020"
+          },
+          "recordId": "1"
+        },
+        "path": [{ "kind": "claim", "id": "1" }]
+      },
+      "sourceClaim": { "predicate": "sowing_window" }
+    }
+  ],
+  "resolvedValue": "average",
+  "reason": "The comparison must preserve both claims."
+}

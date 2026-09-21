@@ -1,0 +1,55 @@
+{
+  "id": "comparison-tomato-sowing",
+  "reviewState": "unreviewed",
+  "outcome": "not-comparable",
+  "candidates": [
+    {
+      "candidateId": "candidate-cropgraph-tomato-1",
+      "sourceClaimKey": {
+        "sourceRecordKey": {
+          "source": {
+            "sourceId": "source_cropgraph",
+            "sourceManifestId": "source_manifest_cropgraph",
+            "sourceReleaseId": "e722c3415bcf2773277f3422e13a4de5efd29b48"
+          },
+          "recordId": "tomato-1"
+        },
+        "path": [{ "kind": "cultivation-window", "id": "direct-sow" }]
+      },
+      "sourceClaim": {
+        "predicate": "sowing_window",
+        "action": "direct_sow",
+        "timing": {
+          "type": "relative-day-window",
+          "anchor": "last_spring_frost",
+          "startOffsetDays": -42,
+          "endOffsetDays": -14
+        }
+      }
+    },
+    {
+      "candidateId": "candidate-grow-tomato-1",
+      "sourceClaimKey": {
+        "sourceRecordKey": {
+          "source": {
+            "sourceId": "source_grow",
+            "sourceManifestId": "source_manifest_grow_2020",
+            "sourceReleaseId": "2020"
+          },
+          "recordId": "1"
+        },
+        "path": [{ "kind": "cultivation-window", "id": "sowing" }]
+      },
+      "sourceClaim": {
+        "predicate": "sowing_window",
+        "action": "direct_sow",
+        "timing": {
+          "type": "calendar-date-window",
+          "start": { "month": 3, "day": 15 },
+          "end": { "month": 4, "day": 15 }
+        }
+      }
+    }
+  ],
+  "reason": "The claims use different timing anchors and cannot be compared without an explicit frost-date model."
+}

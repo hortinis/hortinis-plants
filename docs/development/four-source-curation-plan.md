@@ -115,7 +115,7 @@ Dependencies: T1.
 Acceptance: positive and negative fixtures cover every supported action, negative frost offsets, ambiguous
 actions and invalid narrowing.
 
-### T6 — Add assertion comparison contracts
+### T6 — Add assertion comparison contracts (`validated`)
 
 Add generated comparison records for `agreement`, `conflict` and `not-comparable`, plus reviewed decisions for
 an explicit preferred assertion, retain-both or defer. Every comparison references qualified candidates and

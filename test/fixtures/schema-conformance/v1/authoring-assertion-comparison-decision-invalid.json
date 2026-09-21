@@ -1,0 +1,22 @@
+{
+  "id": "comparison-decision-invalid",
+  "comparisonId": "comparison-tomato-sowing",
+  "draftManifestSha256": "70ea61f87b9b8ca0ca5e272f1e5a0d2fb3afb63bdd88b15994e10e781239ac1a",
+  "decision": "retain-both",
+  "reason": "Both source assertions are retained.",
+  "reviewId": "review-comparison-tomato-sowing",
+  "preferredAssertion": {
+    "candidateId": "candidate-grow-tomato-1",
+    "sourceClaimKey": {
+      "sourceRecordKey": {
+        "source": {
+          "sourceId": "source_grow",
+          "sourceManifestId": "source_manifest_grow_2020",
+          "sourceReleaseId": "2020"
+        },
+        "recordId": "1"
+      },
+      "path": [{ "kind": "cultivation-window", "id": "sowing" }]
+    }
+  }
+}

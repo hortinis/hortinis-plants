@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:curation:v1:assertion-comparison",
+  "title": "Generated comparison of two source assertion candidates",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "reviewState", "outcome", "candidates", "reason"],
+  "properties": {
+    "id": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "reviewState": { "const": "unreviewed" },
+    "outcome": {
+      "enum": ["agreement", "conflict", "not-comparable"]
+    },
+    "candidates": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": { "$ref": "#/$defs/candidate" }
+    },
+    "reason": { "type": "string", "minLength": 1 }
+  },
+  "$defs": {
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidateId", "sourceClaimKey", "sourceClaim"],
+      "properties": {
+        "candidateId": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+        },
+        "sourceClaimKey": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/semanticSubrecordKey"
+        },
+        "sourceClaim": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": true
+        }
+      }
+    }
+  }
+}
