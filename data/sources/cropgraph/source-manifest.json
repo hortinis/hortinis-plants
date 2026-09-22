@@ -1,0 +1,67 @@
+{
+  "id": "source_manifest_cropgraph",
+  "provider": {
+    "id": "provider_cropgraph",
+    "name": "CropGraph"
+  },
+  "release": {
+    "identifier": "e722c3415bcf2773277f3422e13a4de5efd29b48",
+    "publishedAt": "2026-08-06"
+  },
+  "resources": [
+    {
+      "locator": "packages/core/src/data/crop-calendar.json",
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "09fc2f3f56143593578e64007756bce51cf6824ae3b3a265e7242970fb508fb7"
+      },
+      "byteSize": 4293185,
+      "mediaType": "application/json"
+    },
+    {
+      "locator": "packages/core/src/data/crop-calendar.schema.json",
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "e1a478533f4157863870e73bdd66490ee429fa22a8d366fcf70a7ce844abfc30"
+      },
+      "byteSize": 10474,
+      "mediaType": "application/schema+json"
+    },
+    {
+      "locator": "LICENSE",
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "106c59eefa7f30840e255d4157a174ec17b9e540f2473d9e37faf350006a75b5"
+      },
+      "byteSize": 1074,
+      "mediaType": "text/plain"
+    },
+    {
+      "locator": "packages/core/README.md",
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "67b1954c71a27fda8f4aba8bcae5465e7d00f7131dace3aa00fc4dc4bdf0c62a"
+      },
+      "byteSize": 7964,
+      "mediaType": "text/markdown"
+    }
+  ],
+  "licenceReview": {
+    "status": "unreviewed",
+    "declaredLicence": "CC-BY-4.0",
+    "evidenceLocator": "https://github.com/cropgraph/cropgraph/blob/e722c3415bcf2773277f3422e13a4de5efd29b48/packages/core/src/data/crop-calendar.json",
+    "notes": "The calendar file declares CC-BY-4.0. The repository LICENSE and package README declare MIT for software. Neither declaration proves rights in the publications, catalogs, yearbooks and other upstream material named by entry source strings, so commercial eligibility remains pending per-entry review."
+  },
+  "profileEligibility": [
+    {
+      "profile": "commercial",
+      "decision": "pending-review",
+      "reason": "The calendar declares CC-BY-4.0, but effective per-entry citations have not been checked for support and commercial redistribution rights."
+    },
+    {
+      "profile": "dev-validation",
+      "decision": "eligible",
+      "reason": "The exact pinned bytes may be staged as candidate evidence for development and review; this decision does not authorize publication in a commercial release."
+    }
+  ]
+}

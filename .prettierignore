@@ -3,6 +3,7 @@ dist/
 .cache/source-inputs/
 .cache/import-runs/
 data/sources/grow/releases/
+data/sources/cropgraph/releases/
 artifacts/releases/
 coverage/
 *.tsbuildinfo

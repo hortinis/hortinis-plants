@@ -58,9 +58,11 @@ implementation sequence. The previous two-backbone and schema-version questions 
   TAXREF is primarily a French localization and territory/status enrichment source.
 - **validated — Contract evolution:** update the existing V1 contracts in place; do not create a V2 schema or
   permanent legacy-compatibility branch while the project remains in development.
-- **planned — Source pins and cohort:** verify TAXREF archive members, rights evidence and checksums; confirm
-  the inspected CropGraph commit; freeze the selected CropGraph cohort with explicit exclusions and a
-  fingerprint.
+- **validated — CropGraph source pin:** commit `e722c3415bcf2773277f3422e13a4de5efd29b48`, its calendar,
+  matching schema and licence evidence are pinned with exact checksums. Code and data licence scopes remain
+  distinct; the calendar is pending assertion-level rights review for commercial use.
+- **planned — TAXREF pin and CropGraph cohort:** verify TAXREF archive members, rights evidence and checksums;
+  freeze the selected CropGraph cohort with explicit record exclusions and a fingerprint.
 - **planned — CropGraph semantics:** preserve ambiguous soil-temperature meaning, greenhouse context,
   `plant_now`, unknown name languages and harvest-duration anchors as candidates or deferred decisions. Do not
   infer meanings during import.

@@ -1,0 +1,9 @@
+{
+  "id": "licence_cropgraph_data_declared_cc_by_4_0",
+  "name": "CropGraph calendar declared Creative Commons Attribution 4.0 International",
+  "expression": "CC-BY-4.0",
+  "referenceLocator": "https://github.com/cropgraph/cropgraph/blob/e722c3415bcf2773277f3422e13a4de5efd29b48/packages/core/src/data/crop-calendar.json",
+  "commercialUse": "unknown",
+  "attributionRequired": true,
+  "requiredNotice": "CropGraph crop-calendar data at commit e722c3415bcf2773277f3422e13a4de5efd29b48 declares CC BY 4.0. Adapted by Hortinis. Inclusion in a commercial release additionally requires review of the effective per-entry citation."
+}

@@ -140,7 +140,7 @@ Dependencies: T3–T6.
 Acceptance: the tracked dataset validates after migration; the populated fixture preserves every authored ID
 and link; no collection is reset or silently omitted.
 
-### T8 — Pin and document CropGraph
+### T8 — Pin and document CropGraph (`validated`)
 
 Create CropGraph source, licence, manifest and README metadata. Pin commit `e722c3415bcf2773277f3422e13a4de5efd29b48`,
 record exact resources, checksums, citations, bibliography inheritance and exclusions, and keep code and data
