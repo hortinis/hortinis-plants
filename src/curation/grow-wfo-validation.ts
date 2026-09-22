@@ -142,6 +142,8 @@ const collectionSchemaIds: Readonly<Record<string, string>> = {
     "urn:hortinis:plants:schema:authoring:v1:source-geography-decision",
   "source-assertion-decisions":
     "urn:hortinis:plants:schema:authoring:v1:source-assertion-decision",
+  "assertion-comparison-decisions":
+    "urn:hortinis:plants:schema:authoring:v1:assertion-comparison-decision",
   assertions: "urn:hortinis:plants:schema:authoring:v1:assertion",
   "curation-issues": "urn:hortinis:plants:schema:authoring:v1:curation-issue",
   "plant-facts": "urn:hortinis:plants:schema:v1:plant-fact",
@@ -197,6 +199,7 @@ const roleToDatasetField: Readonly<Record<string, keyof ValidationDataset>> = {
   "source-subject-mappings": "sourceSubjectMappings",
   "source-geography-decisions": "sourceGeographyDecisions",
   "source-assertion-decisions": "sourceAssertionDecisions",
+  "assertion-comparison-decisions": "assertionComparisonDecisions",
   assertions: "assertions",
   "curation-issues": "curationIssues",
   "plant-facts": "facts",
@@ -393,6 +396,8 @@ export async function validateGrowWfoDataset(
         recordsByField.get("sourceGeographyDecisions") ?? [],
       sourceAssertionDecisions:
         recordsByField.get("sourceAssertionDecisions") ?? [],
+      assertionComparisonDecisions:
+        recordsByField.get("assertionComparisonDecisions") ?? [],
       sources: dependencyRecords.sources,
       licences: dependencyRecords.licences,
       sourceManifestIds: dependencyRecords.sourceManifestIds,

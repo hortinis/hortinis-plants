@@ -55,3 +55,6 @@ After review, record decisions in the JSON Lines collections named by `dataset-m
 outcome, review status and supersession are separate: the newer record links to the older record it
 supersedes. Do not copy generated queue records into those collections as accepted decisions without the
 required review, source locator, rights, and scope checks.
+
+`assertion-comparison-decisions.jsonl` holds reviewed choices between generated source-assertion comparisons.
+It remains empty until a later comparison packet is explicitly reviewed.

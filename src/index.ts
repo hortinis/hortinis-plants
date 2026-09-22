@@ -50,6 +50,11 @@ export type {
   LoadedCurationDataset,
   RecordLocation,
 } from "./curation/grow-wfo-validation.js";
+export { migrateV1AuthoringDataset } from "./curation/migrate-v1-authoring-dataset.js";
+export type {
+  V1AuthoringMigrationOptions,
+  V1AuthoringMigrationResult,
+} from "./curation/migrate-v1-authoring-dataset.js";
 export { generateGrowWfoDrafts } from "./curation/grow-wfo-drafts.js";
 export {
   createWfoLookupProposal,

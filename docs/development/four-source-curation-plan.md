@@ -126,7 +126,7 @@ Dependencies: T2 and T5.
 Acceptance: absolute dates and frost-relative windows can be non-comparable; a preference references a specific
 assertion; source ordering cannot affect the result.
 
-### T7 — Migrate the current V1 authoring dataset
+### T7 — Migrate the current V1 authoring dataset (`validated`)
 
 Apply the generalized V1 manifest and collection layout in place. Add new empty collections where required and
 preserve existing IDs, reviews, supersession links and file paths. Do not add a permanent V2 reader or legacy

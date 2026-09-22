@@ -4,7 +4,14 @@
   "title": "Reviewed source record to catalog subject mapping",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "sourceLocator", "decision", "reason", "reviewId"],
+  "required": [
+    "id",
+    "sourceRecordKey",
+    "sourceLocator",
+    "decision",
+    "reason",
+    "reviewId"
+  ],
   "properties": {
     "id": {
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
@@ -12,14 +19,6 @@
     "sourceRecordKey": {
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/qualifiedSourceRecordKey"
     },
-    "sourceId": {
-      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
-    },
-    "sourceManifestId": {
-      "$ref": "urn:hortinis:plants:schema:v1:source-manifest#/$defs/sourceManifestId"
-    },
-    "sourceReleaseId": { "type": "string", "minLength": 1 },
-    "sourceRecordId": { "type": "string", "minLength": 1 },
     "sourceLocator": { "type": "string", "minLength": 1 },
     "decision": { "enum": ["map", "reject", "defer"] },
     "subject": {
@@ -45,28 +44,6 @@
     }
   },
   "allOf": [
-    {
-      "anyOf": [
-        {
-          "required": ["sourceRecordKey"],
-          "properties": { "sourceRecordKey": true }
-        },
-        {
-          "required": [
-            "sourceId",
-            "sourceManifestId",
-            "sourceReleaseId",
-            "sourceRecordId"
-          ],
-          "properties": {
-            "sourceId": true,
-            "sourceManifestId": true,
-            "sourceReleaseId": true,
-            "sourceRecordId": true
-          }
-        }
-      ]
-    },
     {
       "if": {
         "properties": { "decision": { "const": "map" } },

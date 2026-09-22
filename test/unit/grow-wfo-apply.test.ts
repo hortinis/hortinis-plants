@@ -216,10 +216,14 @@ describe("GROW/WFO transactional decision application", () => {
                   collection: "source-name-decisions",
                   value: {
                     id: "decision-lineage",
-                    sourceId: "source_grow_edible_plant_database",
-                    sourceManifestId: "source_manifest_grow_epd_2020",
-                    sourceReleaseId: "doi:10.15132/10000157",
-                    sourceRecordId: "1",
+                    sourceRecordKey: {
+                      source: {
+                        sourceId: "source_grow_edible_plant_database",
+                        sourceManifestId: "source_manifest_grow_epd_2020",
+                        sourceReleaseId: "doi:10.15132/10000157",
+                      },
+                      recordId: "1",
+                    },
                     sourceName: "Wrong name",
                     sourceLocator:
                       "plant1.accdb#table=Edible%20plants&record.ID=1",
@@ -277,10 +281,14 @@ describe("GROW/WFO transactional decision application", () => {
                   collection: "source-subject-mappings",
                   value: {
                     id: "mapping-subject-lineage",
-                    sourceId: "source_grow_edible_plant_database",
-                    sourceManifestId: "source_manifest_grow_epd_2020",
-                    sourceReleaseId: "doi:10.15132/10000157",
-                    sourceRecordId: "1",
+                    sourceRecordKey: {
+                      source: {
+                        sourceId: "source_grow_edible_plant_database",
+                        sourceManifestId: "source_manifest_grow_epd_2020",
+                        sourceReleaseId: "doi:10.15132/10000157",
+                      },
+                      recordId: "1",
+                    },
                     sourceLocator: "wrong-locator",
                     decision: "reject",
                     reason: "Test subject lineage rejection",

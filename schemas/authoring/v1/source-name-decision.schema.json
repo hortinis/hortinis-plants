@@ -6,6 +6,7 @@
   "additionalProperties": false,
   "required": [
     "id",
+    "sourceRecordKey",
     "sourceName",
     "sourceLocator",
     "decision",
@@ -19,14 +20,6 @@
     "sourceRecordKey": {
       "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/qualifiedSourceRecordKey"
     },
-    "sourceId": {
-      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
-    },
-    "sourceManifestId": {
-      "$ref": "urn:hortinis:plants:schema:v1:source-manifest#/$defs/sourceManifestId"
-    },
-    "sourceReleaseId": { "type": "string", "minLength": 1 },
-    "sourceRecordId": { "type": "string", "minLength": 1 },
     "sourceName": { "type": "string", "minLength": 1 },
     "sourceLocator": { "type": "string", "minLength": 1 },
     "decision": {
@@ -52,28 +45,6 @@
     }
   },
   "allOf": [
-    {
-      "anyOf": [
-        {
-          "required": ["sourceRecordKey"],
-          "properties": { "sourceRecordKey": true }
-        },
-        {
-          "required": [
-            "sourceId",
-            "sourceManifestId",
-            "sourceReleaseId",
-            "sourceRecordId"
-          ],
-          "properties": {
-            "sourceId": true,
-            "sourceManifestId": true,
-            "sourceReleaseId": true,
-            "sourceRecordId": true
-          }
-        }
-      ]
-    },
     {
       "if": {
         "properties": {

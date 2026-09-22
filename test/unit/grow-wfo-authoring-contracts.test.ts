@@ -64,6 +64,10 @@ const expectedCollections: Readonly<Record<string, readonly [string, string]>> =
       "source-assertion-decisions.jsonl",
       "urn:hortinis:plants:schema:authoring:v1:source-assertion-decision",
     ],
+    "assertion-comparison-decisions": [
+      "assertion-comparison-decisions.jsonl",
+      "urn:hortinis:plants:schema:authoring:v1:assertion-comparison-decision",
+    ],
     assertions: [
       "assertions.jsonl",
       "urn:hortinis:plants:schema:authoring:v1:assertion",
@@ -104,8 +108,8 @@ describe("GROW/WFO C4 authoring contracts", () => {
 
     const roles = manifest.collections.map(({ role }) => role);
     const paths = manifest.collections.map(({ path }) => path);
-    expect(new Set(roles).size).toBe(17);
-    expect(new Set(paths).size).toBe(17);
+    expect(new Set(roles).size).toBe(18);
+    expect(new Set(paths).size).toBe(18);
     expect(
       Object.fromEntries(
         manifest.collections.map(({ role, path, schemaId }) => [

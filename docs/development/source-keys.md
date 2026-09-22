@@ -18,6 +18,10 @@ same nested `source` release key and a semantic `locationId`; locations are rele
 may apply to many source records. A semantic subrecord key adds an ordered path of typed semantic parts such as a
 source field, cultivation window or nested claim.
 
+Tracked authoring records use the nested keys exclusively. The pre-T7 flat source fields were migrated in place;
+they are not accepted by the authoring schemas. Raw importer records may retain their own source-native shape
+until an adapter emits a qualified key.
+
 Keys are serialized canonically for map lookups and generated identifiers. Array positions and file paths are never
 key components. Equal local IDs from different sources therefore coexist, while duplicate complete keys are
 rejected by coverage and dataset validation.

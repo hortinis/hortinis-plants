@@ -1,0 +1,168 @@
+{
+  "taxa": [],
+  "plant-concepts": [
+    {
+      "id": "plant_fixture",
+      "status": "active",
+      "evidenceReferenceIds": ["evidence_fixture"]
+    }
+  ],
+  "geographic-contexts": [
+    {
+      "id": "geography_fixture",
+      "status": "active",
+      "kind": "administrative-area",
+      "name": "Fixture country",
+      "evidenceReferenceIds": ["evidence_fixture"]
+    }
+  ],
+  "cultivation-contexts": [
+    {
+      "id": "context_fixture",
+      "geographicScope": {
+        "type": "specified",
+        "geographicContextIds": ["geography_fixture"]
+      },
+      "growingSystem": "outdoor",
+      "propagation": "unknown"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "review_content_fixture",
+      "purpose": "content",
+      "status": "accepted",
+      "reviewedAt": "2026-09-22T00:00:00Z",
+      "reviewerId": "curator_fixture"
+    },
+    {
+      "id": "review_rights_fixture",
+      "purpose": "rights",
+      "status": "accepted",
+      "reviewedAt": "2026-09-22T00:00:00Z",
+      "reviewerId": "curator_fixture"
+    }
+  ],
+  "evidence-references": [
+    {
+      "id": "evidence_fixture",
+      "sourceId": "source_grow_edible_plant_database",
+      "sourceManifestId": "source_manifest_grow_epd_2020",
+      "sourceReleaseId": "doi:10.15132/10000157",
+      "sourceRecordId": "1",
+      "locator": "fixture://grow/1",
+      "rights": {
+        "licenceId": "licence_cc_by_4_0",
+        "decision": "eligible",
+        "reason": "Fixture rights decision.",
+        "reviewId": "review_rights_fixture"
+      }
+    }
+  ],
+  "assertions": [
+    {
+      "id": "assertion_fixture",
+      "subject": { "type": "plant-concept", "id": "plant_fixture" },
+      "predicate": "frost_sensitivity",
+      "value": "hardy",
+      "contextId": "context_fixture",
+      "evidenceReferenceIds": ["evidence_fixture"],
+      "reviewId": "review_content_fixture"
+    }
+  ],
+  "source-name-decisions": [
+    {
+      "id": "name_decision_old",
+      "sourceId": "source_grow_edible_plant_database",
+      "sourceManifestId": "source_manifest_grow_epd_2020",
+      "sourceReleaseId": "doi:10.15132/10000157",
+      "sourceRecordId": "1",
+      "sourceName": "Fixturea officinalis",
+      "sourceLocator": "fixture://grow/1",
+      "decision": "not-taxonomic",
+      "reason": "Retained as an earlier reviewed interpretation.",
+      "reviewId": "review_content_fixture"
+    },
+    {
+      "id": "name_decision_current",
+      "sourceId": "source_grow_edible_plant_database",
+      "sourceManifestId": "source_manifest_grow_epd_2020",
+      "sourceReleaseId": "doi:10.15132/10000157",
+      "sourceRecordId": "1",
+      "sourceName": "Fixturea officinalis",
+      "sourceLocator": "fixture://grow/1",
+      "decision": "not-taxonomic",
+      "reason": "Current reviewed interpretation.",
+      "reviewId": "review_content_fixture",
+      "supersedesDecisionId": "name_decision_old"
+    }
+  ],
+  "source-subject-mappings": [
+    {
+      "id": "mapping_old",
+      "sourceId": "source_grow_edible_plant_database",
+      "sourceManifestId": "source_manifest_grow_epd_2020",
+      "sourceReleaseId": "doi:10.15132/10000157",
+      "sourceRecordId": "1",
+      "sourceLocator": "fixture://grow/1",
+      "decision": "defer",
+      "reason": "Retained deferred mapping.",
+      "reviewId": "review_content_fixture"
+    },
+    {
+      "id": "mapping_current",
+      "sourceId": "source_grow_edible_plant_database",
+      "sourceManifestId": "source_manifest_grow_epd_2020",
+      "sourceReleaseId": "doi:10.15132/10000157",
+      "sourceRecordId": "1",
+      "sourceLocator": "fixture://grow/1",
+      "decision": "defer",
+      "reason": "Current deferred mapping.",
+      "reviewId": "review_content_fixture",
+      "supersedesMappingId": "mapping_old"
+    }
+  ],
+  "source-geography-decisions": [
+    {
+      "id": "geography_decision_fixture",
+      "sourceId": "source_grow_edible_plant_database",
+      "sourceManifestId": "source_manifest_grow_epd_2020",
+      "sourceReleaseId": "doi:10.15132/10000157",
+      "sourceLocation": {
+        "sheetCode": "ATC",
+        "country": "Fixture country",
+        "name": "Fixture location",
+        "locator": "fixture://grow/ATC"
+      },
+      "decision": "map",
+      "geographicContextId": "geography_fixture",
+      "normalization": {
+        "originalCountry": "Fixture country",
+        "normalizedCountry": "Fixture country",
+        "method": "identity"
+      },
+      "reason": "Reviewed source geography.",
+      "reviewId": "review_content_fixture"
+    }
+  ],
+  "source-assertion-decisions": [
+    {
+      "id": "assertion_decision_fixture",
+      "sourceCandidateId": "candidate_fixture",
+      "draftManifestSha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "decision": "defer",
+      "reason": "Awaiting comparison.",
+      "reviewId": "review_content_fixture"
+    }
+  ],
+  "curation-issues": [
+    {
+      "id": "issue_fixture",
+      "kind": "missing-evidence",
+      "status": "open",
+      "affectedRecordIds": ["plant_fixture"],
+      "reason": "Fixture issue.",
+      "evidenceReferenceIds": ["evidence_fixture"]
+    }
+  ]
+}

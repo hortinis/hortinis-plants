@@ -1,9 +1,13 @@
 {
   "id": "evidence_tomato_transplant",
-  "sourceId": "source_grow",
-  "sourceManifestId": "source_manifest_grow_2020",
-  "sourceReleaseId": "grow-epd-2020",
-  "sourceRecordId": "tomato",
+  "sourceRecordKey": {
+    "source": {
+      "sourceId": "source_grow",
+      "sourceManifestId": "source_manifest_grow_2020",
+      "sourceReleaseId": "grow-epd-2020"
+    },
+    "recordId": "tomato"
+  },
   "locator": "PlantingCalendar.xlsx!Tomato",
   "normalization": {
     "originalValue": "1-3 weeks after last frost",

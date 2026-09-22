@@ -3,6 +3,7 @@ import {
   isValidTemperatureProfile,
 } from "../domain/temperature-profile.js";
 import {
+  qualifiedSourceLocationKey as qualifiedSourceLocationObjectKey,
   qualifiedSourceRecordKey,
   sourceLocationKey as qualifiedSourceLocationKey,
   sourceRecordKey as serializedSourceRecordKey,
@@ -68,6 +69,7 @@ export interface ValidationDataset {
   readonly sourceSubjectMappings?: readonly DatasetRecord[];
   readonly sourceGeographyDecisions?: readonly DatasetRecord[];
   readonly sourceAssertionDecisions?: readonly DatasetRecord[];
+  readonly assertionComparisonDecisions?: readonly DatasetRecord[];
 }
 
 type Collection = readonly DatasetRecord[];
@@ -99,6 +101,7 @@ export function validateValidationDataset(
     sourceSubjectMappings: dataset.sourceSubjectMappings ?? [],
     sourceGeographyDecisions: dataset.sourceGeographyDecisions ?? [],
     sourceAssertionDecisions: dataset.sourceAssertionDecisions ?? [],
+    assertionComparisonDecisions: dataset.assertionComparisonDecisions ?? [],
   };
   const recordsByKind = new Map<string, Map<string, DatasetRecord>>();
   const globalIds = new Map<string, string>();
@@ -178,6 +181,15 @@ export function validateValidationDataset(
     "sourceAssertionDecisions",
     "supersedesDecisionId",
     (record) => stringField(record, "sourceCandidateId"),
+    get,
+    missing,
+    issues,
+  );
+  const currentComparisonDecisions = currentRecords(
+    dataset.assertionComparisonDecisions ?? [],
+    "assertionComparisonDecisions",
+    "supersedesDecisionId",
+    (record) => stringField(record, "comparisonId"),
     get,
     missing,
     issues,
@@ -546,6 +558,27 @@ export function validateValidationDataset(
       checkDeferral(record, id, issues);
     }
   }
+  for (const record of dataset.assertionComparisonDecisions ?? []) {
+    const id = recordId(record);
+    checkReview(stringField(record, "reviewId"), "content", id, get, issues);
+    checkReplacement(
+      record,
+      "supersedesDecisionId",
+      "assertionComparisonDecisions",
+      missing,
+      id,
+    );
+    if (
+      stringField(record, "comparisonId") === undefined &&
+      currentComparisonDecisions.currentIds.has(id)
+    ) {
+      issues.push({
+        code: "INVALID_SOURCE_DECISION",
+        recordId: id,
+        message: `Assertion comparison decision ${id} has no comparison identifier`,
+      });
+    }
+  }
 
   return issues;
 
@@ -554,8 +587,10 @@ export function validateValidationDataset(
     if (allowed === undefined) return;
     const recordKey: QualifiedSourceRecordKey | undefined =
       qualifiedSourceRecordKey(record);
+    const locationKey = qualifiedSourceLocationObjectKey(record);
     const sourceManifestId =
       recordKey?.source.sourceManifestId ??
+      locationKey?.source.sourceManifestId ??
       stringField(record, "sourceManifestId") ??
       stringField(asRecord(record.externalIdentifier), "sourceManifestId");
     if (sourceManifestId === undefined || !allowed.includes(sourceManifestId)) {

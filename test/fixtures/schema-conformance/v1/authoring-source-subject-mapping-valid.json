@@ -1,9 +1,13 @@
 {
   "id": "mapping-grow-record-1",
-  "sourceId": "source_grow_edible_plant_database",
-  "sourceManifestId": "source_manifest_grow_epd_2020",
-  "sourceReleaseId": "doi:10.15132/10000157",
-  "sourceRecordId": "1",
+  "sourceRecordKey": {
+    "source": {
+      "sourceId": "source_grow_edible_plant_database",
+      "sourceManifestId": "source_manifest_grow_epd_2020",
+      "sourceReleaseId": "doi:10.15132/10000157"
+    },
+    "recordId": "1"
+  },
   "sourceLocator": "plant1.accdb#Edible plants.ID=1",
   "decision": "map",
   "subject": { "type": "cultivar-group", "id": "cultivar-group-tomato" },

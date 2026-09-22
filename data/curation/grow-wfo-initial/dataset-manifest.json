@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "datasetVersion": "0.1.0",
+  "datasetVersion": "0.2.0",
   "id": "curation_grow_wfo_initial",
   "status": "in progress",
   "scope": "All pinned GROW 2020 source records reconciled against the pinned WFO 2026-06 snapshot.",
@@ -108,6 +108,13 @@
       "path": "source-assertion-decisions.jsonl",
       "format": "jsonl",
       "schemaId": "urn:hortinis:plants:schema:authoring:v1:source-assertion-decision",
+      "authority": "curator-authored"
+    },
+    {
+      "role": "assertion-comparison-decisions",
+      "path": "assertion-comparison-decisions.jsonl",
+      "format": "jsonl",
+      "schemaId": "urn:hortinis:plants:schema:authoring:v1:assertion-comparison-decision",
       "authority": "curator-authored"
     },
     {
