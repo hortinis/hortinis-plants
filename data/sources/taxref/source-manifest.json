@@ -1,0 +1,40 @@
+{
+  "id": "source_manifest_taxref_18_0",
+  "provider": {
+    "id": "provider_patrinat_mnhn",
+    "name": "PatriNat / Muséum national d’Histoire naturelle"
+  },
+  "release": {
+    "identifier": "18.0",
+    "publishedAt": "2025-01-09"
+  },
+  "resources": [
+    {
+      "locator": "https://assets.patrinat.fr/files/referentiel/TAXREF_v18_2025.zip",
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "a6963ea1a3baec3220f0bf76b43eaa9b49d0c0eecd5ab72294b760adf78897a7"
+      },
+      "byteSize": 60582042,
+      "mediaType": "application/zip"
+    }
+  ],
+  "licenceReview": {
+    "status": "accepted",
+    "declaredLicence": "Open Licence (TAXREF publisher terms; version unspecified)",
+    "evidenceLocator": "https://taxref.mnhn.fr/taxref-web/about",
+    "notes": "TAXREF's conditions state that its data are available under the Open Licence, equivalent to CC-BY, with unrestricted reuse subject to citation; redistribution is permitted. The conditions page does not name a numbered licence version, so this record preserves the publisher's generic licence name and does not assert a specific CC-BY version. The recorded notice cites TAXREF v18.0. This decision covers the TAXREF data as published and does not grant rights in separately reused third-party publications, images, or website content."
+  },
+  "profileEligibility": [
+    {
+      "profile": "commercial",
+      "decision": "eligible",
+      "reason": "TAXREF's published terms allow reuse and redistribution subject to attribution. The release is cited in the required notice; the publisher does not specify a numbered licence version."
+    },
+    {
+      "profile": "dev-validation",
+      "decision": "eligible",
+      "reason": "The exact pinned archive is eligible for local inspection and candidate staging; commercial reuse is also eligible under the publisher's Open Licence terms with attribution."
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "release": "18.0",
+  "archiveLocator": "https://assets.patrinat.fr/files/referentiel/TAXREF_v18_2025.zip",
+  "members": [
+    { "path": "CDNOM_DISPARUS.txt", "byteSize": 1284620, "sha256": "5015cacfd56b6c928be30e608d8486c9469735aa2088f2afbc0f9775e37a7cc3", "role": "removed-identifiers" },
+    { "path": "habitats_note.csv", "byteSize": 1027, "sha256": "1d502eb4550c83ccb5841236dbfc592e65ee5c596d0a7ba6cdab30c8cb538323", "role": "habitat-code-list" },
+    { "path": "rangs_note.csv", "byteSize": 1563, "sha256": "47f1a8b473c04f21daab792361dc2d4e0fc4c77bf901db0436fd5560810a6da3", "role": "rank-code-list" },
+    { "path": "statuts_note.csv", "byteSize": 4973, "sha256": "46faa4c8708d6ebc55014f06b53ee89e3a71ef15c6260d528b522a2f67f9b75e", "role": "territory-status-code-list" },
+    { "path": "TAXREFv18.txt", "byteSize": 317126709, "sha256": "97a79024b3c9723467cf0a978b02c02b0f734bafb47136a94d1ff67a49155c0a", "role": "taxonomy" },
+    { "path": "TAXREF_CHANGES.txt", "byteSize": 5032513, "sha256": "ac9d3e3b4f6305744e14a35f918331396b7a5d9e04237bf97f290d3e838b74f8", "role": "change-history" },
+    { "path": "TAXREF_LIENS.txt", "byteSize": 353212934, "sha256": "0833147dcc88d5618e42a285561be33347a1965e435921263cf05680cd6e4a5e", "role": "external-source-links" },
+    { "path": "TAXVERNv18.txt", "byteSize": 9753256, "sha256": "b15e0a5950dff30f1b707d799acd703c5f14bc9271c2e8c153a85f2ef15c30c5", "role": "vernacular-names" },
+    { "path": "TAXREFv18.pdf", "byteSize": 2542859, "sha256": "9aa2b35db9481e1b988a34a9d011dba19ca43b4eccb4adee733a3b161cf74988", "role": "release-methodology-and-documentation" }
+  ]
+}

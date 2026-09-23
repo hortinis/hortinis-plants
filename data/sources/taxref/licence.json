@@ -1,0 +1,9 @@
+{
+  "id": "licence_taxref_open_licence",
+  "name": "Open Licence (as declared in TAXREF conditions; version unspecified)",
+  "expression": "Open Licence",
+  "referenceLocator": "https://taxref.mnhn.fr/taxref-web/about",
+  "commercialUse": "allowed",
+  "attributionRequired": true,
+  "requiredNotice": "TAXREF [Eds] 2025. TAXREF v18.0, référentiel taxonomique pour la France. PatriNat (OFB-CNRS-MNHN-IRD), Muséum national d’Histoire naturelle, Paris. Archive generated 9 January 2025. Adapted by Hortinis."
+}

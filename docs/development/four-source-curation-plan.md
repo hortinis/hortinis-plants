@@ -151,15 +151,18 @@ Dependencies: T4.
 Acceptance: exact local bytes are verifiable offline; wrong files fail before parsing; excluded datasets and
 rights limitations are explicit.
 
-### T9 — Pin and document TAXREF
+### T9 — Pin and document TAXREF (`validated`)
 
-Inspect and pin the selected TAXREF archive and documentation. Record actual member names, encoding, delimiters,
-vernacular-name fields, territory/status code lists, external links, change history and removed identifiers.
+Pin TAXREF v18.0 and its bundled methodology PDF. Record the archive and per-member checksums, actual member
+names, encoding, delimiters, vernacular-name fields, territory/status code lists, external links, change history
+and removed identifiers. Verify the complete archive before any parser starts and fail with a path-specific
+diagnostic when a required member is absent or changed. Keep the large archive outside Git.
 
 Dependencies: T4.
 
-Acceptance: required members and exact bytes are verified before parsing; missing documentation or code lists
-fails with an actionable diagnostic.
+Acceptance: `pnpm verify:taxref-pin` verifies the archive and all nine members; missing documentation or code
+lists fails with an actionable diagnostic. Commercial reuse follows TAXREF's published Open Licence terms with
+attribution; no numbered licence version is asserted.
 
 ### T10 — Implement CropGraph raw staging and scope
 

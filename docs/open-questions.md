@@ -61,8 +61,11 @@ implementation sequence. The previous two-backbone and schema-version questions 
 - **validated — CropGraph source pin:** commit `e722c3415bcf2773277f3422e13a4de5efd29b48`, its calendar,
   matching schema and licence evidence are pinned with exact checksums. Code and data licence scopes remain
   distinct; the calendar is pending assertion-level rights review for commercial use.
-- **planned — TAXREF pin and CropGraph cohort:** verify TAXREF archive members, rights evidence and checksums;
-  freeze the selected CropGraph cohort with explicit record exclusions and a fingerprint.
+- **validated — TAXREF pin and licence:** v18.0 is pinned with its bundled methodology, all nine archive members
+  and per-member checksums. TAXREF's terms allow reuse and redistribution under the Open Licence with citation;
+  commercial eligibility is recorded with attribution. The publisher does not name a numbered licence version.
+- **planned — CropGraph cohort:** freeze the selected CropGraph cohort with explicit record exclusions and a
+  fingerprint.
 - **planned — CropGraph semantics:** preserve ambiguous soil-temperature meaning, greenhouse context,
   `plant_now`, unknown name languages and harvest-duration anchors as candidates or deferred decisions. Do not
   infer meanings during import.
