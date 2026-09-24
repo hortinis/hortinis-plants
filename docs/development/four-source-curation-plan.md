@@ -164,7 +164,7 @@ Acceptance: `pnpm verify:taxref-pin` verifies the archive and all nine members; 
 lists fails with an actionable diagnostic. Commercial reuse follows TAXREF's published Open Licence terms with
 attribution; no numbered licence version is asserted.
 
-### T10 — Implement CropGraph raw staging and scope
+### T10 — Implement CropGraph raw staging and scope (`validated`)
 
 Stream the calendar, validate entries, emit raw source records and diagnostics, detect duplicate slugs and
 inventory excluded files. Then freeze the selected CropGraph cohort with an explicit inclusion/exclusion file,

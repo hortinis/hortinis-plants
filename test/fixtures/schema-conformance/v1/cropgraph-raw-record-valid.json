@@ -1,0 +1,17 @@
+{
+  "sourceRecordKey": {
+    "source": {
+      "sourceId": "source_cropgraph",
+      "sourceManifestId": "source_manifest_cropgraph",
+      "sourceReleaseId": "e722c3415bcf2773277f3422e13a4de5efd29b48"
+    },
+    "recordId": "tomato"
+  },
+  "sourceLocator": "packages/core/src/data/crop-calendar.json#/entries/0",
+  "originalIndex": 0,
+  "rawEntry": { "slug": "tomato" },
+  "effectiveCitation": "Example source citation",
+  "citationLevel": "calendar",
+  "declaredLicence": "CC-BY-4.0",
+  "commercialRights": "pending-review"
+}

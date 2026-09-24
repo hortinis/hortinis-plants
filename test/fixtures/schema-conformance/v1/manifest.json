@@ -970,6 +970,21 @@
       "expected": { "valid": true }
     },
     {
+      "id": "cropgraph-raw-record-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:cropgraph-raw-record",
+      "fixture": "cropgraph-raw-record-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "cropgraph-raw-record-invalid",
+      "schemaId": "urn:hortinis:plants:schema:v1:cropgraph-raw-record",
+      "fixture": "cropgraph-raw-record-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "", "keyword": "required" }]
+      }
+    },
+    {
       "id": "curation-decision-input-invalid",
       "schemaId": "urn:hortinis:plants:schema:curation:v1:decision-input",
       "fixture": "curation-decision-input-invalid.json",

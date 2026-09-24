@@ -72,3 +72,19 @@ candidate is not itself an accepted crosswalk.
 The reconciled staging JSONL is not the final catalog. C4 curation will author accepted Hortinis taxa
 and scientific-name/synonym records, plant concepts and separate horticultural group/cultivar records;
 C5 will project only reviewed, profile-eligible records into deterministic consumer releases.
+
+## CropGraph raw staging
+
+Run `pnpm import:cropgraph` to verify the four pinned resources and stream the CropGraph calendar through
+the shared importer runner. The default output is `.cache/import-runs/cropgraph/latest/`. It contains all
+5,006 raw source records, the same 5,006 selected records, an inventory, diagnostics and a run manifest.
+The selected cohort is an explicit, fingerprinted list of every pinned slug; it is not a match to catalog
+subjects or the France MVP allowlist. Source array positions appear only in provenance locators. The
+release-qualified slug is the stable source record key.
+
+The adapter validates against the pinned upstream entry schema and records a warning for each of the 21
+pinned entries using `plant_now` in climate modifier `windowShifts`, which that schema omits. The exception
+register pins the exact slugs and source checksums. Other schema errors, duplicate slugs, changed resources
+and cohort gaps fail the run atomically. Entry-level source strings override the calendar-level citation;
+both the effective string and its inheritance level are preserved. All entries remain pending commercial
+rights review, and cultivation interpretation belongs to later curation tasks.

@@ -64,8 +64,9 @@ implementation sequence. The previous two-backbone and schema-version questions 
 - **validated — TAXREF pin and licence:** v18.0 is pinned with its bundled methodology, all nine archive members
   and per-member checksums. TAXREF's terms allow reuse and redistribution under the Open Licence with citation;
   commercial eligibility is recorded with attribution. The publisher does not name a numbered licence version.
-- **planned — CropGraph cohort:** freeze the selected CropGraph cohort with explicit record exclusions and a
-  fingerprint.
+- **validated — CropGraph cohort:** include all 5,006 pinned calendar entries for raw staging, with zero
+  entry exclusions. The explicit slug list and fingerprint are frozen in `data/sources/cropgraph/cohort.json`;
+  subject matching is deferred to curation.
 - **planned — CropGraph semantics:** preserve ambiguous soil-temperature meaning, greenhouse context,
   `plant_now`, unknown name languages and harvest-duration anchors as candidates or deferred decisions. Do not
   infer meanings during import.

@@ -81,3 +81,23 @@ import unless a later planned task explicitly adds and audits them:
 This resource exclusion is not the crop cohort decision. T10 inventories the full pinned calendar and freezes
 the selected record cohort in a separate inclusion/exclusion file with its own rationale and fingerprint. T8
 does not select records or interpret ambiguous calendar semantics.
+
+## T10 raw staging and cohort
+
+Run `pnpm import:cropgraph` to stage the entire pinned calendar in
+`.cache/import-runs/cropgraph/latest/`. The tracked `cohort.json` explicitly includes all 5,006 slugs and
+excludes no calendar entries. Its fingerprint covers the sorted decisions, rationale and calendar checksum.
+Subject matching and applicability are later curation decisions. The importer fails if any calendar slug is
+missing from the cohort, duplicated or newly introduced without a corresponding tracked change.
+
+The manually captured `resource-inventory.json` lists the four included paths and 80 reviewed paths from the
+pinned Git commit as excluded. Its `commitId` identifies the commit used during review; it is not a
+cryptographic reconstruction of that commit's Git tree. The generated inventory records the same resource
+scope and accounts for every calendar entry. Raw and selected records retain original values, source locators
+and effective citation strings; commercial rights remain `pending-review`.
+
+The pinned calendar and its matching schema disagree on one field: 21 entries use `plant_now` in climate
+modifier `windowShifts`, but the schema permits only `start_indoors`, `direct_sow` and `transplant` there.
+`schema-exceptions.json` freezes the 21 affected slugs against both pinned checksums. The importer preserves
+their raw entries and emits a warning for each. Any other schema failure or change to the exception set is
+fatal. No climate shift or action meaning is inferred at this stage.

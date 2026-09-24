@@ -1,0 +1,28 @@
+{
+  "calendarSha256": "09fc2f3f56143593578e64007756bce51cf6824ae3b3a265e7242970fb508fb7",
+  "schemaSha256": "e1a478533f4157863870e73bdd66490ee429fa22a8d366fcf70a7ce844abfc30",
+  "reason": "The pinned schema omits plant_now from climate modifier windowShifts, while these pinned entries use it. Preserve these raw entries with a warning; all other schema errors remain fatal.",
+  "plantNowModifierSlugs": [
+    "apple-fuji",
+    "apple-granny-smith",
+    "apple-pink-lady",
+    "blueberry-bluecrop",
+    "blueberry-tifblue",
+    "elderberry-adams",
+    "fig-mission",
+    "grape-concord",
+    "grape-marquette",
+    "lavender-grosso",
+    "mint-corsican",
+    "pawpaw-shenandoah",
+    "peach-redhaven",
+    "plum-santa-rosa",
+    "pomegranate-wonderful",
+    "raspberry-anne",
+    "rosemary-arp",
+    "sage-berggarten",
+    "saskatoon-berry-thiessen",
+    "strawberry-chandler",
+    "strawberry-honeoye"
+  ]
+}
