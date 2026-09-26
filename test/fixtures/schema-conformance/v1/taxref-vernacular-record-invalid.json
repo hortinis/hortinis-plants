@@ -1,0 +1,22 @@
+{
+  "sourceRecordKey": {
+    "source": {
+      "sourceId": "source_taxref",
+      "sourceManifestId": "source_manifest_taxref_18_0",
+      "sourceReleaseId": "18.0"
+    },
+    "recordId": "200"
+  },
+  "sourceLocator": "archive.zip!/TAXVERNv18.txt#record=1",
+  "recordNumber": 1,
+  "targetTaxonIdentifier": "not-numeric",
+  "rawRecord": {
+    "CD_VERN": "200",
+    "CD_NOM": "100",
+    "LB_VERN": "Plante exemple",
+    "NOM_VERN_SOURCE": "",
+    "LANGUE": "Français",
+    "ISO639_3": "fra",
+    "PAYS": "France"
+  }
+}

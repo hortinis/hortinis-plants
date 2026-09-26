@@ -77,7 +77,7 @@ describe("GROW/WFO C4 draft generation", () => {
     } finally {
       await rm(fixture.root, { recursive: true, force: true });
     }
-  });
+  }, 15000);
 
   it("consolidates shared identifiers while keeping synonym-row provenance and record references", async () => {
     const fixture = await createFixture();

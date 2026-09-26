@@ -64,6 +64,14 @@ implementation sequence. The previous two-backbone and schema-version questions 
 - **validated — TAXREF pin and licence:** v18.0 is pinned with its bundled methodology, all nine archive members
   and per-member checksums. TAXREF's terms allow reuse and redistribution under the Open Licence with citation;
   commercial eligibility is recorded with attribution. The publisher does not name a numbered licence version.
+- **validated — TAXREF localization extraction:** preserve complete taxonomy, vernacular, change, removed-ID and
+  vocabulary staging records. Emit French candidates only from the documented `NOM_VERN` field or agreeing
+  `LANGUE=Français` and `ISO639_3=fra` markers. Keep delimiter-separated strings unsplit, `PAYS` unnormalized,
+  and synonym evidence attached to its original `CD_NOM`. The eight v18 parent gaps are unresolved diagnostics;
+  broken accepted-name references and graph cycles are fatal.
+- **validated — TAXREF external-link boundary:** verify `TAXREF_LIENS.txt` as part of the complete archive pin but
+  do not materialize its 2,016,747 rows in T12. If T14 needs TAXREF-asserted WFO links, add a separately scoped
+  extraction contract rather than silently importing every external database mapping.
 - **validated — CropGraph cohort:** include all 5,006 pinned calendar entries for raw staging, with zero
   entry exclusions. The explicit slug list and fingerprint are frozen in `data/sources/cropgraph/cohort.json`;
   subject matching is deferred to curation.

@@ -195,7 +195,7 @@ rights pending review. Fixtures cover semantic identity under reordering, conser
 modifier bases and failure atomicity. The [adapter guide](source-adapter-guide.md#cropgraph-candidates-t11)
 documents the extraction rules and limits; unresolved interpretation remains in the open questions register.
 
-### T12 — Implement TAXREF extraction and localization candidates
+### T12 — Implement TAXREF extraction and localization candidates (`validated`)
 
 Stream required TAXREF members while preserving `CD_NOM`, `CD_REF`, names, authorship, rank, parentage,
 vernacular strings, territory/status codes and identifier changes. Validate duplicates, missing referents,
@@ -209,6 +209,14 @@ Dependencies: T1 and T9.
 
 Acceptance: fixtures cover accepted/synonym rows, homonyms, missing targets, parent cycles, duplicate IDs,
 vernacular delimiters, encoding and removed identifiers. Malformed archives publish no partial output.
+
+Implemented by the TAXREF 0.1.0 localization-staging importer. The pinned v18.0 run emits 708,685
+taxonomic records, 82,966 vernacular records, 213,060 unreviewed French localization candidates, 68,761
+change records, 12,891 removed identifiers and 78 vocabulary records. Eight parent identifiers absent from
+the distributed taxonomy are retained as unresolved diagnostics; accepted-name referential failures, cycles,
+duplicates, encoding errors and malformed records fail atomically. The importer preserves comma-delimited
+vernacular strings without splitting them and does not attach TAXREF names to WFO identities. External database
+links remain verified archive members but are not materialized by T12.
 
 ### T13 — Generalize WFO reconciliation for GROW and CropGraph
 

@@ -1025,6 +1025,98 @@
         "valid": false,
         "errors": [{ "instancePath": "/reviewState", "keyword": "const" }]
       }
+    },
+    {
+      "id": "taxref-taxonomic-record-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:taxref-taxonomic-record",
+      "fixture": "taxref-taxonomic-record-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "taxref-taxonomic-record-invalid",
+      "schemaId": "urn:hortinis:plants:schema:v1:taxref-taxonomic-record",
+      "fixture": "taxref-taxonomic-record-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/taxonomicStatus", "keyword": "enum" }]
+      }
+    },
+    {
+      "id": "taxref-vernacular-record-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:taxref-vernacular-record",
+      "fixture": "taxref-vernacular-record-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "taxref-vernacular-record-invalid",
+      "schemaId": "urn:hortinis:plants:schema:v1:taxref-vernacular-record",
+      "fixture": "taxref-vernacular-record-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [
+          { "instancePath": "/targetTaxonIdentifier", "keyword": "pattern" }
+        ]
+      }
+    },
+    {
+      "id": "taxref-localization-candidate-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:taxref-localization-candidate",
+      "fixture": "taxref-localization-candidate-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "taxref-localization-candidate-invalid",
+      "schemaId": "urn:hortinis:plants:schema:v1:taxref-localization-candidate",
+      "fixture": "taxref-localization-candidate-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/reviewState", "keyword": "const" }]
+      }
+    },
+    {
+      "id": "taxref-change-record-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:taxref-change-record",
+      "fixture": "taxref-change-record-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "taxref-change-record-invalid",
+      "schemaId": "urn:hortinis:plants:schema:v1:taxref-change-record",
+      "fixture": "taxref-change-record-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/taxonIdentifier", "keyword": "pattern" }]
+      }
+    },
+    {
+      "id": "taxref-removed-identifier-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:taxref-removed-identifier",
+      "fixture": "taxref-removed-identifier-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "taxref-removed-identifier-invalid",
+      "schemaId": "urn:hortinis:plants:schema:v1:taxref-removed-identifier",
+      "fixture": "taxref-removed-identifier-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/identifier", "keyword": "pattern" }]
+      }
+    },
+    {
+      "id": "taxref-vocabulary-record-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:taxref-vocabulary-record",
+      "fixture": "taxref-vocabulary-record-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "taxref-vocabulary-record-invalid",
+      "schemaId": "urn:hortinis:plants:schema:v1:taxref-vocabulary-record",
+      "fixture": "taxref-vocabulary-record-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/code", "keyword": "minLength" }]
+      }
     }
   ]
 }

@@ -147,3 +147,37 @@ claims. Regional review flags recognize `long-day`, `short-day`, `day-length`, `
 These checks do not establish that other prose is consistent or turn notes into numeric, geographic or
 accepted facts. Greenhouse heating, numeric soil-temperature meaning, `plant_now` and harvest anchors have
 separate unresolved diagnostics.
+
+## TAXREF extraction and localization candidates (T12)
+
+Run `pnpm import:taxref` with the pinned v18.0 archive at
+`.cache/source-inputs/taxref/18.0/TAXREF_v18_2025.zip`. An alternative archive and output directory may be
+passed as the first and second arguments. The default output is `.cache/import-runs/taxref/latest/`.
+
+The adapter runs the complete archive and member checksum preflight before opening any table. It then streams
+the semicolon-delimited Windows-1252 vocabularies and the tab-delimited UTF-8 taxonomy, vernacular, change and
+removed-identifier tables directly from the ZIP. Headers and CRLF record framing are exact contracts. Invalid
+UTF-8, duplicate source identifiers, unknown vocabulary codes, broken accepted-name references, synonym chains,
+parent cycles and missing vernacular or replacement targets fail the run atomically.
+
+Taxonomic records retain the complete decoded row, release-qualified `CD_NOM`, `CD_REF`, both parent links,
+rank details and every non-empty territory/status pair. Homonymous strings are allowed because `CD_NOM`, not a
+scientific-name string, is the source key. The v18.0 distribution contains eight `CD_SUP` values whose targets
+are not distributed; these produce `MISSING_PARENT_TARGET` diagnostics instead of fabricating ancestors or
+rejecting the pinned release. No `CD_REF` targets are missing.
+
+Vernacular records retain every language. `NOM_VERN` creates a French candidate from the source field contract;
+`TAXVERN.LB_VERN` creates one only when `LANGUE=Français` and `ISO639_3=fra`. ISO 639-3 `fra` maps explicitly to
+BCP 47 `fr`. Comma-delimited values remain one original string, `PAYS` stays unnormalized source text and taxon
+biogeographic status is represented separately from name-usage territory. A synonym's name and status remain
+attached to its own `CD_NOM`; only T14 may link reviewed equivalent TAXREF and WFO concepts.
+
+Candidate IDs hash semantic content beneath a qualified source record and never depend on a row number or file
+path. Physical record numbers remain in exact archive-member locators. Every candidate is `unreviewed`, carries
+the TAXREF Open Licence decision and attribution, and is commercially eligible at the source-rights level.
+Eligibility is not botanical or editorial acceptance.
+
+The pinned run contains 708,685 taxonomic records, 82,966 vernacular records, 213,060 localization candidates,
+68,761 change records, 12,891 removed identifiers, 78 vocabulary records and eight unresolved-parent
+diagnostics. `TAXREF_LIENS.txt` is verified but not materialized: external-link extraction is outside T12's
+localization contract and must be separately scoped if a later reconciliation needs it.

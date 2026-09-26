@@ -22,6 +22,12 @@ interface TaxrefArchiveMember {
   readonly role: string;
 }
 
+interface TaxrefArchiveIndexDocument {
+  readonly release?: unknown;
+  readonly archiveLocator?: unknown;
+  readonly members?: unknown;
+}
+
 interface TaxrefArchiveIndex {
   readonly release: string;
   readonly archiveLocator: string;
@@ -55,10 +61,11 @@ export async function verifyTaxrefPin(options: {
     options.sourceManifestPath,
     "TAXREF source manifest",
   );
-  const index = await readJson<TaxrefArchiveIndex>(
+  const index = await readJson<TaxrefArchiveIndexDocument>(
     options.archiveIndexPath,
     "TAXREF archive index",
   );
+  validateIndex(index);
   const archiveResource = manifest.resources.find(
     (resource) => resource.locator === index.archiveLocator,
   );
@@ -93,8 +100,9 @@ export async function verifyTaxrefPin(options: {
     );
   }
 
-  validateIndex(index);
-  const expectedByPath = new Map(index.members.map((member) => [member.path, member]));
+  const expectedByPath = new Map(
+    index.members.map((member) => [member.path, member]),
+  );
   const found = new Set<string>();
   const archive = unzipper.Parse({ forceStream: true });
   const completion = pipeline(createReadStream(options.archivePath), archive);
@@ -154,7 +162,9 @@ export async function verifyTaxrefPin(options: {
   return { release: index.release, memberCount: found.size };
 }
 
-function validateIndex(index: TaxrefArchiveIndex): void {
+function validateIndex(
+  index: TaxrefArchiveIndexDocument,
+): asserts index is TaxrefArchiveIndex {
   if (
     typeof index.release !== "string" ||
     typeof index.archiveLocator !== "string" ||
@@ -163,15 +173,10 @@ function validateIndex(index: TaxrefArchiveIndex): void {
   ) {
     throw new TaxrefPinError("TAXREF archive index is incomplete");
   }
+  const members: readonly unknown[] = index.members;
   const paths = new Set<string>();
-  for (const member of index.members) {
-    if (
-      typeof member.path !== "string" ||
-      typeof member.role !== "string" ||
-      !Number.isSafeInteger(member.byteSize) ||
-      member.byteSize < 0 ||
-      !/^[0-9a-f]{64}$/u.test(member.sha256)
-    ) {
+  for (const member of members) {
+    if (!isArchiveMember(member)) {
       throw new TaxrefPinError(
         `Invalid TAXREF archive index entry ${JSON.stringify(member)}`,
       );
@@ -183,6 +188,22 @@ function validateIndex(index: TaxrefArchiveIndex): void {
     }
     paths.add(member.path);
   }
+}
+
+function isArchiveMember(value: unknown): value is TaxrefArchiveMember {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    return false;
+  }
+  const member = value as Record<string, unknown>;
+  return (
+    typeof member.path === "string" &&
+    typeof member.role === "string" &&
+    Number.isSafeInteger(member.byteSize) &&
+    typeof member.byteSize === "number" &&
+    member.byteSize >= 0 &&
+    typeof member.sha256 === "string" &&
+    /^[0-9a-f]{64}$/u.test(member.sha256)
+  );
 }
 
 async function readJson<T>(path: string, label: string): Promise<T> {

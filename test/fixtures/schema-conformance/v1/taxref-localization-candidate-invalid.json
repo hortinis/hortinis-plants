@@ -1,0 +1,51 @@
+{
+  "id": "candidate_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "kind": "common-name",
+  "sourceRecordKey": {
+    "source": {
+      "sourceId": "source_taxref",
+      "sourceManifestId": "source_manifest_taxref_18_0",
+      "sourceReleaseId": "18.0"
+    },
+    "recordId": "200"
+  },
+  "sourceClaimKey": {
+    "sourceRecordKey": {
+      "source": {
+        "sourceId": "source_taxref",
+        "sourceManifestId": "source_manifest_taxref_18_0",
+        "sourceReleaseId": "18.0"
+      },
+      "recordId": "200"
+    },
+    "path": [{ "kind": "field", "id": "LB_VERN" }]
+  },
+  "targetTaxonRecordKey": {
+    "source": {
+      "sourceId": "source_taxref",
+      "sourceManifestId": "source_manifest_taxref_18_0",
+      "sourceReleaseId": "18.0"
+    },
+    "recordId": "100"
+  },
+  "acceptedTaxonIdentifier": "100",
+  "taxonomicStatus": "accepted",
+  "sourceLocators": ["archive.zip!/TAXVERNv18.txt#record=1&field=LB_VERN"],
+  "rawValue": "Plante exemple",
+  "value": {
+    "text": "Plante exemple",
+    "languageTag": "fr",
+    "sourceLanguage": "Français",
+    "sourceLanguageCode": "fra",
+    "languageVerification": "taxref-iso639-3-and-label",
+    "taxonBiogeographicStatuses": [],
+    "delimiterInterpretation": "preserved-unsplit"
+  },
+  "mappingMethod": "verified-source-language",
+  "reviewState": "accepted",
+  "effectiveCitation": "TAXREF v18.0",
+  "citationLocator": "archive.zip!/TAXVERNv18.txt#record=1",
+  "licenceId": "licence_taxref_open_licence",
+  "declaredLicence": "Open Licence (TAXREF publisher terms; version unspecified)",
+  "commercialRights": "eligible"
+}

@@ -1,0 +1,12 @@
+{
+  "vocabulary": "rank",
+  "code": "ES",
+  "sourceLocator": "archive.zip!/rangs_note.csv#record=1",
+  "recordNumber": 1,
+  "rawRecord": {
+    "RG_LEVEL": "290",
+    "RANG": "ES",
+    "DETAIL": "Espèce",
+    "DETAIL_EN": "Species"
+  }
+}

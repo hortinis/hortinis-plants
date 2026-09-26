@@ -21,6 +21,7 @@
     "coverage": "vitest run --coverage",
     "import:grow": "pnpm build && node dist/adapters/grow/cli.js",
     "import:cropgraph": "pnpm build && node dist/adapters/cropgraph/cli.js",
+    "import:taxref": "pnpm build && node dist/adapters/taxref/cli.js",
     "import:wfo": "pnpm build && node dist/adapters/wfo/cli.js",
     "verify:taxref-pin": "pnpm build && node dist/adapters/taxref/verify-pin-cli.js",
     "curate:grow-wfo:drafts": "pnpm build && node dist/curation/grow-wfo-drafts-cli.js",

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:taxref-change-record",
+  "title": "TAXREF release change record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "sourceRecordKey",
+    "sourceLocator",
+    "recordNumber",
+    "taxonIdentifier",
+    "rawRecord"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "sourceRecordKey": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/qualifiedSourceRecordKey"
+    },
+    "sourceLocator": { "type": "string", "minLength": 1 },
+    "recordNumber": { "type": "integer", "minimum": 1 },
+    "taxonIdentifier": { "type": "string", "pattern": "^[0-9]+$" },
+    "rawRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "CD_NOM",
+        "NUM_VERSION_INIT",
+        "NUM_VERSION_FINAL",
+        "CHAMP",
+        "VALEUR_INIT",
+        "VALEUR_FINAL",
+        "TYPE_CHANGE"
+      ],
+      "properties": {
+        "CD_NOM": { "type": "string" },
+        "NUM_VERSION_INIT": { "type": "string" },
+        "NUM_VERSION_FINAL": { "type": "string" },
+        "CHAMP": { "type": "string" },
+        "VALEUR_INIT": { "type": "string" },
+        "VALEUR_FINAL": { "type": "string" },
+        "TYPE_CHANGE": { "type": "string" }
+      }
+    }
+  }
+}

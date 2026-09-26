@@ -1,0 +1,21 @@
+{
+  "sourceRecordKey": {
+    "source": {
+      "sourceId": "source_taxref",
+      "sourceManifestId": "source_manifest_taxref_18_0",
+      "sourceReleaseId": "18.0"
+    },
+    "recordId": "50"
+  },
+  "sourceLocator": "archive.zip!/CDNOM_DISPARUS.txt#record=1",
+  "recordNumber": 1,
+  "identifier": "50",
+  "replacementTaxonIdentifier": "100",
+  "rawRecord": {
+    "CD_NOM": "50",
+    "PLUS_RECENTE_DIFFUSION": "17.0",
+    "CD_NOM_REMPLACEMENT": "100",
+    "CD_RAISON_SUPPRESSION": "1",
+    "RAISON_SUPPRESSION": "Doublon"
+  }
+}

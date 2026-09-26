@@ -1,0 +1,41 @@
+{
+  "sourceRecordKey": {
+    "source": {
+      "sourceId": "source_taxref",
+      "sourceManifestId": "source_manifest_taxref_18_0",
+      "sourceReleaseId": "18.0"
+    },
+    "recordId": "100"
+  },
+  "sourceLocator": "archive.zip!/TAXREFv18.txt#record=1",
+  "recordNumber": 1,
+  "taxonomicStatus": "accepted",
+  "acceptedTaxonIdentifier": "100",
+  "rank": {
+    "code": "ES",
+    "level": "290",
+    "label": "Espèce",
+    "labelEnglish": "Species"
+  },
+  "territoryStatuses": [
+    {
+      "territoryCode": "FR",
+      "statusCode": "P",
+      "statusLabel": "Présent",
+      "sourceLocator": "archive.zip!/TAXREFv18.txt#record=1&field=FR"
+    }
+  ],
+  "rawRecord": {
+    "CD_NOM": "100",
+    "CD_TAXSUP": "10",
+    "CD_SUP": "10",
+    "CD_REF": "100",
+    "RANG": "ES",
+    "LB_NOM": "Planta exemplaris",
+    "LB_AUTEUR": "Fixture",
+    "NOM_COMPLET": "Planta exemplaris Fixture",
+    "NOM_VALIDE": "Planta exemplaris Fixture",
+    "NOM_VERN": "Plante exemple",
+    "NOM_VERN_ENG": "Example plant"
+  }
+}

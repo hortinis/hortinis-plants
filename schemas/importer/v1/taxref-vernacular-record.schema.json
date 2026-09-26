@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:taxref-vernacular-record",
+  "title": "TAXREF vernacular staging record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sourceRecordKey",
+    "sourceLocator",
+    "recordNumber",
+    "targetTaxonIdentifier",
+    "rawRecord"
+  ],
+  "properties": {
+    "sourceRecordKey": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/qualifiedSourceRecordKey"
+    },
+    "sourceLocator": { "type": "string", "minLength": 1 },
+    "recordNumber": { "type": "integer", "minimum": 1 },
+    "targetTaxonIdentifier": { "type": "string", "pattern": "^[0-9]+$" },
+    "rawRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "CD_VERN",
+        "CD_NOM",
+        "LB_VERN",
+        "NOM_VERN_SOURCE",
+        "LANGUE",
+        "ISO639_3",
+        "PAYS"
+      ],
+      "properties": {
+        "CD_VERN": { "type": "string" },
+        "CD_NOM": { "type": "string" },
+        "LB_VERN": { "type": "string" },
+        "NOM_VERN_SOURCE": { "type": "string" },
+        "LANGUE": { "type": "string" },
+        "ISO639_3": { "type": "string" },
+        "PAYS": { "type": "string" }
+      }
+    }
+  }
+}

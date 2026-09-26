@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:taxref-removed-identifier",
+  "title": "Removed TAXREF identifier",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sourceRecordKey",
+    "sourceLocator",
+    "recordNumber",
+    "identifier",
+    "rawRecord"
+  ],
+  "properties": {
+    "sourceRecordKey": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/qualifiedSourceRecordKey"
+    },
+    "sourceLocator": { "type": "string", "minLength": 1 },
+    "recordNumber": { "type": "integer", "minimum": 1 },
+    "identifier": { "type": "string", "pattern": "^[0-9]+$" },
+    "replacementTaxonIdentifier": {
+      "type": "string",
+      "pattern": "^[0-9]+$"
+    },
+    "rawRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "CD_NOM",
+        "PLUS_RECENTE_DIFFUSION",
+        "CD_NOM_REMPLACEMENT",
+        "CD_RAISON_SUPPRESSION",
+        "RAISON_SUPPRESSION"
+      ],
+      "properties": {
+        "CD_NOM": { "type": "string" },
+        "PLUS_RECENTE_DIFFUSION": { "type": "string" },
+        "CD_NOM_REMPLACEMENT": { "type": "string" },
+        "CD_RAISON_SUPPRESSION": { "type": "string" },
+        "RAISON_SUPPRESSION": { "type": "string" }
+      }
+    }
+  }
+}

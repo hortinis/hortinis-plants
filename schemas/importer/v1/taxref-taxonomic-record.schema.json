@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:taxref-taxonomic-record",
+  "title": "TAXREF taxonomic staging record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sourceRecordKey",
+    "sourceLocator",
+    "recordNumber",
+    "taxonomicStatus",
+    "acceptedTaxonIdentifier",
+    "rank",
+    "territoryStatuses",
+    "rawRecord"
+  ],
+  "properties": {
+    "sourceRecordKey": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/qualifiedSourceRecordKey"
+    },
+    "sourceLocator": { "type": "string", "minLength": 1 },
+    "recordNumber": { "type": "integer", "minimum": 1 },
+    "taxonomicStatus": { "enum": ["accepted", "synonym"] },
+    "acceptedTaxonIdentifier": { "$ref": "#/$defs/sourceIdentifier" },
+    "rank": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "level", "label", "labelEnglish"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "level": { "type": "string" },
+        "label": { "type": "string" },
+        "labelEnglish": { "type": "string" }
+      }
+    },
+    "territoryStatuses": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/territoryStatus" }
+    },
+    "rawRecord": {
+      "type": "object",
+      "required": [
+        "CD_NOM",
+        "CD_TAXSUP",
+        "CD_SUP",
+        "CD_REF",
+        "RANG",
+        "LB_NOM",
+        "LB_AUTEUR",
+        "NOM_COMPLET",
+        "NOM_VALIDE",
+        "NOM_VERN",
+        "NOM_VERN_ENG"
+      ],
+      "properties": {
+        "CD_NOM": { "type": "string" },
+        "CD_TAXSUP": { "type": "string" },
+        "CD_SUP": { "type": "string" },
+        "CD_REF": { "type": "string" },
+        "RANG": { "type": "string" },
+        "LB_NOM": { "type": "string" },
+        "LB_AUTEUR": { "type": "string" },
+        "NOM_COMPLET": { "type": "string" },
+        "NOM_VALIDE": { "type": "string" },
+        "NOM_VERN": { "type": "string" },
+        "NOM_VERN_ENG": { "type": "string" }
+      },
+      "additionalProperties": { "type": "string" }
+    }
+  },
+  "$defs": {
+    "sourceIdentifier": { "type": "string", "pattern": "^[0-9]+$" },
+    "territoryStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "territoryCode",
+        "statusCode",
+        "statusLabel",
+        "sourceLocator"
+      ],
+      "properties": {
+        "territoryCode": {
+          "enum": [
+            "FR",
+            "GF",
+            "MAR",
+            "GUA",
+            "SM",
+            "SB",
+            "SPM",
+            "MAY",
+            "EPA",
+            "REU",
+            "SA",
+            "TA",
+            "TAAF",
+            "PF",
+            "NC",
+            "WF",
+            "CLI"
+          ]
+        },
+        "statusCode": { "type": "string", "minLength": 1 },
+        "statusLabel": { "type": "string", "minLength": 1 },
+        "sourceLocator": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "change_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "sourceRecordKey": {
+    "source": {
+      "sourceId": "source_taxref",
+      "sourceManifestId": "source_manifest_taxref_18_0",
+      "sourceReleaseId": "18.0"
+    },
+    "recordId": "change_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "sourceLocator": "archive.zip!/TAXREF_CHANGES.txt#record=1",
+  "recordNumber": 1,
+  "taxonIdentifier": "invalid",
+  "rawRecord": {
+    "CD_NOM": "100",
+    "NUM_VERSION_INIT": "17.0",
+    "NUM_VERSION_FINAL": "18.0",
+    "CHAMP": "FR",
+    "VALEUR_INIT": "M",
+    "VALEUR_FINAL": "I",
+    "TYPE_CHANGE": "MODIFICATION"
+  }
+}

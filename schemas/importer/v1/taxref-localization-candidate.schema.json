@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:taxref-localization-candidate",
+  "title": "Unreviewed TAXREF French localization candidate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "kind",
+    "sourceRecordKey",
+    "sourceClaimKey",
+    "targetTaxonRecordKey",
+    "acceptedTaxonIdentifier",
+    "taxonomicStatus",
+    "sourceLocators",
+    "rawValue",
+    "value",
+    "mappingMethod",
+    "reviewState",
+    "effectiveCitation",
+    "citationLocator",
+    "licenceId",
+    "declaredLicence",
+    "commercialRights"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "kind": { "const": "common-name" },
+    "sourceRecordKey": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/qualifiedSourceRecordKey"
+    },
+    "sourceClaimKey": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/semanticSubrecordKey"
+    },
+    "targetTaxonRecordKey": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/qualifiedSourceRecordKey"
+    },
+    "acceptedTaxonIdentifier": { "type": "string", "pattern": "^[0-9]+$" },
+    "taxonomicStatus": { "enum": ["accepted", "synonym"] },
+    "sourceLocators": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "rawValue": { "type": "string", "minLength": 1 },
+    "value": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "text",
+        "languageTag",
+        "sourceLanguage",
+        "sourceLanguageCode",
+        "languageVerification",
+        "taxonBiogeographicStatuses",
+        "delimiterInterpretation"
+      ],
+      "properties": {
+        "text": { "type": "string", "minLength": 1 },
+        "languageTag": { "const": "fr" },
+        "sourceLanguage": { "type": "string", "minLength": 1 },
+        "sourceLanguageCode": { "const": "fra" },
+        "languageVerification": {
+          "enum": ["taxref-french-field-contract", "taxref-iso639-3-and-label"]
+        },
+        "nameUsageTerritoryOriginal": { "type": "string", "minLength": 1 },
+        "taxonBiogeographicStatuses": {
+          "type": "array",
+          "items": {
+            "$ref": "urn:hortinis:plants:schema:v1:taxref-taxonomic-record#/$defs/territoryStatus"
+          }
+        },
+        "delimiterInterpretation": { "const": "preserved-unsplit" }
+      }
+    },
+    "mappingMethod": { "const": "verified-source-language" },
+    "reviewState": { "const": "unreviewed" },
+    "effectiveCitation": { "type": "string", "minLength": 1 },
+    "citationLocator": { "type": "string", "minLength": 1 },
+    "licenceId": { "const": "licence_taxref_open_licence" },
+    "declaredLicence": {
+      "const": "Open Licence (TAXREF publisher terms; version unspecified)"
+    },
+    "commercialRights": { "const": "eligible" }
+  }
+}

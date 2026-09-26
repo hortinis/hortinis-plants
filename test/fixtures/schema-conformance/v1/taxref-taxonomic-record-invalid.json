@@ -1,0 +1,34 @@
+{
+  "sourceRecordKey": {
+    "source": {
+      "sourceId": "source_taxref",
+      "sourceManifestId": "source_manifest_taxref_18_0",
+      "sourceReleaseId": "18.0"
+    },
+    "recordId": "100"
+  },
+  "sourceLocator": "archive.zip!/TAXREFv18.txt#record=1",
+  "recordNumber": 1,
+  "taxonomicStatus": "retired",
+  "acceptedTaxonIdentifier": "100",
+  "rank": {
+    "code": "ES",
+    "level": "290",
+    "label": "Espèce",
+    "labelEnglish": "Species"
+  },
+  "territoryStatuses": [],
+  "rawRecord": {
+    "CD_NOM": "100",
+    "CD_TAXSUP": "",
+    "CD_SUP": "",
+    "CD_REF": "100",
+    "RANG": "ES",
+    "LB_NOM": "Example",
+    "LB_AUTEUR": "",
+    "NOM_COMPLET": "Example",
+    "NOM_VALIDE": "Example",
+    "NOM_VERN": "",
+    "NOM_VERN_ENG": ""
+  }
+}
