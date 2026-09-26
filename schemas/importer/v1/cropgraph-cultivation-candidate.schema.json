@@ -1,0 +1,471 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:cropgraph-cultivation-candidate",
+  "title": "Unreviewed CropGraph cultivation candidate",
+  "type": "object",
+  "properties": {
+    "kind": {
+      "enum": [
+        "window",
+        "context",
+        "soil-temperature",
+        "harvest-range",
+        "classification",
+        "modifier",
+        "note"
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "$ref": "urn:hortinis:plants:schema:v1:cropgraph-identity-candidate#/$defs/envelope"
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "window"
+          }
+        },
+        "required": ["kind"]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "sourceAction",
+              "action",
+              "actionMapping",
+              "sourceTiming",
+              "timing",
+              "applicability"
+            ],
+            "properties": {
+              "sourceAction": {
+                "enum": [
+                  "start_indoors",
+                  "direct_sow",
+                  "transplant",
+                  "plant_now"
+                ]
+              },
+              "action": {
+                "enum": ["start_indoors", "direct_sow", "transplant", null]
+              },
+              "actionMapping": {
+                "enum": ["identity", "unresolved"]
+              },
+              "sourceTiming": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["anchor", "fromFrostDays", "toFrostDays"],
+                "properties": {
+                  "anchor": {
+                    "enum": ["last_spring", "first_fall"]
+                  },
+                  "fromFrostDays": {
+                    "type": "integer"
+                  },
+                  "toFrostDays": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "timing": {
+                "$ref": "urn:hortinis:plants:schema:v1:cultivation-rule#/$defs/relativeDayWindow"
+              },
+              "applicability": {
+                "const": "unreviewed"
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "sourceAction": {
+                      "const": "start_indoors"
+                    }
+                  },
+                  "required": ["sourceAction"]
+                },
+                "then": {
+                  "properties": {
+                    "action": {
+                      "const": "start_indoors"
+                    },
+                    "actionMapping": {
+                      "const": "identity"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "sourceAction": {
+                      "const": "direct_sow"
+                    }
+                  },
+                  "required": ["sourceAction"]
+                },
+                "then": {
+                  "properties": {
+                    "action": {
+                      "const": "direct_sow"
+                    },
+                    "actionMapping": {
+                      "const": "identity"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "sourceAction": {
+                      "const": "transplant"
+                    }
+                  },
+                  "required": ["sourceAction"]
+                },
+                "then": {
+                  "properties": {
+                    "action": {
+                      "const": "transplant"
+                    },
+                    "actionMapping": {
+                      "const": "identity"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "sourceAction": {
+                      "const": "plant_now"
+                    }
+                  },
+                  "required": ["sourceAction"]
+                },
+                "then": {
+                  "properties": {
+                    "action": {
+                      "const": null
+                    },
+                    "actionMapping": {
+                      "const": "unresolved"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "sourceTiming": {
+                      "type": "object",
+                      "properties": {
+                        "anchor": {
+                          "const": "last_spring"
+                        }
+                      },
+                      "required": ["anchor"]
+                    }
+                  },
+                  "required": ["sourceTiming"]
+                },
+                "then": {
+                  "properties": {
+                    "timing": {
+                      "type": "object",
+                      "properties": {
+                        "anchor": {
+                          "const": "last_spring_frost"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "sourceTiming": {
+                      "type": "object",
+                      "properties": {
+                        "anchor": {
+                          "const": "first_fall"
+                        }
+                      },
+                      "required": ["anchor"]
+                    }
+                  },
+                  "required": ["sourceTiming"]
+                },
+                "then": {
+                  "properties": {
+                    "timing": {
+                      "type": "object",
+                      "properties": {
+                        "anchor": {
+                          "const": "first_autumn_frost"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "mappingMethod": {
+            "const": "normalized-source-timing"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "context"
+          }
+        },
+        "required": ["kind"]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "growingContext",
+              "presence",
+              "heating",
+              "geographicApplicability"
+            ],
+            "properties": {
+              "growingContext": {
+                "enum": ["outdoor", "indoor", "both", "greenhouse", "unknown"]
+              },
+              "presence": {
+                "enum": ["absent", "present"]
+              },
+              "heating": {
+                "const": "unknown"
+              },
+              "geographicApplicability": {
+                "const": "unreviewed"
+              }
+            }
+          },
+          "mappingMethod": {
+            "const": "source-preserved"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "soil-temperature"
+          }
+        },
+        "required": ["kind"]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["value", "unit", "interpretation"],
+            "properties": {
+              "value": {
+                "type": ["number", "null"]
+              },
+              "unit": {
+                "const": "[degF]"
+              },
+              "interpretation": {
+                "const": "unresolved"
+              }
+            }
+          },
+          "mappingMethod": {
+            "const": "source-preserved"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "harvest-range"
+          }
+        },
+        "required": ["kind"]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["minimum", "maximum", "unit", "anchor"],
+            "properties": {
+              "minimum": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "maximum": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "unit": {
+                "const": "d"
+              },
+              "anchor": {
+                "const": "unknown"
+              }
+            }
+          },
+          "mappingMethod": {
+            "const": "source-preserved"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "classification"
+          }
+        },
+        "required": ["kind"]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["field", "sourceValue"],
+            "properties": {
+              "field": {
+                "enum": ["category", "season", "zoneRange"]
+              },
+              "sourceValue": {
+                "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/jsonValue"
+              }
+            }
+          },
+          "mappingMethod": {
+            "const": "source-preserved"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "modifier"
+          }
+        },
+        "required": ["kind"]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "climate",
+              "sourceAction",
+              "shiftWeeks",
+              "application",
+              "baseWindowCandidateIds"
+            ],
+            "properties": {
+              "climate": {
+                "enum": [
+                  "maritime",
+                  "mediterranean",
+                  "continental",
+                  "humid_subtropical",
+                  "arid",
+                  "semi_arid"
+                ]
+              },
+              "sourceAction": {
+                "enum": [
+                  "start_indoors",
+                  "direct_sow",
+                  "transplant",
+                  "plant_now"
+                ]
+              },
+              "shiftWeeks": {
+                "type": "integer",
+                "minimum": -12,
+                "maximum": 12
+              },
+              "application": {
+                "const": "unapplied"
+              },
+              "baseWindowCandidateIds": {
+                "type": "array",
+                "items": {
+                  "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+                },
+                "uniqueItems": true
+              }
+            }
+          },
+          "mappingMethod": {
+            "const": "source-preserved"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "note"
+          }
+        },
+        "required": ["kind"]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["text"],
+            "properties": {
+              "text": {
+                "type": "string"
+              },
+              "climate": {
+                "enum": [
+                  "maritime",
+                  "mediterranean",
+                  "continental",
+                  "humid_subtropical",
+                  "arid",
+                  "semi_arid"
+                ]
+              }
+            }
+          },
+          "mappingMethod": {
+            "const": "source-preserved"
+          }
+        }
+      }
+    }
+  ]
+}

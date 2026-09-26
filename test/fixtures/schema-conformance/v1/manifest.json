@@ -995,6 +995,36 @@
           { "instancePath": "/operations", "keyword": "minItems" }
         ]
       }
+    },
+    {
+      "id": "cropgraph-identity-candidate-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:cropgraph-identity-candidate",
+      "fixture": "cropgraph-identity-candidate-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "cropgraph-identity-candidate-invalid",
+      "schemaId": "urn:hortinis:plants:schema:v1:cropgraph-identity-candidate",
+      "fixture": "cropgraph-identity-candidate-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/reviewState", "keyword": "const" }]
+      }
+    },
+    {
+      "id": "cropgraph-cultivation-candidate-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:cropgraph-cultivation-candidate",
+      "fixture": "cropgraph-cultivation-candidate-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "cropgraph-cultivation-candidate-invalid",
+      "schemaId": "urn:hortinis:plants:schema:v1:cropgraph-cultivation-candidate",
+      "fixture": "cropgraph-cultivation-candidate-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/reviewState", "keyword": "const" }]
+      }
     }
   ]
 }

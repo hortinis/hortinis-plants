@@ -1,0 +1,65 @@
+{
+  "id": "candidate_cceaeb052c4379019da83dd7d4105aa9ab4914ec478f5b14d6506a49432e1319",
+  "kind": "subject-label",
+  "sourceRecordKey": {
+    "source": {
+      "sourceId": "source_cropgraph",
+      "sourceManifestId": "source_manifest_cropgraph",
+      "sourceReleaseId": "e722c3415bcf2773277f3422e13a4de5efd29b48"
+    },
+    "recordId": "rosemary-arp"
+  },
+  "sourceClaimKey": {
+    "sourceRecordKey": {
+      "source": {
+        "sourceId": "source_cropgraph",
+        "sourceManifestId": "source_manifest_cropgraph",
+        "sourceReleaseId": "e722c3415bcf2773277f3422e13a4de5efd29b48"
+      },
+      "recordId": "rosemary-arp"
+    },
+    "path": [
+      {
+        "kind": "field",
+        "id": "subject-label"
+      },
+      {
+        "kind": "claim",
+        "id": "5a8ea6ef5aa322b66cf8561e479e1295fdb6bf814431942e83b874410ac4f8e9"
+      }
+    ]
+  },
+  "sourceLocators": [
+    "packages/core/src/data/crop-calendar.json#/entries/0/category",
+    "packages/core/src/data/crop-calendar.json#/entries/0/commonName",
+    "packages/core/src/data/crop-calendar.json#/entries/0/scientificName",
+    "packages/core/src/data/crop-calendar.json#/entries/0/slug"
+  ],
+  "rawValue": {
+    "slug": "rosemary-arp",
+    "commonName": "Arp Rosemary",
+    "scientificName": "Salvia rosmarinus 'Arp'",
+    "category": "herb"
+  },
+  "value": {
+    "commonName": "Arp Rosemary",
+    "scientificName": "Salvia rosmarinus 'Arp'",
+    "resolution": "unresolved",
+    "hints": [
+      {
+        "scope": "cultivar",
+        "label": "Arp",
+        "sourceField": "scientificName"
+      }
+    ]
+  },
+  "mappingMethod": "explicit-label",
+  "relatedCandidateIds": [],
+  "reviewState": "unreviewed",
+  "effectiveCitation": "Texas A&M AgriLife Extension - Hardy Rosemary",
+  "citationLevel": "entry",
+  "citationLocator": "packages/core/src/data/crop-calendar.json#/entries/0/source",
+  "licenceId": "licence_cropgraph_data_declared_cc_by_4_0",
+  "declaredLicence": "CC-BY-4.0",
+  "commercialRights": "pending-review"
+}

@@ -1,0 +1,263 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:cropgraph-identity-candidate",
+  "title": "Unreviewed CropGraph identity candidate",
+  "type": "object",
+  "properties": {
+    "kind": {
+      "enum": ["scientific-name", "common-name", "alias", "subject-label"]
+    }
+  },
+  "allOf": [
+    {
+      "$ref": "#/$defs/envelope"
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "scientific-name"
+          }
+        },
+        "required": ["kind"]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["text", "nameRole"],
+            "properties": {
+              "text": {
+                "type": "string",
+                "minLength": 1
+              },
+              "nameRole": {
+                "const": "source-scientific-label"
+              }
+            }
+          },
+          "mappingMethod": {
+            "const": "source-preserved"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "common-name"
+          }
+        },
+        "required": ["kind"]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["text", "language"],
+            "properties": {
+              "text": {
+                "type": "string",
+                "minLength": 1
+              },
+              "language": {
+                "const": "unknown"
+              }
+            }
+          },
+          "mappingMethod": {
+            "const": "source-preserved"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "alias"
+          }
+        },
+        "required": ["kind"]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["text", "language", "nameRole"],
+            "properties": {
+              "text": {
+                "type": "string",
+                "minLength": 1
+              },
+              "language": {
+                "const": "unknown"
+              },
+              "nameRole": {
+                "const": "unknown"
+              }
+            }
+          },
+          "mappingMethod": {
+            "const": "source-preserved"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "subject-label"
+          }
+        },
+        "required": ["kind"]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["commonName", "scientificName", "resolution", "hints"],
+            "properties": {
+              "commonName": {
+                "type": "string",
+                "minLength": 1
+              },
+              "scientificName": {
+                "type": "string",
+                "minLength": 1
+              },
+              "resolution": {
+                "const": "unresolved"
+              },
+              "hints": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["scope", "label", "sourceField"],
+                  "properties": {
+                    "scope": {
+                      "enum": [
+                        "cultivar",
+                        "microgreen",
+                        "sprout",
+                        "mixture",
+                        "crop-form"
+                      ]
+                    },
+                    "label": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "sourceField": {
+                      "enum": ["commonName", "scientificName", "slug"]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "mappingMethod": {
+            "const": "explicit-label"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "envelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "sourceRecordKey",
+        "sourceClaimKey",
+        "sourceLocators",
+        "rawValue",
+        "value",
+        "mappingMethod",
+        "relatedCandidateIds",
+        "reviewState",
+        "effectiveCitation",
+        "citationLevel",
+        "citationLocator",
+        "licenceId",
+        "declaredLicence",
+        "commercialRights"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourceRecordKey": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/qualifiedSourceRecordKey"
+        },
+        "sourceClaimKey": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/semanticSubrecordKey"
+        },
+        "sourceLocators": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "rawValue": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/jsonValue"
+        },
+        "value": {
+          "type": "object"
+        },
+        "mappingMethod": {
+          "enum": [
+            "source-preserved",
+            "explicit-label",
+            "normalized-source-timing"
+          ]
+        },
+        "relatedCandidateIds": {
+          "type": "array",
+          "items": {
+            "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+          },
+          "uniqueItems": true
+        },
+        "reviewState": {
+          "const": "unreviewed"
+        },
+        "effectiveCitation": {
+          "type": "string"
+        },
+        "citationLevel": {
+          "enum": ["entry", "calendar"]
+        },
+        "citationLocator": {
+          "type": "string",
+          "minLength": 1
+        },
+        "licenceId": {
+          "const": "licence_cropgraph_data_declared_cc_by_4_0"
+        },
+        "declaredLicence": {
+          "const": "CC-BY-4.0"
+        },
+        "commercialRights": {
+          "const": "pending-review"
+        }
+      }
+    }
+  }
+}

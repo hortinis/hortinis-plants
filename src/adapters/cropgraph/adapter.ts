@@ -13,6 +13,8 @@ import { streamObject } from "stream-json/streamers/stream-object.js";
 import { runImporter } from "../../importer/runner.js";
 import type { ImportEvent, ImporterDefinition } from "../../importer/types.js";
 import { serializeCanonicalJson } from "../../serialization/canonical-json.js";
+import { extractCropGraphCandidates } from "./candidates.js";
+import type { CropGraphEntry, CropGraphRawRecord } from "./types.js";
 import type { ValidationApi } from "../../schema/validation-api.js";
 
 const releaseId = "e722c3415bcf2773277f3422e13a4de5efd29b48";
@@ -54,12 +56,6 @@ interface Cohort {
     readonly reason: string;
   }[];
   readonly fingerprint: string;
-}
-
-interface Entry {
-  readonly slug: string;
-  readonly source?: string;
-  readonly [key: string]: unknown;
 }
 
 interface SchemaExceptions {
@@ -107,7 +103,7 @@ export async function importCropGraphSource(options: CropGraphImportOptions) {
     readonly resourceInventorySha256: string;
   }> = {
     name: "cropgraph-raw-staging",
-    version: "0.1.0",
+    version: "0.2.0",
     configuration: {
       cohortSha256,
       exceptionsSha256: digest(exceptionsBytes),
@@ -138,6 +134,13 @@ export async function importCropGraphSource(options: CropGraphImportOptions) {
         mediaType: "application/jsonl",
         schemaId: rawSchemaId,
       },
+      ...["identity", "cultivation"].map((kind) => ({
+        name: `${kind}-candidates`,
+        path: `${kind}-candidates.jsonl`,
+        role: "auxiliary" as const,
+        mediaType: "application/jsonl",
+        schemaId: `urn:hortinis:plants:schema:v1:cropgraph-${kind}-candidate`,
+      })),
       {
         name: "inventory",
         path: "inventory.jsonl",
@@ -233,7 +236,7 @@ export async function importCropGraphSource(options: CropGraphImportOptions) {
           "Pinned CropGraph calendar metadata changed or is malformed",
         );
       }
-      const records: { slug: string; value: Record<string, unknown> }[] = [];
+      const records: { slug: string; value: CropGraphRawRecord }[] = [];
       const seen = new Set<string>();
       const encounteredExceptions = new Set<string>();
       const diagnostics: Record<string, unknown>[] = [];
@@ -248,7 +251,7 @@ export async function importCropGraphSource(options: CropGraphImportOptions) {
       for await (const item of stream) {
         const { key: index, value } = item as { key: number; value: unknown };
         if (!validateEntry(value)) {
-          const entry = value as Partial<Entry>;
+          const entry = value as Partial<CropGraphEntry>;
           const errors = validateEntry.errors ?? [];
           if (
             typeof entry.slug !== "string" ||
@@ -292,7 +295,7 @@ export async function importCropGraphSource(options: CropGraphImportOptions) {
             },
           });
         }
-        const entry = value as Entry;
+        const entry = value as CropGraphEntry;
         if (seen.has(entry.slug))
           throw new Error(
             `Duplicate CropGraph slug ${entry.slug} at /entries/${index}`,
@@ -314,14 +317,14 @@ export async function importCropGraphSource(options: CropGraphImportOptions) {
             `Reversed CropGraph range at /entries/${index} (${entry.slug})`,
           );
         }
-        const valueOut = {
+        const valueOut: CropGraphRawRecord = {
           sourceRecordKey: { source, recordId: entry.slug },
           sourceLocator: `${calendarLocator}#/entries/${index}`,
           originalIndex: index,
           rawEntry: entry,
           effectiveCitation: entry.source ?? metadata.source,
           citationLevel: entry.source === undefined ? "calendar" : "entry",
-          declaredLicence: metadata.license,
+          declaredLicence: "CC-BY-4.0",
           commercialRights: "pending-review",
         };
         records.push({ slug: entry.slug, value: valueOut });
@@ -348,10 +351,28 @@ export async function importCropGraphSource(options: CropGraphImportOptions) {
         );
       }
       const included = new Set(cohort.include);
+      let identityCandidates = 0;
+      let cultivationCandidates = 0;
+      let candidateDiagnostics = 0;
+      const diagnosticCounts: Record<string, number> = {};
       for (const record of records) {
         yield { output: "source-records", value: record.value };
-        if (included.has(record.slug))
+        if (included.has(record.slug)) {
           yield { output: "selected-records", value: record.value };
+          const extracted = extractCropGraphCandidates(record.value);
+          identityCandidates += extracted.identity.length;
+          cultivationCandidates += extracted.cultivation.length;
+          candidateDiagnostics += extracted.diagnostics.length;
+          for (const value of extracted.identity)
+            yield { output: "identity-candidates", value };
+          for (const value of extracted.cultivation)
+            yield { output: "cultivation-candidates", value };
+          for (const value of extracted.diagnostics) {
+            diagnosticCounts[value.code] =
+              (diagnosticCounts[value.code] ?? 0) + 1;
+            yield { output: "diagnostics", value };
+          }
+        }
       }
       diagnostics.sort((a, b) =>
         String(a.sourceRecordId).localeCompare(String(b.sourceRecordId), "en"),
@@ -368,6 +389,10 @@ export async function importCropGraphSource(options: CropGraphImportOptions) {
           includedRecords: cohort.include.length,
           excludedRecords: cohort.exclude.length,
           pinnedSchemaExceptions: diagnostics.length,
+          identityCandidates,
+          cultivationCandidates,
+          candidateDiagnostics,
+          diagnosticCounts,
           metadata,
           includedResources: resourceInventory.includedPaths,
           excludedResources: resourceInventory.excludedPaths,
@@ -482,7 +507,7 @@ function rangeReversed(value: unknown): boolean {
   );
 }
 
-function validPlantNowShifts(entry: Partial<Entry>): boolean {
+function validPlantNowShifts(entry: Partial<CropGraphEntry>): boolean {
   const modifiers = entry.climateModifiers;
   if (!isObject(modifiers)) return false;
   for (const modifier of Object.values(modifiers)) {

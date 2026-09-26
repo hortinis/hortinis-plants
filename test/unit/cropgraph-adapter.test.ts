@@ -11,6 +11,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { importCropGraphSource } from "../../src/adapters/cropgraph/adapter.js";
+import { validate } from "../../src/schema/validation-api.js";
 import { serializeCanonicalJson } from "../../src/serialization/canonical-json.js";
 
 const releaseId = "e722c3415bcf2773277f3422e13a4de5efd29b48";
@@ -67,11 +68,50 @@ describe("CropGraph raw staging", () => {
       .split("\n");
     expect(records).toHaveLength(5006);
     expect(selected).toEqual(records);
+    const diagnostics = (
+      await readFile(join(root, "first/diagnostics.jsonl"), "utf8")
+    )
+      .trim()
+      .split("\n")
+      .map((line) => JSON.parse(line) as { code: string });
     expect(
-      (await readFile(join(root, "first/diagnostics.jsonl"), "utf8"))
-        .trim()
-        .split("\n"),
+      diagnostics.filter(
+        (d) => d.code === "PINNED_SCHEMA_OMITS_PLANT_NOW_MODIFIER",
+      ),
     ).toHaveLength(21);
+    expect(
+      diagnostics.some((d) => d.code === "WINDOW_NOTE_RANGE_DISAGREEMENT"),
+    ).toBe(true);
+    for (const name of ["identity-candidates", "cultivation-candidates"]) {
+      const bytes = await readFile(join(root, `first/${name}.jsonl`));
+      expect(
+        bytes.equals(await readFile(join(root, `second/${name}.jsonl`))),
+      ).toBe(true);
+      const candidates = bytes
+        .toString("utf8")
+        .trim()
+        .split("\n")
+        .map(
+          (line) =>
+            JSON.parse(line) as {
+              id: string;
+              sourceRecordKey: { recordId: string };
+              reviewState: string;
+              commercialRights: string;
+            },
+        );
+      expect(new Set(candidates.map((c) => c.id)).size).toBe(candidates.length);
+      expect(
+        new Set(candidates.map((c) => c.sourceRecordKey.recordId)).size,
+      ).toBe(5006);
+      expect(
+        candidates.every(
+          (c) =>
+            c.reviewState === "unreviewed" &&
+            c.commercialRights === "pending-review",
+        ),
+      ).toBe(true);
+    }
     const tomato = JSON.parse(
       records.find((line) => line.includes('"recordId":"tomato"'))!,
     ) as {
@@ -84,7 +124,7 @@ describe("CropGraph raw staging", () => {
       rawEntry: { slug: "tomato" },
       commercialRights: "pending-review",
     });
-  }, 20000);
+  }, 60000);
 
   it("keeps selected record keys stable when the source array is reordered", async () => {
     const fixture = await makeFixture((entries) => entries.reverse());
@@ -112,7 +152,7 @@ describe("CropGraph raw staging", () => {
     expect(
       JSON.parse(selected[0]!) as { sourceRecordKey: { recordId: string } },
     ).toMatchObject({ sourceRecordKey: { recordId: "abaca-manila-hemp" } });
-  });
+  }, 60000);
 
   it("fails atomically for a malformed entry and for a duplicate slug", async () => {
     for (const [name, change, message] of [
@@ -146,6 +186,46 @@ describe("CropGraph raw staging", () => {
       ).rejects.toThrow();
     }
   });
+
+  it("preserves a successful run when candidate validation fails", async () => {
+    const root = await mkdtemp(join(tmpdir(), "cropgraph-t11-atomic-"));
+    scratch.push(root);
+    const outputDirectory = join(root, "run");
+    await importCropGraphSource({
+      inputDirectory: originalDirectory,
+      outputDirectory,
+    });
+    const before = await readFile(
+      join(outputDirectory, "importer-run-manifest.json"),
+    );
+    const candidatesBefore = await readFile(
+      join(outputDirectory, "cultivation-candidates.jsonl"),
+    );
+    await expect(
+      importCropGraphSource({
+        inputDirectory: originalDirectory,
+        outputDirectory,
+        validationApi: {
+          validate(schema, value) {
+            if (
+              schema.endsWith(":cropgraph-cultivation-candidate") &&
+              value !== null
+            )
+              throw new Error("Injected candidate validation failure");
+            return validate(schema, value);
+          },
+        },
+      }),
+    ).rejects.toThrow();
+    expect(
+      await readFile(join(outputDirectory, "importer-run-manifest.json")),
+    ).toEqual(before);
+    expect(
+      (
+        await readFile(join(outputDirectory, "cultivation-candidates.jsonl"))
+      ).equals(candidatesBefore),
+    ).toBe(true);
+  }, 60000);
 
   it("rejects a cohort that omits a pinned slug", async () => {
     const root = await mkdtemp(join(tmpdir(), "cropgraph-t10-scope-"));

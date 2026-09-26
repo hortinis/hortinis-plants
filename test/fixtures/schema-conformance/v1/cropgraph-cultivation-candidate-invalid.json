@@ -1,0 +1,69 @@
+{
+  "id": "candidate_9e5ae4479120a8ebd35c96bb4ba2eac2a8514e2a24dbe61dc5c3eb3c7332f1b7",
+  "kind": "window",
+  "sourceRecordKey": {
+    "source": {
+      "sourceId": "source_cropgraph",
+      "sourceManifestId": "source_manifest_cropgraph",
+      "sourceReleaseId": "e722c3415bcf2773277f3422e13a4de5efd29b48"
+    },
+    "recordId": "rosemary-arp"
+  },
+  "sourceClaimKey": {
+    "sourceRecordKey": {
+      "source": {
+        "sourceId": "source_cropgraph",
+        "sourceManifestId": "source_manifest_cropgraph",
+        "sourceReleaseId": "e722c3415bcf2773277f3422e13a4de5efd29b48"
+      },
+      "recordId": "rosemary-arp"
+    },
+    "path": [
+      {
+        "kind": "field",
+        "id": "windows"
+      },
+      {
+        "kind": "claim",
+        "id": "8764a2e5885f53b6e74663dc8a3f5bf184598bdb67a50c91dcdf52708e1fd064"
+      }
+    ]
+  },
+  "sourceLocators": [
+    "packages/core/src/data/crop-calendar.json#/entries/0/windows/0"
+  ],
+  "rawValue": {
+    "action": "plant_now",
+    "anchor": "last_spring",
+    "fromFrostDays": -14,
+    "toFrostDays": 28
+  },
+  "value": {
+    "sourceAction": "plant_now",
+    "action": null,
+    "actionMapping": "unresolved",
+    "sourceTiming": {
+      "anchor": "last_spring",
+      "fromFrostDays": -14,
+      "toFrostDays": 28
+    },
+    "timing": {
+      "type": "relative-day-window",
+      "anchor": "last_spring_frost",
+      "startOffsetDays": -14,
+      "endOffsetDays": 28
+    },
+    "applicability": "unreviewed"
+  },
+  "mappingMethod": "normalized-source-timing",
+  "relatedCandidateIds": [
+    "candidate_de669af9a4e51c3f8a22628db26f62e5cd16a96be691b1c5b0f858c52eabd854"
+  ],
+  "reviewState": "accepted",
+  "effectiveCitation": "Texas A&M AgriLife Extension - Hardy Rosemary",
+  "citationLevel": "entry",
+  "citationLocator": "packages/core/src/data/crop-calendar.json#/entries/0/source",
+  "licenceId": "licence_cropgraph_data_declared_cc_by_4_0",
+  "declaredLicence": "CC-BY-4.0",
+  "commercialRights": "pending-review"
+}

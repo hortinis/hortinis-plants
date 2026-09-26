@@ -75,3 +75,13 @@ implementation sequence. The previous two-backbone and schema-version questions 
 - **validated — Comparison contract:** preserve agreement, conflict and non-comparability; require an explicit
   preferred assertion, retain-both decision or deferral; do not average values or apply source priority
   implicitly. Packet matching and completion coverage remain planned for T16 and T19.
+
+- **validated — CropGraph candidate identity:** use qualified semantic content keys, collapse exact nested
+  duplicates into one candidate with every occurrence locator, and keep differing notes as distinct claims.
+  Source array positions never determine candidate identity.
+- **validated — CropGraph extraction boundary:** explicit label hints and the bounded diagnostic patterns in
+  the [adapter guide](development/source-adapter-guide.md#cropgraph-candidates-t11) preserve unreviewed source
+  claims. Unrecognized labels and prose remain unresolved rather than being interpreted automatically.
+- **planned — CropGraph broader label and prose interpretation:** resolving cultivar names without explicit
+  quoted epithets, crop-form equivalence, mixture components, alias languages and additional note patterns
+  requires later curation. The T11 extractor does not establish these meanings.

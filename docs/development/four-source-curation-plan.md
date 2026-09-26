@@ -175,7 +175,7 @@ Dependencies: T8.
 Acceptance: malformed entries fail deterministically; the full source is accounted for; selected records are
 stable under input reordering; raw output is byte-deterministic.
 
-### T11 — Emit CropGraph identity and cultivation candidates
+### T11 — Emit CropGraph identity and cultivation candidates (`validated`)
 
 Emit qualified candidates for names, aliases, crop forms, cultivars, mixtures, windows, actions, anchors,
 contexts, soil temperatures, harvest ranges, modifiers and notes. Preserve raw values and source notes. Keep
@@ -188,6 +188,12 @@ Dependencies: T5, T10.
 
 Acceptance: tomato numeric/note disagreement, onion regional notes, ambiguous soil temperature, `plant_now`,
 negative offsets, modifier lineage, absent citations and duplicate slugs all have fixture coverage.
+
+Implemented by the CropGraph 0.2.0 importer with schema-validated identity and cultivation JSONL outputs.
+The pinned cohort emits 17,032 identity and 41,916 cultivation candidates, all unreviewed with commercial
+rights pending review. Fixtures cover semantic identity under reordering, conservative note diagnostics,
+modifier bases and failure atomicity. The [adapter guide](source-adapter-guide.md#cropgraph-candidates-t11)
+documents the extraction rules and limits; unresolved interpretation remains in the open questions register.
 
 ### T12 — Implement TAXREF extraction and localization candidates
 

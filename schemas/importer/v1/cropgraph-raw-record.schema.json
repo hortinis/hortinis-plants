@@ -21,7 +21,7 @@
     "sourceLocator": { "type": "string", "minLength": 1 },
     "originalIndex": { "type": "integer", "minimum": 0 },
     "rawEntry": { "type": "object" },
-    "effectiveCitation": { "type": "string", "minLength": 1 },
+    "effectiveCitation": { "type": "string" },
     "citationLevel": { "enum": ["entry", "calendar"] },
     "declaredLicence": { "const": "CC-BY-4.0" },
     "commercialRights": { "const": "pending-review" }

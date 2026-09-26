@@ -28,5 +28,5 @@ evidence for `dev-validation` and remains `pending-review` for `commercial` rele
 
 The current pin includes only the crop calendar, its JSON Schema, the repository licence and the core README.
 Companion, rotation, succession, pest, beneficial-insect, GDD, climate, zone and software assets are explicitly
-excluded. T10 will inventory the pinned calendar and freeze a record-level cohort; this audit does not select
-records or resolve ambiguous cultivation semantics.
+excluded. T10 inventories the pinned calendar and freezes all 5,006 entries in the record-level cohort. T11 preserves
+candidate-level citation lineage and pending rights; this audit does not resolve ambiguous cultivation semantics.

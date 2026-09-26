@@ -1,0 +1,323 @@
+{
+  "sourceReleaseId": "e722c3415bcf2773277f3422e13a4de5efd29b48",
+  "calendarCitation": "USDA Cooperative Extension publications + Washington State University Extension + Cornell Cooperative Extension + The Old Farmer's Almanac + USDA GRIN (germplasm) + Seed Savers Exchange yearbooks + Fedco/Johnny's/Baker Creek/Strictly Medicinal seed catalogs (cultivar descriptors). Conservative ranges suitable for general North American gardening; coastal, mountain, and desert microclimates may shift dates 2-3 weeks. Schema v2 (2026-05-13): category enum extended to 14 values (added grain, mushroom, native, medicinal, fiber, forage, sprout).",
+  "entries": [
+    {
+      "slug": "tomato",
+      "commonName": "Tomato",
+      "scientificName": "Solanum lycopersicum",
+      "category": "vegetable",
+      "season": "warm",
+      "growingContext": "outdoor",
+      "daysToHarvest": {
+        "min": 55,
+        "max": 90
+      },
+      "minSoilTempF": 60,
+      "zoneRange": {
+        "min": 3,
+        "max": 11
+      },
+      "windows": [
+        {
+          "action": "start_indoors",
+          "anchor": "last_spring",
+          "fromFrostDays": -56,
+          "toFrostDays": -28,
+          "notes": "6-8 weeks before last frost; 70-75\u00b0F germination"
+        },
+        {
+          "action": "transplant",
+          "anchor": "last_spring",
+          "fromFrostDays": 7,
+          "toFrostDays": 84,
+          "notes": "Harden off 7-10 days; soil should reach 60\u00b0F"
+        }
+      ],
+      "notes": "Pinch suckers on indeterminate varieties. Stake or cage. Mulch heavily to maintain even moisture and reduce blossom-end rot.",
+      "aliases": ["tomate", "love apple"],
+      "climateModifiers": {
+        "maritime": {
+          "windowShifts": {
+            "start_indoors": -2,
+            "transplant": 1
+          },
+          "notes": "Choose short-season determinates (55-70d). Cool slow-warming soil, wait until soil hits 60\u00b0F before transplant. Late-blight pressure high; stake/prune for airflow."
+        },
+        "mediterranean": {
+          "notes": "Deep weekly watering beats shallow daily; avoid overhead irrigation to limit foliar disease. Long warm season favors indeterminates."
+        },
+        "continental": {
+          "notes": "Wall-of-Water or row cover lets you transplant 1-2 weeks earlier. Short window favors determinates with predictable harvest."
+        },
+        "humid_subtropical": {
+          "windowShifts": {
+            "start_indoors": 1,
+            "transplant": -1
+          },
+          "notes": "Heat builds fast, get plants in early. Choose VFN/TSWV-resistant varieties; mulch heavily; consider a second fall crop started in midsummer."
+        },
+        "arid": {
+          "windowShifts": {
+            "start_indoors": 1
+          },
+          "notes": "Big seedlings struggle in extreme heat, start later for compact transplants. 30% shade cloth above 95\u00b0F preserves fruit set; mulch and drip-irrigate."
+        },
+        "semi_arid": {
+          "notes": "Wind exposure stresses transplants, provide windbreak and stake early. Mulch heavily to retain irrigation moisture."
+        }
+      }
+    },
+    {
+      "slug": "onion",
+      "commonName": "Onion",
+      "scientificName": "Allium cepa",
+      "category": "vegetable",
+      "season": "cool",
+      "growingContext": "outdoor",
+      "daysToHarvest": {
+        "min": 100,
+        "max": 140
+      },
+      "minSoilTempF": 50,
+      "zoneRange": {
+        "min": 3,
+        "max": 10
+      },
+      "windows": [
+        {
+          "action": "start_indoors",
+          "anchor": "last_spring",
+          "fromFrostDays": -84,
+          "toFrostDays": -56,
+          "notes": "From seed: 10-12 weeks before last frost"
+        },
+        {
+          "action": "transplant",
+          "anchor": "last_spring",
+          "fromFrostDays": -28,
+          "toFrostDays": 7,
+          "notes": "Sets and transplants tolerate light frost"
+        }
+      ],
+      "notes": "Day-length sensitive: long-day varieties for North (>40\u00b0N), short-day for South (<35\u00b0N), intermediate for the middle.",
+      "climateModifiers": {
+        "maritime": {
+          "notes": "Long-day onions (Walla Walla, Patterson, Copra) for storage. Maritime springs work well; thrips pressure in dry summers."
+        },
+        "mediterranean": {
+          "notes": "Short-day onions (Yellow Granex, Texas Early Grano), only southern California reliably; intermediate-day for central coast."
+        },
+        "continental": {
+          "notes": "Long-day onions; start indoors 10-12 weeks before transplant. Cold-store storage onions (Copra, Patterson)."
+        },
+        "humid_subtropical": {
+          "notes": "Short-day onions for southeast (zones 8+); plant Oct-Nov for May harvest. Pink root and thrips pressure."
+        },
+        "arid": {
+          "notes": "Short-day for southwest; plant Oct-Nov for spring harvest. Deep watering critical at bulbing."
+        },
+        "semi_arid": {
+          "notes": "Long-day or intermediate-day; wind exposure on tall tops; consistent moisture at bulbing."
+        }
+      }
+    },
+    {
+      "slug": "lettuce-leaf",
+      "commonName": "Leaf Lettuce",
+      "scientificName": "Lactuca sativa",
+      "category": "vegetable",
+      "season": "cool",
+      "growingContext": "both",
+      "daysToHarvest": {
+        "min": 30,
+        "max": 50
+      },
+      "minSoilTempF": 40,
+      "zoneRange": {
+        "min": 3,
+        "max": 11
+      },
+      "windows": [
+        {
+          "action": "direct_sow",
+          "anchor": "last_spring",
+          "fromFrostDays": -28,
+          "toFrostDays": 28,
+          "notes": "Succession sow every 2 weeks"
+        },
+        {
+          "action": "direct_sow",
+          "anchor": "first_fall",
+          "fromFrostDays": -84,
+          "toFrostDays": -28
+        }
+      ],
+      "notes": "Cut-and-come-again, harvest outer leaves, inner keeps growing. Bolts in heat over 75\u00b0F.",
+      "climateModifiers": {
+        "maritime": {
+          "notes": "Cool maritime summers extend lettuce season into June-July. Slugs are the primary pest, beer traps, copper tape, or iron phosphate baits."
+        },
+        "mediterranean": {
+          "windowShifts": {
+            "direct_sow": -2
+          },
+          "notes": "Hot dry summers force lettuce into a strict spring + fall pattern. Sow earlier in spring; skip summer; sow heavily in fall through winter."
+        },
+        "continental": {
+          "notes": "Succession-sow every 2 weeks until daytime highs hit 75\u00b0F. Resume in late summer for fall crop."
+        },
+        "humid_subtropical": {
+          "windowShifts": {
+            "direct_sow": -2
+          },
+          "notes": "Lettuce season is short, sow as early as possible in spring; switch to heat-tolerant varieties (Jericho, Nevada) for late spring; resume in fall."
+        },
+        "arid": {
+          "windowShifts": {
+            "direct_sow": -2
+          },
+          "notes": "Sow much earlier in spring (often Feb) and through fall/winter. Summer impossible without 50% shade cloth and constant moisture."
+        },
+        "semi_arid": {
+          "notes": "Wind desiccates seedlings, direct-sow into shallow trenches and cover until established. Bolts fast in heat."
+        }
+      }
+    },
+    {
+      "slug": "microgreen-sunflower",
+      "commonName": "Sunflower Microgreens",
+      "scientificName": "Helianthus annuus",
+      "category": "sprout",
+      "season": "cool",
+      "growingContext": "indoor",
+      "daysToHarvest": {
+        "min": 8,
+        "max": 14
+      },
+      "minSoilTempF": 55,
+      "zoneRange": {
+        "min": 1,
+        "max": 13
+      },
+      "windows": [
+        {
+          "action": "direct_sow",
+          "anchor": "last_spring",
+          "fromFrostDays": -180,
+          "toFrostDays": 180,
+          "notes": "Indoor production year-round; frost dates not relevant"
+        }
+      ],
+      "notes": "Indoor tray-grown; soak black-oil seed 8 hours, weight tray for first 3 days for tall stems. Harvest at first true leaf.",
+      "source": "Cornell Cooperative Extension - Microgreen Production"
+    },
+    {
+      "slug": "rosemary-arp",
+      "commonName": "Arp Rosemary",
+      "scientificName": "Salvia rosmarinus 'Arp'",
+      "category": "herb",
+      "season": "perennial",
+      "growingContext": "both",
+      "daysToHarvest": {
+        "min": 90,
+        "max": 365
+      },
+      "minSoilTempF": null,
+      "zoneRange": {
+        "min": 6,
+        "max": 10
+      },
+      "windows": [
+        {
+          "action": "plant_now",
+          "anchor": "last_spring",
+          "fromFrostDays": -14,
+          "toFrostDays": 28
+        }
+      ],
+      "notes": "Cold-hardy Texas heirloom; survives zone 6 with good drainage and protected siting. Hardy rosemary for marginal climates.",
+      "source": "Texas A&M AgriLife Extension - Hardy Rosemary",
+      "climateModifiers": {
+        "mediterranean": {
+          "notes": "Ideal Mediterranean herb; thrives in long warm summers with low water. Drought-tolerant once established."
+        },
+        "humid_subtropical": {
+          "notes": "Premier cold-hardy rosemary for upper South Zone 7 plus; tolerates Texas / Georgia winters where Tuscan Blue dies back. Well-drained soil mandatory."
+        },
+        "continental": {
+          "windowShifts": {
+            "plant_now": 1
+          },
+          "notes": "Hardy to Zone 6 with mulch; the defining cold-hardy rosemary. Plant in raised bed or south-facing wall microclimate for Zone 5 culture."
+        },
+        "arid": {
+          "notes": "Drought-tolerant rosemary thrives in desert SW; minimal irrigation after establishment. The defining xeriscape culinary herb."
+        },
+        "maritime": {
+          "windowShifts": {
+            "plant_now": 1
+          },
+          "notes": "Productive in Pacific NW with well-drained soil; raised bed culture preferred. Wet winter soils cause root rot; plant on slope or in container."
+        }
+      }
+    },
+    {
+      "slug": "seaberry-pollmix",
+      "commonName": "Pollmix Seaberry",
+      "scientificName": "Hippophae rhamnoides",
+      "category": "fruit",
+      "season": "perennial",
+      "growingContext": "outdoor",
+      "daysToHarvest": {
+        "min": 730,
+        "max": 1460
+      },
+      "minSoilTempF": null,
+      "zoneRange": {
+        "min": 3,
+        "max": 8
+      },
+      "windows": [
+        {
+          "action": "plant_now",
+          "anchor": "last_spring",
+          "fromFrostDays": -45,
+          "toFrostDays": 45,
+          "notes": "Male pollinator; bears no fruit but is essential for female cultivars"
+        }
+      ],
+      "notes": "German-bred male sea buckthorn; extended bloom period covers most named female cultivars. Nitrogen-fixing, cold-hardy to zone 3. Plant 1 male per 6 to 8 females within 30 ft.",
+      "aliases": ["pollmix", "pollmix 1"],
+      "source": "University of Saskatchewan fruit program seaberry records; German horticulture cultivar trials"
+    },
+    {
+      "slug": "nasturtium-jewel-mix",
+      "commonName": "Jewel Mix Nasturtium",
+      "scientificName": "Tropaeolum majus",
+      "category": "flower",
+      "season": "warm",
+      "growingContext": "outdoor",
+      "daysToHarvest": {
+        "min": 50,
+        "max": 65
+      },
+      "minSoilTempF": 55,
+      "zoneRange": {
+        "min": 4,
+        "max": 11
+      },
+      "windows": [
+        {
+          "action": "direct_sow",
+          "anchor": "last_spring",
+          "fromFrostDays": 0,
+          "toFrostDays": 30,
+          "notes": "Dwarf bushy 12-inch form; mix of yellow, orange, salmon, red flowers."
+        }
+      ],
+      "notes": "Compact mounding mix with edible peppery flowers and leaves; classic mix for kitchen borders. Bush habit holds blooms upright for cut-flower use. Self-seeds reliably.",
+      "source": "Cornell Vegetable Varieties Nasturtium"
+    }
+  ]
+}

@@ -87,4 +87,63 @@ pinned entries using `plant_now` in climate modifier `windowShifts`, which that 
 register pins the exact slugs and source checksums. Other schema errors, duplicate slugs, changed resources
 and cohort gaps fail the run atomically. Entry-level source strings override the calendar-level citation;
 both the effective string and its inheritance level are preserved. All entries remain pending commercial
-rights review, and cultivation interpretation belongs to later curation tasks.
+rights review. Candidate extraction is described below; cultivation interpretation belongs to later curation tasks.
+
+### CropGraph candidates (T11)
+
+The same atomic run also writes `identity-candidates.jsonl` and `cultivation-candidates.jsonl`. Both have
+compiled V1 schemas; the run manifest records their schema, byte size, count and SHA-256. The inventory adds
+candidate counts and candidate diagnostic counts. Candidates are emitted per selected record, ordered by
+source slug and then opaque candidate ID. Generated files remain under ignored `.cache` paths.
+
+Every candidate carries a release-qualified record key, semantic claim key, exact occurrence locators, raw
+value, extraction method, effective citation and citation locator, declared licence reference, `unreviewed`
+content state and `pending-review` commercial rights. No authored subject, context or acceptance is created.
+An absent entry citation inherits the calendar bibliography and emits `ENTRY_CITATION_ABSENT`. A present but
+empty or whitespace-only citation remains an entry citation and emits `CITATION_UNUSABLE`; it does not silently
+fall back to the bibliography. Neither citation form establishes rights in the underlying work.
+
+Identity output preserves scientific labels, common names and aliases verbatim. Alias language and whether
+an alias is common or scientific remain unknown. Every entry gets an unresolved subject-label candidate,
+including its original slug, names and category. Explicit hints use only these documented patterns:
+
+- A trailing single-quoted or curly-single-quoted epithet in the scientific label proposes a cultivar label.
+- A whole word `microgreen`/`microgreens` in the common name, or a `microgreen-` slug prefix, flags microgreens.
+- A whole word `sprout`/`sprouts` in a common name is flagged only with source category `sprout`.
+- Whole words `mix`, `mixture` or `blend` in the common name flag a mixture; `Pollmix` does not match.
+- `var.`, `subsp.` or `Group` followed by whitespace in the scientific label flags a crop-form review hint.
+
+Hints are unreviewed source-label cues, not established taxonomic or horticultural identities. Other cultivar
+and crop-form labels remain visible in the full unresolved subject label and notes. No automatic name
+stripping, mixture decomposition, synonym acceptance or mature-crop inheritance is performed.
+
+Cultivation windows preserve the original action, anchor, signed offsets and notes. `start_indoors`,
+`direct_sow` and `transplant` map by identity; `plant_now` has a null catalog action and an unresolved action
+mapping. Frost anchor spelling is normalized to the existing relative-day timing vocabulary without
+calculating dates. Context retains `both` and `greenhouse`, leaves heating unknown, and records missing
+context explicitly instead of assuming outdoor cultivation. Source category, season and USDA zone range are
+source classifications, not French applicability or inferred lifecycle assertions.
+
+Soil temperatures retain Fahrenheit and unresolved meaning, including an explicit null; absent temperature
+fields emit no temperature candidate. Harvest ranges retain days with an unknown anchor. Notes remain text
+candidates. Window notes link to their window; modifier notes retain their climate key and link to that
+climate's shift candidates. Entry notes remain scoped by the qualified source record.
+
+A modifier retains its climate, source action and week delta, plus every matching base-window candidate ID.
+It remains unapplied. Zero or multiple distinct bases produce `MODIFIER_BASE_MISSING` or
+`MODIFIER_BASE_AMBIGUOUS`; later review chooses applicability and bases. The pinned `plant_now` exception
+register continues to apply. No climate, zone or runtime-code datasets are imported.
+
+Semantic keys hash canonical claim content within a qualified source record and semantic field. Candidate
+IDs never contain array positions or file paths. Exact duplicate aliases/windows share a candidate, retain
+all occurrence locators and emit `DUPLICATE_SEMANTIC_CLAIM`. Different window notes make distinct claims.
+Reordering changes locators and possibly hashes of output files, but not candidate identities. Changes to
+claim content change the candidate ID; run fingerprints also track changed citations and other inputs.
+
+Diagnostics deliberately recognize a limited set of prose patterns. An explicit `N-M weeks before last/first
+frost` window note is compared to numeric offsets only when its anchor matches; disagreement preserves both
+claims. Regional review flags recognize `long-day`, `short-day`, `day-length`, `California`, `southeast`,
+`southwest` and degrees north. Every indoor frost-relative window is flagged for applicability review.
+These checks do not establish that other prose is consistent or turn notes into numeric, geographic or
+accepted facts. Greenhouse heating, numeric soil-temperature meaning, `plant_now` and harvest anchors have
+separate unresolved diagnostics.
