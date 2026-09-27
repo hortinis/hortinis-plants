@@ -218,7 +218,7 @@ duplicates, encoding errors and malformed records fail atomically. The importer 
 vernacular strings without splitting them and does not attach TAXREF names to WFO identities. External database
 links remain verified archive members but are not materialized by T12.
 
-### T13 — Generalize WFO reconciliation for GROW and CropGraph
+### T13 — Generalize WFO reconciliation for GROW and CropGraph (`validated`)
 
 Replace the GROW-only seed interface with qualified GROW and selected CropGraph source-name seeds. Reconcile
 against WFO using the existing conservative normalization. Preserve accepted, synonym, ambiguous, unplaced,
@@ -228,6 +228,13 @@ Dependencies: T4, T7, T10–T11.
 
 Acceptance: every selected source-name seed has one WFO outcome, including explicit no-match; existing GROW/WFO
 fixtures remain valid; equal local IDs from different sources remain distinct.
+
+Implemented by the WFO 0.2.0 reconciliation job. The pinned run covers all 140 GROW records and all 5,006
+selected CropGraph scientific-name candidates, retaining qualified semantic claim keys and exact source
+locators. It emits 2,937 accepted candidates, 321 synonym candidates, 1,300 ambiguous outcomes, 100
+unresolved-status outcomes and 488 explicit unmatched outcomes; no pinned seed is unplaced. CropGraph common
+names, aliases and subject labels are not taxonomy seeds, and cultivar or crop-form qualifiers are never
+stripped. The historical GROW draft generator consumes only the GROW projection of the combined run.
 
 ### T14 — Link TAXREF localization to reviewed WFO identity
 

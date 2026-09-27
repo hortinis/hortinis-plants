@@ -32,10 +32,20 @@ import {
   WFO_SOURCE_RELEASE_ID,
   WFO_TAXONOMIC_RECORD_SCHEMA,
 } from "./constants.js";
+import {
+  CROPGRAPH_IDENTITY_CANDIDATE_SCHEMA,
+  CROPGRAPH_PROVIDER_ID,
+  CROPGRAPH_RAW_RECORD_SCHEMA,
+  CROPGRAPH_SOURCE_ID,
+  CROPGRAPH_SOURCE_MANIFEST_ID,
+  CROPGRAPH_SOURCE_RELEASE_ID,
+} from "../cropgraph/constants.js";
 import { readWfoSnapshot, WfoSnapshotError } from "./read-snapshot.js";
 import type {
   GrowImportRecord,
-  GrowNameRecord,
+  CropGraphIdentityCandidate,
+  CropGraphSelectedRecord,
+  SourceNameSeed,
   TaxonMatchCandidate,
   TaxonMatchOutcome,
   WfoDiagnostic,
@@ -45,12 +55,18 @@ import type {
   WfoTaxonMatchAlternative,
 } from "./types.js";
 import { readJsonLines } from "../../serialization/json-lines.js";
-import { serializeQualifiedSourceRecordKey } from "../../domain/source-keys.js";
+import {
+  makeSemanticSubrecordKey,
+  serializeQualifiedSourceRecordKey,
+  serializeSemanticSubrecordKey,
+} from "../../domain/source-keys.js";
 import { serializeCanonicalJson } from "../../serialization/canonical-json.js";
 import { validate, type ValidationApi } from "../../schema/validation-api.js";
 
 const WFO_SOURCE_MANIFEST_PATH = "data/sources/wfo/source-manifest.json";
 const GROW_SOURCE_MANIFEST_PATH = "data/sources/grow/source-manifest.json";
+const CROPGRAPH_SOURCE_MANIFEST_PATH =
+  "data/sources/cropgraph/source-manifest.json";
 const RECONCILIATION_OUTPUTS = [
   {
     role: "taxon-match-candidates",
@@ -71,10 +87,12 @@ const RECONCILIATION_OUTPUTS = [
 
 export interface WfoImportOptions {
   readonly growRunDirectory: string;
+  readonly cropGraphRunDirectory: string;
   readonly snapshotPath: string;
   readonly outputDirectory: string;
   readonly wfoSourceManifestPath?: string;
   readonly growSourceManifestPath?: string;
+  readonly cropGraphSourceManifestPath?: string;
   readonly validationApi?: ValidationApi;
 }
 
@@ -108,19 +126,26 @@ interface SourceManifest {
   }[];
 }
 
-interface GrowRunManifest {
+interface ImporterRunManifest {
+  readonly importer?: {
+    readonly name?: unknown;
+    readonly version?: unknown;
+  };
   readonly sourceManifest?: {
     readonly id?: unknown;
     readonly sha256?: unknown;
   };
-  readonly outputs?: readonly {
-    readonly path?: unknown;
-    readonly sha256?: unknown;
-    readonly byteSize?: unknown;
-    readonly recordCount?: unknown;
-    readonly schemaId?: unknown;
-  }[];
+  readonly configuration?: unknown;
+  readonly outputs?: readonly RunOutputDescriptor[];
   readonly configurationSha256?: unknown;
+}
+
+interface RunOutputDescriptor {
+  readonly path?: unknown;
+  readonly sha256?: unknown;
+  readonly byteSize?: unknown;
+  readonly recordCount?: unknown;
+  readonly schemaId?: unknown;
 }
 
 interface SourceInfo {
@@ -157,9 +182,11 @@ export class ExactWfoNameMatchIndex {
   readonly #seenWfoIds = new Set<string>();
   #rowsScanned = 0;
 
-  constructor(growNames: readonly GrowNameRecord[]) {
+  constructor(sourceNames: readonly SourceNameSeed[]) {
     this.#requestedNames = new Set(
-      growNames.map((record) => normalizeScientificName(record.scientificName)),
+      sourceNames.map((record) =>
+        normalizeScientificName(record.scientificName),
+      ),
     );
   }
 
@@ -190,18 +217,22 @@ export class ExactWfoNameMatchIndex {
   }
 }
 
-/** Reconcile every GROW source record against a locally pinned WFO snapshot. */
+/** Reconcile qualified GROW and selected CropGraph names against pinned WFO. */
 export async function importWfoSnapshot(
   options: WfoImportOptions,
 ): Promise<WfoImportResult> {
   const validationApi = options.validationApi ?? { validate };
   const outputDirectory = resolve(options.outputDirectory);
   const growRunDirectory = resolve(options.growRunDirectory);
+  const cropGraphRunDirectory = resolve(options.cropGraphRunDirectory);
   const wfoManifestPath = resolve(
     options.wfoSourceManifestPath ?? WFO_SOURCE_MANIFEST_PATH,
   );
   const growManifestPath = resolve(
     options.growSourceManifestPath ?? GROW_SOURCE_MANIFEST_PATH,
+  );
+  const cropGraphManifestPath = resolve(
+    options.cropGraphSourceManifestPath ?? CROPGRAPH_SOURCE_MANIFEST_PATH,
   );
   const snapshotPath = resolve(options.snapshotPath);
 
@@ -221,6 +252,17 @@ export async function importWfoSnapshot(
     "GROW source manifest",
   );
   assertExpectedGrowSource(growSource.manifest);
+  const cropGraphSource = await readSourceInfo(
+    cropGraphManifestPath,
+    CROPGRAPH_SOURCE_ID,
+  );
+  assertSchema(
+    validationApi,
+    SOURCE_MANIFEST_SCHEMA,
+    cropGraphSource.manifest,
+    "CropGraph source manifest",
+  );
+  assertExpectedCropGraphSource(cropGraphSource.manifest);
   const wfoResource = findDeclaredResource(
     wfoSource.manifest,
     WFO_ARCHIVE_LOCATOR,
@@ -230,54 +272,77 @@ export async function importWfoSnapshot(
   const snapshotMetadata = await hashFile(snapshotPath);
   assertResourceMatches(snapshotMetadata, wfoResource, WFO_ARCHIVE_LOCATOR);
 
-  const growRunManifestPath = join(
+  const growRun = await readImporterRun(
     growRunDirectory,
-    "importer-run-manifest.json",
+    "GROW",
+    validationApi,
   );
-  const growRunManifestBytes = await readFile(growRunManifestPath).catch(
-    (error: unknown) => {
-      throw new Error(
-        `Unable to read GROW importer run manifest at ${growRunManifestPath}`,
-        { cause: error },
-      );
-    },
+  assertImporterRunSource(
+    growRun.manifest,
+    growSource,
+    "grow-edible-plant-database",
+    "GROW",
   );
-  const growRunManifestValue = parseJson(
-    growRunManifestBytes,
-    growRunManifestPath,
+  const growRecords = await verifyRunOutput(
+    growRun.manifest,
+    growRunDirectory,
+    "source-records.jsonl",
+    "GROW",
   );
-  const growRunManifest = objectValue<GrowRunManifest>(growRunManifestValue);
-  assertGrowRunSource(growRunManifest, growSource);
-  const growRecordsOutput = findGrowRecordsOutput(growRunManifest);
-  const growRecordsPath = join(growRunDirectory, growRecordsOutput.path);
-  const growRecordsMetadata = await hashFile(growRecordsPath);
-  if (growRecordsMetadata.sha256 !== growRecordsOutput.sha256) {
-    throw new Error(
-      `GROW source-record output checksum mismatch: expected ${growRecordsOutput.sha256}, got ${growRecordsMetadata.sha256}`,
-    );
-  }
-  if (
-    growRecordsOutput.byteSize !== undefined &&
-    growRecordsMetadata.byteSize !== growRecordsOutput.byteSize
-  ) {
-    throw new Error(
-      "GROW source-record output byte size does not match its run manifest",
-    );
-  }
+  const growNames = await readGrowNames(growRecords.path);
+  assertRecordCount(growRecords.output, growNames.length, "GROW source names");
 
-  const growNames = await readGrowNames(growRecordsPath);
-  if (
-    growRecordsOutput.recordCount !== undefined &&
-    growNames.length !== growRecordsOutput.recordCount
-  ) {
+  const cropGraphRun = await readImporterRun(
+    cropGraphRunDirectory,
+    "CropGraph",
+    validationApi,
+  );
+  assertImporterRunSource(
+    cropGraphRun.manifest,
+    cropGraphSource,
+    "cropgraph-raw-staging",
+    "CropGraph",
+  );
+  const cropGraphSelected = await verifyRunOutput(
+    cropGraphRun.manifest,
+    cropGraphRunDirectory,
+    "selected-records.jsonl",
+    "CropGraph",
+    CROPGRAPH_RAW_RECORD_SCHEMA,
+  );
+  const cropGraphIdentity = await verifyRunOutput(
+    cropGraphRun.manifest,
+    cropGraphRunDirectory,
+    "identity-candidates.jsonl",
+    "CropGraph",
+    CROPGRAPH_IDENTITY_CANDIDATE_SCHEMA,
+  );
+  const cropGraphNames = await readCropGraphNames(
+    cropGraphSelected.path,
+    cropGraphIdentity.path,
+    validationApi,
+  );
+  const selectedCropGraphCount = await countJsonLines(cropGraphSelected.path);
+  assertRecordCount(
+    cropGraphSelected.output,
+    selectedCropGraphCount,
+    "CropGraph selected records",
+  );
+  assertRecordCount(
+    cropGraphIdentity.output,
+    await countJsonLines(cropGraphIdentity.path),
+    "CropGraph identity candidates",
+  );
+  if (cropGraphNames.length !== selectedCropGraphCount) {
     throw new Error(
-      "GROW source-record output count does not match its run manifest",
+      "CropGraph scientific-name seeds do not cover every selected record",
     );
   }
+  const sourceNames = sortSourceNameSeeds([...growNames, ...cropGraphNames]);
 
   const { matchesByName, rowsScanned } = await findExactWfoMatches(
     snapshotPath,
-    growNames,
+    sourceNames,
   );
   const acceptedTargetSelection = await loadAcceptedTargets(
     snapshotPath,
@@ -290,11 +355,10 @@ export async function importWfoSnapshot(
     selectedRows,
   );
   const candidates = createTaxonMatchCandidates(
-    growNames,
+    sourceNames,
     matchesByName,
     selectedRows,
     candidateSourceMetadata(wfoSource),
-    candidateSourceMetadata(growSource),
     snapshotMetadata.sha256,
   );
   const taxonomicRecords = [...selectedRows.values()]
@@ -322,6 +386,14 @@ export async function importWfoSnapshot(
       byteSize: growSource.manifestBytes.byteLength,
     },
     {
+      role: `source-manifest-${cropGraphSource.manifest.id as string}`,
+      id: cropGraphSource.manifest.id as string,
+      locator: CROPGRAPH_SOURCE_MANIFEST_PATH,
+      schemaId: SOURCE_MANIFEST_SCHEMA,
+      sha256: cropGraphSource.sha256,
+      byteSize: cropGraphSource.manifestBytes.byteLength,
+    },
+    {
       role: `source-manifest-${wfoSource.manifest.id as string}`,
       id: wfoSource.manifest.id as string,
       locator: WFO_SOURCE_MANIFEST_PATH,
@@ -340,29 +412,64 @@ export async function importWfoSnapshot(
       role: "grow-importer-run-manifest",
       locator: "grow-import-run:importer-run-manifest.json",
       schemaId: "urn:hortinis:plants:schema:v1:importer-run-manifest",
-      sha256: hashBuffer(growRunManifestBytes),
-      byteSize: growRunManifestBytes.byteLength,
-      configurationSha256: growRunManifest.configurationSha256 as string,
+      sha256: hashBuffer(growRun.bytes),
+      byteSize: growRun.bytes.byteLength,
+      configurationSha256: growRun.manifest.configurationSha256 as string,
     },
     {
       role: "grow-source-records",
-      locator: `grow-import-run:${growRecordsOutput.path}`,
-      sha256: growRecordsMetadata.sha256,
-      byteSize: growRecordsMetadata.byteSize,
-      recordCount: growRecordsOutput.recordCount as number,
-      ...(growRecordsOutput.schemaId === undefined
+      locator: `grow-import-run:${growRecords.output.path as string}`,
+      sha256: growRecords.metadata.sha256,
+      byteSize: growRecords.metadata.byteSize,
+      recordCount: growNames.length,
+      ...(growRecords.output.schemaId === undefined
         ? {}
-        : { schemaId: growRecordsOutput.schemaId }),
+        : { schemaId: growRecords.output.schemaId }),
+    },
+    {
+      role: "cropgraph-importer-run-manifest",
+      locator: "cropgraph-import-run:importer-run-manifest.json",
+      schemaId: "urn:hortinis:plants:schema:v1:importer-run-manifest",
+      sha256: hashBuffer(cropGraphRun.bytes),
+      byteSize: cropGraphRun.bytes.byteLength,
+      configurationSha256: cropGraphRun.manifest.configurationSha256 as string,
+    },
+    {
+      role: "cropgraph-selected-records",
+      locator: `cropgraph-import-run:${cropGraphSelected.output.path as string}`,
+      schemaId: CROPGRAPH_RAW_RECORD_SCHEMA,
+      sha256: cropGraphSelected.metadata.sha256,
+      byteSize: cropGraphSelected.metadata.byteSize,
+      recordCount: selectedCropGraphCount,
+    },
+    {
+      role: "cropgraph-identity-candidates",
+      locator: `cropgraph-import-run:${cropGraphIdentity.output.path as string}`,
+      schemaId: CROPGRAPH_IDENTITY_CANDIDATE_SCHEMA,
+      sha256: cropGraphIdentity.metadata.sha256,
+      byteSize: cropGraphIdentity.metadata.byteSize,
+      recordCount: cropGraphIdentity.output.recordCount as number,
     },
   ];
   const configuration = {
     wfoRelease: WFO_SOURCE_RELEASE_ID,
-    growRelease: GROW_SOURCE_RELEASE_ID,
+    sourceNameSeeds: [
+      {
+        sourceId: GROW_SOURCE_ID,
+        sourceReleaseId: GROW_SOURCE_RELEASE_ID,
+        role: "grow-full-taxonomic-name",
+      },
+      {
+        sourceId: CROPGRAPH_SOURCE_ID,
+        sourceReleaseId: CROPGRAPH_SOURCE_RELEASE_ID,
+        role: "selected-scientific-name-candidate",
+      },
+    ],
     classificationEntry: "classification.csv",
     nameNormalization: NAME_NORMALIZATION_ID,
     matchMethod: MATCH_METHOD,
     outputScope:
-      "GROW exact-match candidate rows, accepted-name targets, their synonyms, genus and family rows",
+      "GROW and selected CropGraph exact-match rows, accepted-name targets, their synonyms, genus and family rows",
   };
   const outputs = RECONCILIATION_OUTPUTS.map((output) => ({
     ...output,
@@ -375,20 +482,23 @@ export async function importWfoSnapshot(
   }));
   const manifest = {
     schemaVersion: "1.0.0",
-    job: { name: "grow-wfo-taxonomy-reconciliation", version: "0.1.0" },
+    job: { name: "wfo-taxonomy-reconciliation", version: "0.2.0" },
     inputs,
     configuration,
     configurationSha256: hashBuffer(serializeCanonicalJson(configuration)),
     tools: { csvParse: "6.2.1", unzipper: "0.10.14", node: process.version },
     outputs: [],
     counts: buildCounts(
-      growNames,
+      sourceNames,
       candidates,
       diagnostics,
       taxonomicRecords,
       rowsScanned + acceptedTargetSelection.rowsScanned + closureRowsScanned,
     ),
   };
+  assertUniqueRoles(inputs, "reconciliation input");
+  assertUniqueRoles(RECONCILIATION_OUTPUTS, "reconciliation output");
+  assertUniqueRoles(manifest.counts, "reconciliation count");
   const published = await writeRun(
     outputDirectory,
     outputs,
@@ -468,6 +578,31 @@ function assertExpectedGrowSource(manifest: SourceManifest): void {
   assertSourceRights(manifest, "CC-BY-4.0", "GROW");
 }
 
+function assertExpectedCropGraphSource(manifest: SourceManifest): void {
+  if (
+    manifest.id !== CROPGRAPH_SOURCE_MANIFEST_ID ||
+    manifest.provider?.id !== CROPGRAPH_PROVIDER_ID ||
+    manifest.release?.identifier !== CROPGRAPH_SOURCE_RELEASE_ID
+  ) {
+    throw new Error(
+      "CropGraph source manifest does not identify the pinned release",
+    );
+  }
+  if (manifest.licenceReview?.declaredLicence !== "CC-BY-4.0") {
+    throw new Error("CropGraph source manifest has an unexpected licence");
+  }
+  if (
+    !manifest.profileEligibility?.some(
+      (entry) =>
+        entry.profile === "dev-validation" && entry.decision === "eligible",
+    )
+  ) {
+    throw new Error(
+      "CropGraph source manifest is not eligible for dev-validation",
+    );
+  }
+}
+
 function assertSourceRights(
   manifest: SourceManifest,
   expectedLicence: string,
@@ -494,23 +629,48 @@ function assertSourceRights(
   }
 }
 
-function assertGrowRunSource(run: GrowRunManifest, source: SourceInfo): void {
+function assertImporterRunSource(
+  run: ImporterRunManifest,
+  source: SourceInfo,
+  expectedImporter: string,
+  label: string,
+): void {
+  const sourceReference = run.sourceManifest;
   if (
-    run.sourceManifest?.id !== GROW_SOURCE_MANIFEST_ID ||
-    run.sourceManifest.sha256 !== source.sha256
+    run.importer?.name !== expectedImporter ||
+    sourceReference?.id !== source.manifest.id ||
+    sourceReference?.sha256 !== source.sha256
   ) {
     throw new Error(
-      "GROW importer run does not reference the checked-in GROW source manifest",
+      `${label} importer run does not match its checked-in source manifest`,
+    );
+  }
+  if (
+    typeof run.configurationSha256 !== "string" ||
+    run.configurationSha256 !==
+      hashBuffer(serializeCanonicalJson(run.configuration))
+  ) {
+    throw new Error(
+      `${label} importer run has an invalid configuration digest`,
     );
   }
 }
 
-async function readGrowNames(path: string): Promise<GrowNameRecord[]> {
-  const names: GrowNameRecord[] = [];
-  const seenIds = new Set<string>();
+async function readGrowNames(path: string): Promise<SourceNameSeed[]> {
+  const names: SourceNameSeed[] = [];
+  const seenKeys = new Set<string>();
   for await (const entry of readJsonLines(createReadStream(path))) {
     const record = objectValue<GrowImportRecord>(entry.value);
     const sourceRecordKey = record.sourceRecordKey;
+    assertSeedSource(
+      sourceRecordKey,
+      candidateSourceMetadataFromValues(
+        GROW_SOURCE_ID,
+        GROW_SOURCE_MANIFEST_ID,
+        GROW_SOURCE_RELEASE_ID,
+      ),
+      "GROW source record",
+    );
     const sourceRecordId = stringValue(
       sourceRecordKey?.recordId,
       "sourceRecordKey.recordId",
@@ -522,37 +682,167 @@ async function readGrowNames(path: string): Promise<GrowNameRecord[]> {
         `GROW source record ${sourceRecordId} has no scientific name at ${sourceLocator}`,
       );
     }
-    if (seenIds.has(sourceRecordId)) {
-      throw new Error(`GROW source-record output repeats ID ${sourceRecordId}`);
+    const serializedKey = serializeQualifiedSourceRecordKey(sourceRecordKey);
+    if (seenKeys.has(serializedKey)) {
+      throw new Error(`GROW source-record output repeats key ${serializedKey}`);
     }
-    seenIds.add(sourceRecordId);
+    seenKeys.add(serializedKey);
     names.push({
       sourceRecordKey,
-      sourceRecordId,
-      sourceLocator,
+      sourceClaimKey: makeSemanticSubrecordKey(sourceRecordKey, [
+        { kind: "field", id: "Full taxonomic name" },
+      ]),
+      sourceLocators: [sourceLocator],
       scientificName: sourceName,
     });
   }
   if (names.length === 0) throw new Error("GROW source-record output is empty");
-  return names.sort((left, right) =>
-    (left.sourceRecordKey?.recordId ?? left.sourceRecordId ?? "").localeCompare(
-      right.sourceRecordKey?.recordId ?? right.sourceRecordId ?? "",
-      "en",
-      {
-        numeric: true,
-      },
+  return sortSourceNameSeeds(names);
+}
+
+async function readCropGraphNames(
+  selectedPath: string,
+  identityPath: string,
+  validationApi: ValidationApi,
+): Promise<SourceNameSeed[]> {
+  const selectedRecords: CropGraphSelectedRecord[] = [];
+  for await (const entry of readJsonLines(createReadStream(selectedPath))) {
+    assertSchema(
+      validationApi,
+      CROPGRAPH_RAW_RECORD_SCHEMA,
+      entry.value,
+      `CropGraph selected record ${entry.lineNumber}`,
+    );
+    const record = objectValue<CropGraphSelectedRecord>(entry.value);
+    selectedRecords.push(record);
+  }
+  const identityCandidates: CropGraphIdentityCandidate[] = [];
+  for await (const entry of readJsonLines(createReadStream(identityPath))) {
+    assertSchema(
+      validationApi,
+      CROPGRAPH_IDENTITY_CANDIDATE_SCHEMA,
+      entry.value,
+      `CropGraph identity candidate ${entry.lineNumber}`,
+    );
+    const candidate = objectValue<CropGraphIdentityCandidate>(entry.value);
+    identityCandidates.push(candidate);
+  }
+  return createCropGraphSourceNameSeeds(selectedRecords, identityCandidates);
+}
+
+export function createCropGraphSourceNameSeeds(
+  selectedRecords: readonly CropGraphSelectedRecord[],
+  identityCandidates: readonly CropGraphIdentityCandidate[],
+): SourceNameSeed[] {
+  const selected = new Map<string, CropGraphSelectedRecord>();
+  for (const record of selectedRecords) {
+    assertSeedSource(
+      record.sourceRecordKey,
+      candidateSourceMetadataFromValues(
+        CROPGRAPH_SOURCE_ID,
+        CROPGRAPH_SOURCE_MANIFEST_ID,
+        CROPGRAPH_SOURCE_RELEASE_ID,
+      ),
+      "CropGraph selected record",
+    );
+    const key = serializeQualifiedSourceRecordKey(record.sourceRecordKey);
+    if (selected.has(key))
+      throw new Error(`CropGraph selected records repeat key ${key}`);
+    selected.set(key, record);
+  }
+  if (selected.size === 0)
+    throw new Error("CropGraph selected records are empty");
+
+  const seeds: SourceNameSeed[] = [];
+  const seenClaims = new Set<string>();
+  const coveredRecords = new Set<string>();
+  for (const candidate of identityCandidates) {
+    if (candidate.kind !== "scientific-name") continue;
+    assertSeedSource(
+      candidate.sourceRecordKey,
+      candidateSourceMetadataFromValues(
+        CROPGRAPH_SOURCE_ID,
+        CROPGRAPH_SOURCE_MANIFEST_ID,
+        CROPGRAPH_SOURCE_RELEASE_ID,
+      ),
+      "CropGraph identity candidate",
+    );
+    const recordKey = serializeQualifiedSourceRecordKey(
+      candidate.sourceRecordKey,
+    );
+    const sourceRecord = selected.get(recordKey);
+    if (sourceRecord === undefined) {
+      throw new Error(
+        `CropGraph scientific-name candidate refers to an unselected record ${recordKey}`,
+      );
+    }
+    if (coveredRecords.has(recordKey)) {
+      throw new Error(
+        `CropGraph selected record has more than one scientific-name seed ${recordKey}`,
+      );
+    }
+    const claimKey = serializeSemanticSubrecordKey(candidate.sourceClaimKey);
+    if (
+      serializeQualifiedSourceRecordKey(
+        candidate.sourceClaimKey.sourceRecordKey,
+      ) !== recordKey
+    ) {
+      throw new Error(
+        `CropGraph scientific-name claim key differs from its record ${recordKey}`,
+      );
+    }
+    if (seenClaims.has(claimKey))
+      throw new Error(`CropGraph repeats source-name claim ${claimKey}`);
+    seenClaims.add(claimKey);
+    coveredRecords.add(recordKey);
+    const valueText = candidate.value["text"];
+    if (
+      typeof candidate.rawValue !== "string" ||
+      typeof valueText !== "string" ||
+      candidate.rawValue !== valueText ||
+      valueText !== sourceRecord.rawEntry.scientificName ||
+      !candidate.sourceLocators.includes(
+        `${sourceRecord.sourceLocator}/scientificName`,
+      )
+    ) {
+      throw new Error(
+        `CropGraph scientific-name candidate differs from selected record ${recordKey}`,
+      );
+    }
+    seeds.push({
+      sourceRecordKey: candidate.sourceRecordKey,
+      sourceClaimKey: candidate.sourceClaimKey,
+      sourceCandidateId: candidate.id,
+      sourceLocators: [...candidate.sourceLocators],
+      scientificName: valueText,
+    });
+  }
+  if (coveredRecords.size !== selected.size) {
+    throw new Error(
+      "CropGraph scientific-name candidates do not cover every selected record",
+    );
+  }
+  return sortSourceNameSeeds(seeds);
+}
+
+function sortSourceNameSeeds(
+  seeds: readonly SourceNameSeed[],
+): SourceNameSeed[] {
+  return [...seeds].sort((left, right) =>
+    serializeSemanticSubrecordKey(left.sourceClaimKey).localeCompare(
+      serializeSemanticSubrecordKey(right.sourceClaimKey),
     ),
   );
 }
 
 async function findExactWfoMatches(
   snapshotPath: string,
-  growNames: readonly GrowNameRecord[],
+  sourceNames: readonly SourceNameSeed[],
 ): Promise<{
   readonly matchesByName: Map<string, WfoSnapshotRecord[]>;
   readonly rowsScanned: number;
 }> {
-  const index = new ExactWfoNameMatchIndex(growNames);
+  const index = new ExactWfoNameMatchIndex(sourceNames);
   for await (const row of readWfoSnapshot(snapshotPath)) {
     index.add(row);
   }
@@ -658,23 +948,15 @@ function addSelected(
 }
 
 export function createTaxonMatchCandidates(
-  growNames: readonly GrowNameRecord[],
+  sourceNames: readonly SourceNameSeed[],
   matchesByName: ReadonlyMap<string, readonly WfoSnapshotRecord[]>,
   selectedRows: ReadonlyMap<string, SelectedWfoRecord>,
   wfoSource: CandidateSourceMetadata,
-  growSource: CandidateSourceMetadata,
   snapshotSha256: string,
 ): TaxonMatchCandidate[] {
-  return growNames.map((grow) => {
-    const sourceRecordKey = grow.sourceRecordKey ?? {
-      source: {
-        sourceId: growSource.sourceId,
-        sourceManifestId: growSource.sourceManifestId,
-        sourceReleaseId: growSource.sourceReleaseId,
-      },
-      recordId: grow.sourceRecordId ?? "",
-    };
-    const comparisonName = normalizeScientificName(grow.scientificName);
+  return sourceNames.map((seed) => {
+    const sourceRecordKey = seed.sourceRecordKey;
+    const comparisonName = normalizeScientificName(seed.scientificName);
     const rows = matchesByName.get(comparisonName) ?? [];
     const alternatives = rows.map((row) =>
       toAlternative(row, selectedRows, wfoSource),
@@ -683,19 +965,23 @@ export function createTaxonMatchCandidates(
     return {
       id: stableId(
         `taxon_match_${sourceRecordKey.recordId}`,
-        `${serializeQualifiedSourceRecordKey(sourceRecordKey)}|${wfoSource.sourceReleaseId}`,
+        `${serializeSemanticSubrecordKey(seed.sourceClaimKey)}|${wfoSource.sourceReleaseId}`,
       ),
       source: {
         sourceRecordKey,
-        sourceRecordId: sourceRecordKey.recordId,
-        sourceLocator: grow.sourceLocator,
+        sourceClaimKey: seed.sourceClaimKey,
+        ...(seed.sourceCandidateId === undefined
+          ? {}
+          : { sourceCandidateId: seed.sourceCandidateId }),
+        sourceLocators: [...seed.sourceLocators],
+        sourceLocator: seed.sourceLocators[0]!,
       },
       snapshot: {
         sourceManifestId: wfoSource.sourceManifestId,
         sourceReleaseId: wfoSource.sourceReleaseId,
         sha256: snapshotSha256,
       },
-      sourceName: grow.scientificName,
+      sourceName: seed.scientificName,
       comparisonName,
       normalization: NAME_NORMALIZATION_ID,
       outcome,
@@ -844,8 +1130,8 @@ function createDiagnostics(
     });
   }
   return diagnostics.sort((left, right) =>
-    `${left.code}\u0000${left.sourceRecordId ?? ""}`.localeCompare(
-      `${right.code}\u0000${right.sourceRecordId ?? ""}`,
+    `${left.code}\u0000${left.sourceRecordKey === undefined ? "" : serializeQualifiedSourceRecordKey(left.sourceRecordKey)}`.localeCompare(
+      `${right.code}\u0000${right.sourceRecordKey === undefined ? "" : serializeQualifiedSourceRecordKey(right.sourceRecordKey)}`,
     ),
   );
 }
@@ -867,7 +1153,7 @@ function outcomeMessage(outcome: TaxonMatchOutcome): string {
 }
 
 function buildCounts(
-  growNames: readonly GrowNameRecord[],
+  sourceNames: readonly SourceNameSeed[],
   candidates: readonly TaxonMatchCandidate[],
   diagnostics: readonly WfoDiagnostic[],
   taxonomicRecords: readonly WfoTaxonomicOutputRecord[],
@@ -875,12 +1161,18 @@ function buildCounts(
 ): readonly { readonly role: string; readonly count: number }[] {
   const byOutcome = (outcome: TaxonMatchOutcome) =>
     candidates.filter((candidate) => candidate.outcome === outcome).length;
+  const sourceCount = (sourceId: string) =>
+    sourceNames.filter(
+      (seed) => seed.sourceRecordKey.source.sourceId === sourceId,
+    ).length;
   const values: readonly [string, number][] = [
-    ["grow-records", growNames.length],
+    ["source-name-seeds", sourceNames.length],
+    ["grow-source-name-seeds", sourceCount(GROW_SOURCE_ID)],
+    ["cropgraph-source-name-seeds", sourceCount(CROPGRAPH_SOURCE_ID)],
     [
       "unique-input-names",
       new Set(
-        growNames.map((item) => normalizeScientificName(item.scientificName)),
+        sourceNames.map((item) => normalizeScientificName(item.scientificName)),
       ).size,
     ],
     ["candidate-accepted", byOutcome("candidate-accepted")],
@@ -1018,36 +1310,81 @@ async function publishDirectory(
   if (movedOld) await rm(backup, { recursive: true, force: true });
 }
 
-function findGrowRecordsOutput(run: GrowRunManifest): {
-  readonly path: string;
-  readonly sha256: string;
-  readonly byteSize?: number;
-  readonly recordCount?: number;
-  readonly schemaId?: string;
-} {
-  const output = run.outputs?.find(
-    (item) => item.path === "source-records.jsonl",
+async function readImporterRun(
+  directory: string,
+  label: string,
+  validationApi: ValidationApi,
+): Promise<{ readonly manifest: ImporterRunManifest; readonly bytes: Buffer }> {
+  const path = join(directory, "importer-run-manifest.json");
+  const bytes = await readFile(path).catch((error: unknown) => {
+    throw new Error(
+      `Unable to read ${label} importer run manifest at ${path}`,
+      {
+        cause: error,
+      },
+    );
+  });
+  const value = parseJson(bytes, path);
+  assertSchema(
+    validationApi,
+    "urn:hortinis:plants:schema:v1:importer-run-manifest",
+    value,
+    `${label} importer run manifest`,
   );
+  return { manifest: objectValue<ImporterRunManifest>(value), bytes };
+}
+
+async function verifyRunOutput(
+  run: ImporterRunManifest,
+  directory: string,
+  outputPath: string,
+  label: string,
+  expectedSchemaId?: string,
+): Promise<{
+  readonly output: RunOutputDescriptor;
+  readonly path: string;
+  readonly metadata: FileMetadata;
+}> {
+  const output = run.outputs?.find((item) => item.path === outputPath);
   if (
     output === undefined ||
     typeof output.path !== "string" ||
-    typeof output.sha256 !== "string"
+    typeof output.sha256 !== "string" ||
+    typeof output.byteSize !== "number" ||
+    typeof output.recordCount !== "number"
   ) {
-    throw new Error("GROW run manifest does not declare source-records.jsonl");
+    throw new Error(`${label} run does not declare complete ${outputPath}`);
   }
-  return {
-    path: output.path,
-    sha256: output.sha256,
-    ...(typeof output.byteSize === "number"
-      ? { byteSize: output.byteSize }
-      : {}),
-    ...(typeof output.recordCount === "number"
-      ? { recordCount: output.recordCount }
-      : {}),
-    ...(typeof output.schemaId === "string"
-      ? { schemaId: output.schemaId }
-      : {}),
-  };
+  if (expectedSchemaId !== undefined && output.schemaId !== expectedSchemaId) {
+    throw new Error(`${label} run ${outputPath} has an unexpected schema`);
+  }
+  const path = join(directory, output.path);
+  const metadata = await hashFile(path);
+  if (
+    metadata.sha256 !== output.sha256 ||
+    metadata.byteSize !== output.byteSize
+  ) {
+    throw new Error(`${label} run ${outputPath} checksum or size mismatch`);
+  }
+  return { output, path, metadata };
+}
+
+function assertRecordCount(
+  output: RunOutputDescriptor,
+  actual: number,
+  label: string,
+): void {
+  if (output.recordCount !== actual) {
+    throw new Error(`${label} count does not match its run manifest`);
+  }
+}
+
+async function countJsonLines(path: string): Promise<number> {
+  let count = 0;
+  for await (const entry of readJsonLines(createReadStream(path))) {
+    if (entry.value !== undefined) count += 1;
+  }
+  return count;
 }
 
 function findDeclaredResource(
@@ -1145,6 +1482,30 @@ function candidateSourceMetadata(source: SourceInfo): CandidateSourceMetadata {
   };
 }
 
+function candidateSourceMetadataFromValues(
+  sourceId: string,
+  sourceManifestId: string,
+  sourceReleaseId: string,
+): CandidateSourceMetadata {
+  return { sourceId, sourceManifestId, sourceReleaseId };
+}
+
+function assertSeedSource(
+  key: SourceNameSeed["sourceRecordKey"],
+  expected: CandidateSourceMetadata,
+  label: string,
+): void {
+  if (
+    key?.source?.sourceId !== expected.sourceId ||
+    key.source.sourceManifestId !== expected.sourceManifestId ||
+    key.source.sourceReleaseId !== expected.sourceReleaseId ||
+    typeof key.recordId !== "string" ||
+    key.recordId.length === 0
+  ) {
+    throw new Error(`${label} has the wrong qualified source key`);
+  }
+}
+
 function wfoRowLocator(row: WfoSnapshotRecord): string {
   return `${WFO_ARCHIVE_LOCATOR}!classification.csv#row=${row.rowNumber}`;
 }
@@ -1152,6 +1513,18 @@ function wfoRowLocator(row: WfoSnapshotRecord): string {
 function stableId(prefix: string, input: string): string {
   const digest = createHash("sha256").update(input).digest("hex").slice(0, 24);
   return `${prefix}_${digest}`;
+}
+
+function assertUniqueRoles(
+  descriptors: readonly { readonly role: string }[],
+  label: string,
+): void {
+  const roles = new Set<string>();
+  for (const descriptor of descriptors) {
+    if (roles.has(descriptor.role))
+      throw new Error(`${label} repeats role ${descriptor.role}`);
+    roles.add(descriptor.role);
+  }
 }
 
 async function hashFile(path: string): Promise<FileMetadata> {

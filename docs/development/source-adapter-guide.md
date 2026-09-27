@@ -35,7 +35,7 @@ The Access ID is the only cross-resource join key. The pinned source data contai
 
 The calendar workbook identifies twelve representative locations and source strata. Their coordinates and source names are retained as source-location applicability; the adapter does not map them to Hortinis climate contexts. The catalog contract can represent “Sow outdoors / plant out” as `establish_outdoors` with the combined `direct_sowing_or_transplant` context. Preserve the original source field and never split it into direct sowing or transplanting. The GROW adapter still keeps records staged until their identity, context, timing anchor and rights are resolved; unmapped records remain candidates and diagnostics, not canonical assertions.
 
-## WFO snapshot and GROW name reconciliation
+## WFO snapshot and source-name reconciliation
 
 The WFO adapter uses the pinned 2026-06 archive described in `data/sources/wfo/README.md` and
 `source-manifest.json`. Download the exact `_DwC_backbone_R.zip` release to the ignored
@@ -43,23 +43,34 @@ The WFO adapter uses the pinned 2026-06 archive described in `data/sources/wfo/R
 the adapter checks both and records a SHA-256 for the exact snapshot in its reconciliation manifest.
 It streams `classification.csv` from the ZIP and requires the documented Darwin Core columns.
 
-Run `pnpm import:grow` first, then `pnpm import:wfo`. The WFO run reads every `source-records.jsonl`
-record from the pinned GROW run, including names outside the catalog MVP. It emits one reviewable
-candidate per GROW record. Only NFC normalization, trimming and collapsing whitespace are used for
-automatic exact-name comparison. Exact accepted names and exact synonyms can yield candidates;
+Run `pnpm import:grow` and `pnpm import:cropgraph` first, then `pnpm import:wfo`. The WFO run reads every
+GROW `source-records.jsonl` record and every `scientific-name` candidate for the selected CropGraph cohort,
+including names outside the catalog MVP. It emits one reviewable candidate per qualified source-name seed.
+Only NFC normalization, trimming and collapsing whitespace are used for automatic exact-name comparison.
+Exact accepted names and exact synonyms can yield candidates;
 ambiguous, unplaced, unmatched and other-status names remain unresolved. No candidate is applied to a
 catalog taxon, plant concept, cultivar group or cultivar.
 
-The staged WFO taxonomy subset is limited to exact-name rows for all imported GROW records, referenced
+CropGraph common names, aliases and unresolved subject labels are not WFO lookup seeds. Scientific labels
+retain quoted cultivar epithets, `var.`, `subsp.`, `Group` and other crop-form text during comparison; the
+reconciler never retries after stripping a qualifier. Each outcome retains the originating semantic claim key,
+candidate identifier and exact field locators. CropGraph remains development-eligible staging material with
+commercial rights pending review; reconciliation does not change that rights decision.
+
+The staged WFO taxonomy subset is limited to exact-name rows for all GROW and selected CropGraph seeds, referenced
 accepted-name targets, synonyms that point to selected accepted names, and the corresponding genus and
 family rows. It is a review/extraction subset, not a claim that WFO contains only those taxa and not a
-consumer catalog release. WFO IDs remain external identifiers scoped by source and release. GROW source
-record IDs remain independent, and no GROW-to-catalog subject mapping is emitted.
+consumer catalog release. WFO IDs remain external identifiers scoped by source and release. Source record
+IDs remain release-qualified and independent, and no source-to-catalog subject mapping is emitted.
 
 The staging output goes to `.cache/import-runs/wfo/latest`; it contains candidate JSONL, selected WFO
 taxonomic rows, diagnostics and a deterministic run manifest. A WFO release update supersedes prior
 reviewed crosswalks through explicit curation; it never silently carries or changes an accepted catalog
 identity.
+
+The pinned combined run contains 5,146 source-name seeds: 140 from GROW and 5,006 from CropGraph. It emits
+2,937 accepted candidates, 321 synonym candidates, 1,300 ambiguous outcomes, 100 unresolved-status outcomes,
+488 explicit unmatched outcomes and no unplaced outcomes. These are staging results, not reviewed identities.
 
 For later reconciliation, a reviewer records a source-name decision against the preserved, release-qualified
 GROW source-record key and locator. If accepted, that decision references a reviewed WFO crosswalk keyed by

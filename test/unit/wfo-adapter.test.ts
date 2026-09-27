@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  createCropGraphSourceNameSeeds,
   createTaxonMatchCandidates,
   ExactWfoNameMatchIndex,
   normalizeScientificName,
@@ -11,9 +12,10 @@ import {
 import { WFO_CLASSIFICATION_FILENAME } from "../../src/adapters/wfo/constants.js";
 import { readWfoSnapshot } from "../../src/adapters/wfo/read-snapshot.js";
 import type {
-  GrowNameRecord,
+  SourceNameSeed,
   WfoSnapshotRecord,
 } from "../../src/adapters/wfo/types.js";
+import { makeSemanticSubrecordKey } from "../../src/domain/source-keys.js";
 import { serializeCanonicalJson } from "../../src/serialization/canonical-json.js";
 import { getCompiledValidationApi } from "../support/compiled-validation-api.js";
 
@@ -25,42 +27,14 @@ describe("WFO snapshot name matching", () => {
     const records = JSON.parse(
       await readFile(join(fixtureDirectory, "name-match-records.json"), "utf8"),
     ) as WfoSnapshotRecord[];
-    const growNames: GrowNameRecord[] = [
-      {
-        sourceRecordId: "1",
-        sourceLocator: "grow#1",
-        scientificName: " Beta   vulgaris ",
-      },
-      {
-        sourceRecordId: "2",
-        sourceLocator: "grow#2",
-        scientificName: "Beta vulgaris",
-      },
-      {
-        sourceRecordId: "3",
-        sourceLocator: "grow#3",
-        scientificName: "Brassica oleracea var. capitata",
-      },
-      {
-        sourceRecordId: "4",
-        sourceLocator: "grow#4",
-        scientificName: "Pisum sativum",
-      },
-      {
-        sourceRecordId: "5",
-        sourceLocator: "grow#5",
-        scientificName: "Allium fictum",
-      },
-      {
-        sourceRecordId: "6",
-        sourceLocator: "grow#6",
-        scientificName: "Beta vulgarius",
-      },
-      {
-        sourceRecordId: "7",
-        sourceLocator: "grow#7",
-        scientificName: "Lactuca sativa var. fixture",
-      },
+    const growNames: SourceNameSeed[] = [
+      growSeed("1", "grow#1", " Beta   vulgaris "),
+      growSeed("2", "grow#2", "Beta vulgaris"),
+      growSeed("3", "grow#3", "Brassica oleracea var. capitata"),
+      growSeed("4", "grow#4", "Pisum sativum"),
+      growSeed("5", "grow#5", "Allium fictum"),
+      growSeed("6", "grow#6", "Beta vulgarius"),
+      growSeed("7", "grow#7", "Lactuca sativa var. fixture"),
     ];
     const index = new ExactWfoNameMatchIndex(growNames);
     for (const row of [...records].reverse()) index.add(row);
@@ -81,17 +55,11 @@ describe("WFO snapshot name matching", () => {
       sourceManifestId: "source_manifest_wfo_plant_list_2026_06",
       sourceReleaseId: "2026-06",
     };
-    const growSource = {
-      sourceId: "source_grow_edible_plant_database",
-      sourceManifestId: "source_manifest_grow_epd_2020",
-      sourceReleaseId: "doi:10.15132/10000157",
-    };
     const candidates = createTaxonMatchCandidates(
       growNames,
       matchesByName,
       selected,
       source,
-      growSource,
       "a".repeat(64),
     );
 
@@ -108,7 +76,7 @@ describe("WFO snapshot name matching", () => {
     expect(
       candidates
         .slice(0, 2)
-        .map((candidate) => candidate.source.sourceRecordId),
+        .map((candidate) => candidate.source.sourceRecordKey.recordId),
     ).toEqual(["1", "2"]);
     expect(candidates[2]?.alternatives[0]?.acceptedName).toMatchObject({
       scientificName: "Brassica oleracea",
@@ -136,7 +104,6 @@ describe("WFO snapshot name matching", () => {
       matchesByName,
       selected,
       source,
-      growSource,
       "a".repeat(64),
     );
     expect(serializeCanonicalJson(candidates)).toEqual(
@@ -151,15 +118,97 @@ describe("WFO snapshot name matching", () => {
     );
   });
 
+  it("keeps equal local IDs source-qualified and does not strip crop-form qualifiers", async () => {
+    const [row] = await readMatchRecords();
+    if (row === undefined) throw new Error("WFO fixture row is missing");
+    const grow = growSeed("1", "grow#1", row.scientificName);
+    const cropGraph = cropGraphSeed("1", "cropgraph#1", row.scientificName);
+    const qualified = cropGraphSeed(
+      "qualified",
+      "cropgraph#qualified",
+      `${row.scientificName} 'Fixture'`,
+    );
+    const index = new ExactWfoNameMatchIndex([grow, cropGraph, qualified]);
+    index.add(row);
+    const { matchesByName } = index.result();
+    const selected = new Map<string, SelectedWfoRecord>([
+      [row.taxonID, { row, reasons: new Set(["source-name-match"]) }],
+    ]);
+    const candidates = createTaxonMatchCandidates(
+      [grow, cropGraph, qualified],
+      matchesByName,
+      selected,
+      {
+        sourceId: "source_world_flora_online_plant_list",
+        sourceManifestId: "source_manifest_wfo_plant_list_2026_06",
+        sourceReleaseId: "2026-06",
+      },
+      "a".repeat(64),
+    );
+
+    expect(new Set(candidates.map((candidate) => candidate.id)).size).toBe(3);
+    expect(
+      candidates.slice(0, 2).map((candidate) => candidate.outcome),
+    ).toEqual(["candidate-accepted", "candidate-accepted"]);
+    expect(candidates[0]?.source.sourceRecordKey.source.sourceId).not.toBe(
+      candidates[1]?.source.sourceRecordKey.source.sourceId,
+    );
+    expect(candidates[1]?.source.sourceCandidateId).toBe(
+      cropGraph.sourceCandidateId,
+    );
+    expect(candidates[2]).toMatchObject({
+      sourceName: `${row.scientificName} 'Fixture'`,
+      comparisonName: `${row.scientificName} 'Fixture'`,
+      outcome: "unmatched",
+    });
+  });
+
+  it("requires exactly one CropGraph scientific-name seed per selected record", () => {
+    const seed = cropGraphSeed(
+      "tomato",
+      "calendar#/entries/0/scientificName",
+      "Solanum lycopersicum",
+    );
+    const selected = {
+      sourceRecordKey: seed.sourceRecordKey,
+      sourceLocator: "calendar#/entries/0",
+      rawEntry: { scientificName: seed.scientificName },
+    };
+    const identity = {
+      id: seed.sourceCandidateId!,
+      kind: "scientific-name",
+      sourceRecordKey: seed.sourceRecordKey,
+      sourceClaimKey: seed.sourceClaimKey,
+      sourceLocators: seed.sourceLocators,
+      rawValue: seed.scientificName,
+      value: {
+        text: seed.scientificName,
+        nameRole: "source-scientific-label",
+      },
+    };
+
+    expect(createCropGraphSourceNameSeeds([selected], [identity])).toEqual([
+      seed,
+    ]);
+    expect(() => createCropGraphSourceNameSeeds([selected], [])).toThrow(
+      /do not cover every selected record/u,
+    );
+    expect(() =>
+      createCropGraphSourceNameSeeds([selected], [identity, identity]),
+    ).toThrow(/more than one scientific-name seed/u);
+    expect(
+      createCropGraphSourceNameSeeds(
+        [selected],
+        [{ ...identity, kind: "common-name" }, identity],
+      ),
+    ).toEqual([seed]);
+  });
+
   it("rejects a repeated WFO identifier in the streaming name index", async () => {
     const [row] = await readMatchRecords();
     if (row === undefined) throw new Error("WFO fixture row is missing");
     const index = new ExactWfoNameMatchIndex([
-      {
-        sourceRecordId: "1",
-        sourceLocator: "grow#1",
-        scientificName: row.scientificName,
-      },
+      growSeed("1", "grow#1", row.scientificName),
     ]);
     index.add(row);
     expect(() => index.add({ ...row, rowNumber: row.rowNumber + 1 })).toThrow(
@@ -222,6 +271,54 @@ describe("WFO snapshot name matching", () => {
     });
   });
 });
+
+function growSeed(
+  recordId: string,
+  sourceLocator: string,
+  scientificName: string,
+): SourceNameSeed {
+  const sourceRecordKey = {
+    source: {
+      sourceId: "source_grow_edible_plant_database",
+      sourceManifestId: "source_manifest_grow_epd_2020",
+      sourceReleaseId: "doi:10.15132/10000157",
+    },
+    recordId,
+  };
+  return {
+    sourceRecordKey,
+    sourceClaimKey: makeSemanticSubrecordKey(sourceRecordKey, [
+      { kind: "field", id: "Full taxonomic name" },
+    ]),
+    sourceLocators: [sourceLocator],
+    scientificName,
+  };
+}
+
+function cropGraphSeed(
+  recordId: string,
+  sourceLocator: string,
+  scientificName: string,
+): SourceNameSeed {
+  const sourceRecordKey = {
+    source: {
+      sourceId: "source_cropgraph",
+      sourceManifestId: "source_manifest_cropgraph",
+      sourceReleaseId: "e722c3415bcf2773277f3422e13a4de5efd29b48",
+    },
+    recordId,
+  };
+  return {
+    sourceRecordKey,
+    sourceClaimKey: makeSemanticSubrecordKey(sourceRecordKey, [
+      { kind: "field", id: "scientificName" },
+      { kind: "claim", id: recordId },
+    ]),
+    sourceCandidateId: `candidate_cropgraph_${recordId}`,
+    sourceLocators: [sourceLocator],
+    scientificName,
+  };
+}
 
 async function readMatchRecords(): Promise<WfoSnapshotRecord[]> {
   return JSON.parse(

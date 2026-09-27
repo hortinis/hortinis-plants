@@ -8,7 +8,7 @@ Use the charter for scope, the model and provenance pages for data rules, the co
 - [Calendar rules](domain/calendar-rules.md)
 - [Source register](sources/source-register.md)
 - [Source field matrix](sources/source-field-matrix.md)
-- [WFO snapshot and GROW name reconciliation](development/source-adapter-guide.md#wfo-snapshot-and-grow-name-reconciliation)
+- [WFO snapshot and source-name reconciliation](development/source-adapter-guide.md#wfo-snapshot-and-source-name-reconciliation)
 - [Qualified source keys](development/source-keys.md)
 - [Licence policy](licensing/licensing-policy.md)
 - [Artifact format](contracts/artifact-format.md)

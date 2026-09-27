@@ -1,3 +1,8 @@
+import type {
+  QualifiedSourceRecordKey,
+  SemanticSubrecordKey,
+} from "../../domain/source-keys.js";
+
 export interface WfoSnapshotRecord {
   readonly taxonID: string;
   readonly scientificName: string;
@@ -11,28 +16,16 @@ export interface WfoSnapshotRecord {
   readonly rowNumber: number;
 }
 
-export interface SourceRecordKey {
-  readonly source: {
-    readonly sourceId: string;
-    readonly sourceManifestId: string;
-    readonly sourceReleaseId: string;
-  };
-  readonly recordId: string;
-}
+export type SourceRecordKey = QualifiedSourceRecordKey;
 
-export type GrowNameRecord =
-  | {
-      readonly sourceRecordKey: SourceRecordKey;
-      readonly sourceRecordId?: string;
-      readonly sourceLocator: string;
-      readonly scientificName: string;
-    }
-  | {
-      readonly sourceRecordId: string;
-      readonly sourceRecordKey?: SourceRecordKey;
-      readonly sourceLocator: string;
-      readonly scientificName: string;
-    };
+/** One release-qualified scientific-name claim submitted to WFO matching. */
+export interface SourceNameSeed {
+  readonly sourceRecordKey: SourceRecordKey;
+  readonly sourceClaimKey: SemanticSubrecordKey;
+  readonly sourceCandidateId?: string;
+  readonly sourceLocators: readonly string[];
+  readonly scientificName: string;
+}
 export type TaxonMatchOutcome =
   | "candidate-accepted"
   | "candidate-synonym"
@@ -76,7 +69,9 @@ export interface TaxonMatchCandidate {
   readonly id: string;
   readonly source: {
     readonly sourceRecordKey: SourceRecordKey;
-    readonly sourceRecordId?: string;
+    readonly sourceClaimKey: SemanticSubrecordKey;
+    readonly sourceCandidateId?: string;
+    readonly sourceLocators: readonly string[];
     readonly sourceLocator: string;
   };
   readonly snapshot: {
@@ -122,6 +117,22 @@ export interface GrowImportRecord {
   readonly sourceRecordKey: SourceRecordKey;
   readonly sourceLocator: string;
   readonly fields: Readonly<Record<string, unknown>>;
+}
+
+export interface CropGraphSelectedRecord {
+  readonly sourceRecordKey: SourceRecordKey;
+  readonly sourceLocator: string;
+  readonly rawEntry: { readonly scientificName: string };
+}
+
+export interface CropGraphIdentityCandidate {
+  readonly id: string;
+  readonly kind: string;
+  readonly sourceRecordKey: SourceRecordKey;
+  readonly sourceClaimKey: SemanticSubrecordKey;
+  readonly sourceLocators: readonly string[];
+  readonly rawValue: unknown;
+  readonly value: Readonly<Record<string, unknown>>;
 }
 
 export interface WfoDiagnostic {

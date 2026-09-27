@@ -29,6 +29,12 @@ import {
   WFO_SOURCE_MANIFEST_ID,
   WFO_SOURCE_RELEASE_ID,
 } from "../adapters/wfo/constants.js";
+import {
+  CROPGRAPH_PROVIDER_ID,
+  CROPGRAPH_SOURCE_ID,
+  CROPGRAPH_SOURCE_MANIFEST_ID,
+  CROPGRAPH_SOURCE_RELEASE_ID,
+} from "../adapters/cropgraph/constants.js";
 import { fileURLToPath } from "node:url";
 import {
   qualifiedSourceRecordKey,
@@ -45,6 +51,7 @@ export interface GrowWfoDraftOptions {
   readonly growResourceDirectory?: string;
   readonly wfoSnapshotPath?: string;
   readonly growSourceManifestPath?: string;
+  readonly cropGraphSourceManifestPath?: string;
   readonly wfoSourceManifestPath?: string;
   /** Override the archive pin in fixture-backed tests; the CLI always uses the tracked release pin. */
   readonly expectedWfoArchive?: {
@@ -97,6 +104,10 @@ export async function generateGrowWfoDrafts(
     options.wfoSourceManifestPath ??
       join(repositoryRoot, "data/sources/wfo/source-manifest.json"),
   );
+  const cropGraphSourceManifestPath = resolve(
+    options.cropGraphSourceManifestPath ??
+      join(repositoryRoot, "data/sources/cropgraph/source-manifest.json"),
+  );
   const growRunManifestPath = join(
     growRunDirectory,
     "importer-run-manifest.json",
@@ -105,18 +116,28 @@ export async function generateGrowWfoDrafts(
     wfoRunDirectory,
     "reconciliation-run-manifest.json",
   );
-  const [growRunBytes, wfoRunBytes, growSourceBytes, wfoSourceBytes] =
-    await Promise.all([
-      readFile(growRunManifestPath),
-      readFile(wfoRunManifestPath),
-      readFile(growSourceManifestPath),
-      readFile(wfoSourceManifestPath),
-    ]);
+  const [
+    growRunBytes,
+    wfoRunBytes,
+    growSourceBytes,
+    cropGraphSourceBytes,
+    wfoSourceBytes,
+  ] = await Promise.all([
+    readFile(growRunManifestPath),
+    readFile(wfoRunManifestPath),
+    readFile(growSourceManifestPath),
+    readFile(cropGraphSourceManifestPath),
+    readFile(wfoSourceManifestPath),
+  ]);
   const growManifest = parseObject(growRunBytes, growRunManifestPath);
   const wfoManifest = parseObject(wfoRunBytes, wfoRunManifestPath);
   const growSourceManifest = parseObject(
     growSourceBytes,
     growSourceManifestPath,
+  );
+  const cropGraphSourceManifest = parseObject(
+    cropGraphSourceBytes,
+    cropGraphSourceManifestPath,
   );
   const wfoSourceManifest = parseObject(wfoSourceBytes, wfoSourceManifestPath);
   assertSchema(
@@ -140,6 +161,12 @@ export async function generateGrowWfoDrafts(
   assertSchema(
     validationApi,
     "urn:hortinis:plants:schema:v1:source-manifest",
+    cropGraphSourceManifest,
+    cropGraphSourceManifestPath,
+  );
+  assertSchema(
+    validationApi,
+    "urn:hortinis:plants:schema:v1:source-manifest",
     wfoSourceManifest,
     wfoSourceManifestPath,
   );
@@ -150,6 +177,14 @@ export async function generateGrowWfoDrafts(
     EXPECTED_GROW_MANIFEST_ID,
     EXPECTED_GROW_RELEASE_ID,
     growSourceManifestPath,
+  );
+  assertSourceIdentity(
+    cropGraphSourceManifest,
+    CROPGRAPH_SOURCE_ID,
+    CROPGRAPH_PROVIDER_ID,
+    CROPGRAPH_SOURCE_MANIFEST_ID,
+    CROPGRAPH_SOURCE_RELEASE_ID,
+    cropGraphSourceManifestPath,
   );
   assertSourceIdentity(
     wfoSourceManifest,
@@ -172,8 +207,10 @@ export async function generateGrowWfoDrafts(
     growManifest,
     wfoSourceManifest,
     growSourceManifest,
+    cropGraphSourceManifest,
     growRunBytes,
     growSourceBytes,
+    cropGraphSourceBytes,
     wfoSourceBytes,
     wfoRunDirectory,
     wfoSnapshotPath,
@@ -181,11 +218,17 @@ export async function generateGrowWfoDrafts(
     validationApi,
   );
 
-  const [sourceRecords, growCandidates, taxonCandidates] = await Promise.all([
-    readRecords(join(growRunDirectory, "source-records.jsonl")),
-    readRecords(join(growRunDirectory, "candidates.jsonl")),
-    readRecords(join(wfoRunDirectory, "taxon-match-candidates.jsonl")),
-  ]);
+  const [sourceRecords, growCandidates, allTaxonCandidates] = await Promise.all(
+    [
+      readRecords(join(growRunDirectory, "source-records.jsonl")),
+      readRecords(join(growRunDirectory, "candidates.jsonl")),
+      readRecords(join(wfoRunDirectory, "taxon-match-candidates.jsonl")),
+    ],
+  );
+  const taxonCandidates = allTaxonCandidates.filter((candidate) => {
+    const sourceRecordKey = requiredSourceRecordKey(candidate.source);
+    return sourceRecordKey.source.sourceId === GROW_SOURCE_ID;
+  });
   assertSourceCandidateCoverage(sourceRecords, taxonCandidates);
 
   const taxonBySourceRecord = new Map<string, RecordValue>();
@@ -554,8 +597,10 @@ async function verifyWfoRun(
   growRun: RecordValue,
   wfoSourceManifest: RecordValue,
   growSourceManifest: RecordValue,
+  cropGraphSourceManifest: RecordValue,
   growRunBytes: Buffer,
   growSourceManifestBytes: Buffer,
+  cropGraphSourceManifestBytes: Buffer,
   wfoSourceManifestBytes: Buffer,
   runDirectory: string,
   snapshotPath: string,
@@ -563,7 +608,13 @@ async function verifyWfoRun(
   validationApi: ValidationApi,
 ): Promise<void> {
   const job = asRecord(run.job);
-  if (requiredString(job, "name") !== "grow-wfo-taxonomy-reconciliation") {
+  const jobName = requiredString(job, "name");
+  if (
+    ![
+      "grow-wfo-taxonomy-reconciliation",
+      "wfo-taxonomy-reconciliation",
+    ].includes(jobName)
+  ) {
     throw new Error("WFO reconciliation manifest identifies the wrong job");
   }
   assertConfigurationDigest(run, "WFO reconciliation run");
@@ -584,7 +635,10 @@ async function verifyWfoRun(
         stringField(input, "schemaId") ===
         "urn:hortinis:plants:schema:v1:source-manifest",
     );
-  const expectedSources = [wfoSourceManifest, growSourceManifest];
+  const expectedSources =
+    jobName === "wfo-taxonomy-reconciliation"
+      ? [wfoSourceManifest, growSourceManifest, cropGraphSourceManifest]
+      : [wfoSourceManifest, growSourceManifest];
   for (const expected of expectedSources) {
     const id = requiredString(expected, "id");
     const ref = sourceManifestInputs.find(
@@ -593,7 +647,9 @@ async function verifyWfoRun(
     const sourceBytes =
       id === requiredString(wfoSourceManifest, "id")
         ? wfoSourceManifestBytes
-        : growSourceManifestBytes;
+        : id === requiredString(growSourceManifest, "id")
+          ? growSourceManifestBytes
+          : cropGraphSourceManifestBytes;
     if (
       ref === undefined ||
       requiredString(ref, "sha256") !== sha256(sourceBytes)

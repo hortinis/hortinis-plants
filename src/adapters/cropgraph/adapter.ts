@@ -14,14 +14,22 @@ import { runImporter } from "../../importer/runner.js";
 import type { ImportEvent, ImporterDefinition } from "../../importer/types.js";
 import { serializeCanonicalJson } from "../../serialization/canonical-json.js";
 import { extractCropGraphCandidates } from "./candidates.js";
+import {
+  CROPGRAPH_CALENDAR_LOCATOR,
+  CROPGRAPH_RAW_RECORD_SCHEMA,
+  CROPGRAPH_SCHEMA_LOCATOR,
+  CROPGRAPH_SOURCE_ID,
+  CROPGRAPH_SOURCE_MANIFEST_ID,
+  CROPGRAPH_SOURCE_RELEASE_ID,
+} from "./constants.js";
 import type { CropGraphEntry, CropGraphRawRecord } from "./types.js";
 import type { ValidationApi } from "../../schema/validation-api.js";
 
-const releaseId = "e722c3415bcf2773277f3422e13a4de5efd29b48";
-const sourceManifestId = "source_manifest_cropgraph";
-const sourceId = "source_cropgraph";
-const calendarLocator = "packages/core/src/data/crop-calendar.json";
-const schemaLocator = "packages/core/src/data/crop-calendar.schema.json";
+const releaseId = CROPGRAPH_SOURCE_RELEASE_ID;
+const sourceManifestId = CROPGRAPH_SOURCE_MANIFEST_ID;
+const sourceId = CROPGRAPH_SOURCE_ID;
+const calendarLocator = CROPGRAPH_CALENDAR_LOCATOR;
+const schemaLocator = CROPGRAPH_SCHEMA_LOCATOR;
 const manifestPath = fileURLToPath(
   new URL(
     "../../../data/sources/cropgraph/source-manifest.json",
@@ -43,7 +51,7 @@ const inventoryPath = fileURLToPath(
     import.meta.url,
   ),
 );
-const rawSchemaId = "urn:hortinis:plants:schema:v1:cropgraph-raw-record";
+const rawSchemaId = CROPGRAPH_RAW_RECORD_SCHEMA;
 const diagnosticSchemaId = "urn:hortinis:plants:schema:v1:import-diagnostic";
 
 interface Cohort {

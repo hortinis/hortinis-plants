@@ -197,12 +197,12 @@
     {
       "role": "wfo-reconciliation-configuration",
       "type": "configuration",
-      "sha256": "63a591cec4657a91ac9a98bd95a0056a361b8cdf51caa0b60fe84c9594d5635a"
+      "sha256": "c6b11cb5a2747f710eb84362ee2ea0c2ee6328d7287e5760a6dab2a9107d6567"
     },
     {
       "role": "draft-manifest",
       "type": "manifest",
-      "sha256": "5d68abd5befed5644dd001a8701deb97d169f0289e5a09aaf706784ddc9cf4dc"
+      "sha256": "9e8d3eeeaa3939f241fe4815add2dc8fc571f7a420da1b55172f5d0b7d839cd2"
     }
   ],
   "reviewDraftCommand": "pnpm curate:grow-wfo:drafts"

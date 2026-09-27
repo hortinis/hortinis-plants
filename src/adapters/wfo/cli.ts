@@ -5,16 +5,20 @@ import { importWfoSnapshot } from "./adapter.js";
 const growRunDirectory = resolve(
   process.argv[2] ?? ".cache/import-runs/grow/latest",
 );
+const cropGraphRunDirectory = resolve(
+  process.argv[3] ?? ".cache/import-runs/cropgraph/latest",
+);
 const snapshotPath = resolve(
-  process.argv[3] ??
+  process.argv[4] ??
     `.cache/source-inputs/wfo/2026-06/${WFO_SNAPSHOT_FILENAME}`,
 );
 const outputDirectory = resolve(
-  process.argv[4] ?? ".cache/import-runs/wfo/latest",
+  process.argv[5] ?? ".cache/import-runs/wfo/latest",
 );
 
 const result = await importWfoSnapshot({
   growRunDirectory,
+  cropGraphRunDirectory,
   snapshotPath,
   outputDirectory,
 });

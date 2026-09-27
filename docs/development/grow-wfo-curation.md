@@ -21,12 +21,16 @@ Run the two source jobs, then generate the C4 queue:
 
 ```sh
 pnpm import:grow
+pnpm import:cropgraph
 pnpm import:wfo
 pnpm curate:grow-wfo:drafts
 ```
 
 The drafts remain ignored cache files. They are a deterministic review aid and carry `reviewState:
 "unreviewed"`; they are never consumer catalog records.
+
+The WFO reconciliation run also contains selected CropGraph name outcomes. This historical command projects
+only the GROW subset; integrated GROW and CropGraph review packets are introduced by T15.
 
 For a read-only lookup in the pinned WFO archive, query by normalized scientific name or WFO identifier:
 

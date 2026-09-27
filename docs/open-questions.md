@@ -24,7 +24,8 @@ foundation tooling choices are resolved in [the implementation plan](development
 - **in progress:** Before producing a consumer `global-core` taxonomy projection, confirm whether its
   WFO-derived subset should remain limited to reviewed external crosswalks plus accepted-name/synonym
   and genus/family closure, or include additional higher-rank ancestors and non-GROW catalog seeds. The
-  current staging adapter is intentionally GROW-seeded and does not resolve this consumer-scope choice.
+  current staging adapter is seeded by GROW and the selected CropGraph cohort and does not resolve this
+  consumer-scope choice.
 
 ## GROW adapter
 
