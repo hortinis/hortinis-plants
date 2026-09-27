@@ -1,0 +1,8 @@
+{
+  "id": "taxref_localization_proposal_fixture",
+  "taxonId": "taxon_fixture",
+  "wfoCrosswalkId": "crosswalk_fixture",
+  "linkOutcomeId": "taxref_wfo_outcome_fixture",
+  "taxrefCandidateId": "candidate_fixture",
+  "reviewState": "accepted"
+}

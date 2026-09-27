@@ -12,6 +12,7 @@ export const TAXREF_CITATION =
 export const TAXONOMY_MEMBER = "TAXREFv18.txt";
 export const VERNACULAR_MEMBER = "TAXVERNv18.txt";
 export const CHANGES_MEMBER = "TAXREF_CHANGES.txt";
+export const EXTERNAL_LINKS_MEMBER = "TAXREF_LIENS.txt";
 export const REMOVED_MEMBER = "CDNOM_DISPARUS.txt";
 export const RANKS_MEMBER = "rangs_note.csv";
 export const HABITATS_MEMBER = "habitats_note.csv";
@@ -88,6 +89,17 @@ export const CHANGE_HEADERS = [
   "TYPE_CHANGE",
 ] as const;
 
+export const EXTERNAL_LINK_HEADERS = [
+  "CT_NAME",
+  "CT_TYPE",
+  "CT_AUTHORS",
+  "CT_TITLE",
+  "CT_URL",
+  "CD_NOM",
+  "CT_SP_ID",
+  "URL_SP",
+] as const;
+
 export const REMOVED_HEADERS = [
   "CD_NOM",
   "PLUS_RECENTE_DIFFUSION",
@@ -124,3 +136,5 @@ export const TAXREF_REMOVED_IDENTIFIER_SCHEMA =
   "urn:hortinis:plants:schema:v1:taxref-removed-identifier";
 export const TAXREF_VOCABULARY_RECORD_SCHEMA =
   "urn:hortinis:plants:schema:v1:taxref-vocabulary-record";
+export const TAXREF_EXTERNAL_LINK_SCHEMA =
+  "urn:hortinis:plants:schema:v1:taxref-external-link";

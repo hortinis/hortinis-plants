@@ -1,0 +1,25 @@
+{
+  "id": "taxref_wfo_outcome_fixture",
+  "taxonId": "taxon_fixture",
+  "wfoCrosswalkId": "crosswalk_fixture",
+  "wfoExternalIdentifier": {
+    "sourceId": "source_world_flora_online_plant_list",
+    "sourceManifestId": "source_manifest_wfo_plant_list_2026_06",
+    "sourceReleaseId": "2026-06",
+    "identifier": "wfo-0000000001"
+  },
+  "taxrefSource": {
+    "sourceId": "source_taxref",
+    "sourceManifestId": "source_manifest_taxref_18_0",
+    "sourceReleaseId": "18.0"
+  },
+  "wfoIdentifier": "wfo-0000000001",
+  "wfoLocator": "classification.csv#taxonID=wfo-0000000001",
+  "wfoReviewId": "review_fixture",
+  "wfoName": "Solanum fixture",
+  "wfoRank": "species",
+  "outcome": "unknown",
+  "candidateTaxrefIdentifiers": [],
+  "evidence": [],
+  "reviewState": "unreviewed"
+}

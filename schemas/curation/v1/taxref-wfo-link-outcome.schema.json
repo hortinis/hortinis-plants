@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:curation:v1:taxref-wfo-link-outcome",
+  "title": "TAXREF localization to reviewed WFO identity outcome",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "taxonId",
+    "wfoCrosswalkId",
+    "wfoExternalIdentifier",
+    "taxrefSource",
+    "wfoIdentifier",
+    "wfoLocator",
+    "wfoReviewId",
+    "wfoName",
+    "wfoRank",
+    "outcome",
+    "candidateTaxrefIdentifiers",
+    "evidence",
+    "reviewState"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "taxonId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "wfoCrosswalkId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "wfoExternalIdentifier": { "$ref": "#/$defs/externalIdentifier" },
+    "taxrefSource": { "$ref": "#/$defs/sourceRelease" },
+    "wfoIdentifier": { "type": "string", "minLength": 1 },
+    "wfoLocator": { "type": "string", "minLength": 1 },
+    "wfoReviewId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "wfoAcceptedIdentifier": { "type": "string", "minLength": 1 },
+    "wfoName": { "type": "string", "minLength": 1 },
+    "wfoRank": { "type": "string", "minLength": 1 },
+    "outcome": {
+      "enum": ["linked", "ambiguous", "not-found", "concept-disagreement"]
+    },
+    "candidateTaxrefIdentifiers": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[0-9]+$" }
+    },
+    "evidence": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/evidence" }
+    },
+    "diagnosticCodes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "reviewState": { "const": "unreviewed" }
+  },
+  "$defs": {
+    "sourceRelease": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceId", "sourceManifestId", "sourceReleaseId"],
+      "properties": {
+        "sourceId": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+        },
+        "sourceManifestId": {
+          "$ref": "urn:hortinis:plants:schema:v1:source-manifest#/$defs/sourceManifestId"
+        },
+        "sourceReleaseId": { "type": "string", "minLength": 1 }
+      }
+    },
+    "externalIdentifier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceId",
+        "sourceManifestId",
+        "sourceReleaseId",
+        "identifier"
+      ],
+      "properties": {
+        "sourceId": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+        },
+        "sourceManifestId": {
+          "$ref": "urn:hortinis:plants:schema:v1:source-manifest#/$defs/sourceManifestId"
+        },
+        "sourceReleaseId": { "type": "string", "minLength": 1 },
+        "identifier": { "type": "string", "minLength": 1 }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "sourceLocator"],
+      "properties": {
+        "kind": {
+          "enum": ["taxref-external-link", "taxref-name-match", "taxref-record"]
+        },
+        "sourceLocator": { "type": "string", "minLength": 1 },
+        "taxrefIdentifier": { "type": "string", "pattern": "^[0-9]+$" },
+        "externalIdentifier": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

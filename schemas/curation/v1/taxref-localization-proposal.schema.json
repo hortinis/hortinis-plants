@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:curation:v1:taxref-localization-proposal",
+  "title": "Unreviewed TAXREF localization proposal for a reviewed WFO identity",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "taxonId",
+    "wfoCrosswalkId",
+    "linkOutcomeId",
+    "taxrefCandidateId",
+    "candidate",
+    "reviewState"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "taxonId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "wfoCrosswalkId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "linkOutcomeId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "taxrefCandidateId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "candidate": {
+      "$ref": "urn:hortinis:plants:schema:v1:taxref-localization-candidate"
+    },
+    "reviewState": { "const": "unreviewed" }
+  }
+}

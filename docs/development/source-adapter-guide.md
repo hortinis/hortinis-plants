@@ -192,3 +192,21 @@ The pinned run contains 708,685 taxonomic records, 82,966 vernacular records, 21
 68,761 change records, 12,891 removed identifiers, 78 vocabulary records and eight unresolved-parent
 diagnostics. `TAXREF_LIENS.txt` is verified but not materialized: external-link extraction is outside T12's
 localization contract and must be separately scoped if a later reconciliation needs it.
+
+## TAXREF localization to reviewed WFO identity (T14)
+
+Run `pnpm reconcile:taxref-wfo` after successful TAXREF and WFO runs. The job reads the current authored WFO
+crosswalks and accepted content reviews from `data/curation/grow-wfo-initial`, then streams only the matching WFO
+rows from the pinned `TAXREF_LIENS.txt` member. It does not materialize unrelated external database links.
+
+The output is written atomically beneath `.cache/import-runs/taxref-wfo/latest/`:
+
+- `external-links.jsonl` contains the selected TAXREF external-link rows;
+- `link-outcomes.jsonl` contains `linked`, `ambiguous`, `not-found` and `concept-disagreement` outcomes;
+- `localization-proposals.jsonl` contains unreviewed French candidates linked to a reviewed Hortinis taxon;
+- `diagnostics.jsonl` records missing identifiers, ambiguities and disagreements;
+- `reconciliation-run-manifest.json` records every input, output and configuration hash.
+
+T14 requires exact WFO identifier equality and does not strip cultivar or crop-form qualifiers. A proposal never
+targets a plant concept, cultivar group or cultivar directly, and the job never writes an accepted catalog
+`localized-name`. Editorial localization decisions are applied by later curation tasks.

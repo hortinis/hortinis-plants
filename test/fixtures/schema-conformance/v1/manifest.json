@@ -1074,6 +1074,56 @@
       }
     },
     {
+      "id": "taxref-external-link-valid",
+      "schemaId": "urn:hortinis:plants:schema:v1:taxref-external-link",
+      "fixture": "taxref-external-link-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "taxref-external-link-invalid",
+      "schemaId": "urn:hortinis:plants:schema:v1:taxref-external-link",
+      "fixture": "taxref-external-link-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [
+          { "instancePath": "/taxrefIdentifier", "keyword": "pattern" }
+        ]
+      }
+    },
+    {
+      "id": "taxref-wfo-link-outcome-valid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:taxref-wfo-link-outcome",
+      "fixture": "taxref-wfo-link-outcome-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "taxref-wfo-link-outcome-invalid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:taxref-wfo-link-outcome",
+      "fixture": "taxref-wfo-link-outcome-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/outcome", "keyword": "enum" }]
+      }
+    },
+    {
+      "id": "taxref-localization-proposal-valid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:taxref-localization-proposal",
+      "fixture": "taxref-localization-proposal-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "taxref-localization-proposal-invalid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:taxref-localization-proposal",
+      "fixture": "taxref-localization-proposal-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [
+          { "instancePath": "", "keyword": "required" },
+          { "instancePath": "/reviewState", "keyword": "const" }
+        ]
+      }
+    },
+    {
       "id": "taxref-change-record-valid",
       "schemaId": "urn:hortinis:plants:schema:v1:taxref-change-record",
       "fixture": "taxref-change-record-valid.json",

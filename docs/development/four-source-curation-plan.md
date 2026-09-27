@@ -236,7 +236,7 @@ unresolved-status outcomes and 488 explicit unmatched outcomes; no pinned seed i
 names, aliases and subject labels are not taxonomy seeds, and cultivar or crop-form qualifiers are never
 stripped. The historical GROW draft generator consumes only the GROW projection of the combined run.
 
-### T14 — Link TAXREF localization to reviewed WFO identity
+### T14 — Link TAXREF localization to reviewed WFO identity (`validated`)
 
 Use WFO-backed identity proposals as the starting point for TAXREF lookup. Emit `linked`, `ambiguous`,
 `not-found` and `concept-disagreement` outcomes. Attach French-name proposals only to reviewed equivalent
@@ -246,6 +246,13 @@ Dependencies: T12–T13.
 
 Acceptance: missing TAXREF data does not block WFO identity; disagreements become visible issues; localized names
 cannot attach to the wrong crop form automatically.
+
+The first implementation is the `taxref-wfo-localization` reconciliation job. It consumes current WFO
+crosswalks whose content review is accepted, streams only the WFO rows needed from `TAXREF_LIENS.txt`, and
+resolves each TAXREF `CD_NOM` to its accepted `CD_REF`. It emits deterministic link outcomes and unreviewed
+French localization proposals. Proposals target the reviewed Hortinis taxon only; they do not create accepted
+`localized-name` records or attach names to plant concepts, cultivars or crop forms. Exact WFO identifiers are
+required; version-suffixed identifiers are retained as unresolved evidence rather than silently rewritten.
 
 ### T15 — Generate integrated review packets
 

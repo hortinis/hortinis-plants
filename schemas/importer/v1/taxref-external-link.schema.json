@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:v1:taxref-external-link",
+  "title": "Selected TAXREF external taxonomy link",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sourceLocator",
+    "recordNumber",
+    "sourceAcronym",
+    "sourceType",
+    "sourceTitle",
+    "sourceUrl",
+    "taxrefIdentifier",
+    "externalIdentifier",
+    "externalUrl"
+  ],
+  "properties": {
+    "sourceLocator": { "type": "string", "minLength": 1 },
+    "recordNumber": { "type": "integer", "minimum": 1 },
+    "sourceAcronym": { "type": "string", "minLength": 1 },
+    "sourceType": { "type": "string", "minLength": 1 },
+    "sourceAuthors": { "type": "string" },
+    "sourceTitle": { "type": "string", "minLength": 1 },
+    "sourceUrl": { "type": "string", "minLength": 1 },
+    "taxrefIdentifier": { "type": "string", "pattern": "^[0-9]+$" },
+    "externalIdentifier": { "type": "string", "minLength": 1 },
+    "externalUrl": { "type": "string", "minLength": 1 }
+  }
+}

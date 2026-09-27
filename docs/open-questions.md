@@ -71,8 +71,15 @@ implementation sequence. The previous two-backbone and schema-version questions 
   and synonym evidence attached to its original `CD_NOM`. The eight v18 parent gaps are unresolved diagnostics;
   broken accepted-name references and graph cycles are fatal.
 - **validated — TAXREF external-link boundary:** verify `TAXREF_LIENS.txt` as part of the complete archive pin but
-  do not materialize its 2,016,747 rows in T12. If T14 needs TAXREF-asserted WFO links, add a separately scoped
-  extraction contract rather than silently importing every external database mapping.
+  do not materialize its 2,016,747 rows in T12. T14 uses a separately scoped extraction contract that streams
+  only rows whose `CT_NAME` is exactly `WFO (World Flora Online)` and whose WFO identifier is in the reviewed
+  crosswalk input. Other external database mappings remain outside the localization contract.
+- **in progress — T14 WFO identifier versions:** T14 requires exact WFO identifier equality. Identifiers such as
+  `wfo-0000449318-2022-06` are not silently reduced to `wfo-0000449318`; they remain visible as unresolved or
+  disagreement evidence until a release-aware equivalence rule is explicitly reviewed.
+- **validated — T14 proposal boundary:** a `linked` T14 outcome is generated review material, not editorial
+  acceptance. French proposals remain `unreviewed` and target only the reviewed Hortinis taxon. Applying a
+  preferred localized name or attaching it to a crop form belongs to later curation decisions.
 - **validated — CropGraph cohort:** include all 5,006 pinned calendar entries for raw staging, with zero
   entry exclusions. The explicit slug list and fingerprint are frozen in `data/sources/cropgraph/cohort.json`;
   subject matching is deferred to curation.
