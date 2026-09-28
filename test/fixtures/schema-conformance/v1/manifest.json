@@ -827,6 +827,51 @@
       }
     },
     {
+      "id": "curation-integrated-review-packet-valid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:integrated-review-packet",
+      "fixture": "curation-integrated-review-packet-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "curation-integrated-review-packet-invalid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:integrated-review-packet",
+      "fixture": "curation-integrated-review-packet-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/reviewState", "keyword": "const" }]
+      }
+    },
+    {
+      "id": "curation-integrated-review-queue-item-valid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:integrated-review-queue-item",
+      "fixture": "curation-integrated-review-queue-item-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "curation-integrated-review-queue-item-invalid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:integrated-review-queue-item",
+      "fixture": "curation-integrated-review-queue-item-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/reviewState", "keyword": "const" }]
+      }
+    },
+    {
+      "id": "curation-integrated-review-scope-valid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:integrated-review-scope",
+      "fixture": "curation-integrated-review-scope-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "curation-integrated-review-scope-invalid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:integrated-review-scope",
+      "fixture": "curation-integrated-review-scope-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [{ "instancePath": "/reviewState", "keyword": "const" }]
+      }
+    },
+    {
       "id": "curation-identity-review-item-valid",
       "schemaId": "urn:hortinis:plants:schema:curation:v1:identity-review-item",
       "fixture": "curation-identity-review-item-valid.json",

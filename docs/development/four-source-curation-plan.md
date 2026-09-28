@@ -254,7 +254,7 @@ French localization proposals. Proposals target the reviewed Hortinis taxon only
 `localized-name` records or attach names to plant concepts, cultivars or crop forms. Exact WFO identifiers are
 required; version-suffixed identifiers are retained as unresolved evidence rather than silently rewritten.
 
-### T15 — Generate integrated review packets
+### T15 — Generate integrated review packets (`validated`)
 
 Generate a frozen, deterministic draft containing original GROW and CropGraph records, WFO identity outcomes,
 TAXREF localization outcomes, cultivation candidates, existing authored decisions, rights evidence, scope
@@ -266,6 +266,12 @@ Dependencies: T4, T6, T7, T11, T13–T14.
 
 Acceptance: unmatched records remain visible; shared taxa can have distinct crop forms; packet membership and
 hashes are deterministic; changed dependencies invalidate the draft.
+
+Implemented by `curate:integrated-review`. Packets are grouped provisionally by qualified source record, so
+GROW rows and CropGraph slugs remain distinct even when they share a WFO outcome. The ignored draft contains
+the complete packet JSONL, queue JSONL, frozen scope and dependency descriptors. Packet content hashes,
+qualified source keys, source-level rights evidence and candidate-level rights states are preserved; no
+subject merge or editorial acceptance is performed.
 
 ### T16 — Add comparisons to review packets
 

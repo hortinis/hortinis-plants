@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "1.0.0",
+  "reviewState": "unreviewed",
+  "policy": "qualified-source-record-v1",
+  "sources": [
+    {
+      "kind": "grow",
+      "sourceId": "source_grow",
+      "sourceManifestId": "source_manifest_grow",
+      "sourceReleaseId": "2020"
+    },
+    {
+      "kind": "cropgraph",
+      "sourceId": "source_cropgraph",
+      "sourceManifestId": "source_manifest_cropgraph",
+      "sourceReleaseId": "2026"
+    }
+  ],
+  "fingerprints": [
+    {
+      "role": "fixture",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "byteSize": 0
+    }
+  ],
+  "counts": [{ "role": "packets", "count": 0 }]
+}

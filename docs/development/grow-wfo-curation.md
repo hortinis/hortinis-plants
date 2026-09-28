@@ -32,6 +32,15 @@ The drafts remain ignored cache files. They are a deterministic review aid and c
 The WFO reconciliation run also contains selected CropGraph name outcomes. This historical command projects
 only the GROW subset; integrated GROW and CropGraph review packets are introduced by T15.
 
+For the integrated four-source review material, run the source jobs and TAXREF/WFO reconciliation first, then:
+
+```sh
+pnpm curate:integrated-review
+```
+
+This writes ignored `.cache/curation-drafts/integrated/latest` artifacts. Packets are provisional
+source-record review material and do not merge shared WFO taxa into one horticultural subject.
+
 For a read-only lookup in the pinned WFO archive, query by normalized scientific name or WFO identifier:
 
 ```sh

@@ -1,0 +1,18 @@
+{
+  "id": "review-queue-fixture",
+  "packetId": "review-packet-fixture",
+  "reviewState": "reviewed",
+  "sourceKind": "grow",
+  "sourceRecordKey": {
+    "source": {
+      "sourceId": "source_grow",
+      "sourceManifestId": "source_manifest_grow",
+      "sourceReleaseId": "2020"
+    },
+    "recordId": "1"
+  },
+  "reviewKinds": ["identity"],
+  "candidateCounts": { "identity": 0 },
+  "taxonomyOutcomes": [],
+  "rightsStatus": "eligible"
+}

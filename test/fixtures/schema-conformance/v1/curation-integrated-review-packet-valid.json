@@ -1,0 +1,31 @@
+{
+  "id": "review-packet-fixture",
+  "packetVersion": "1.0.0",
+  "reviewState": "unreviewed",
+  "grouping": "qualified-source-record-v1",
+  "sourceKind": "grow",
+  "sourceRecordKey": {
+    "source": {
+      "sourceId": "source_grow",
+      "sourceManifestId": "source_manifest_grow",
+      "sourceReleaseId": "2020"
+    },
+    "recordId": "1"
+  },
+  "sourceRecord": {},
+  "identityCandidates": [],
+  "cultivationCandidates": [],
+  "taxonomyOutcomes": [],
+  "localizationOutcomes": [],
+  "localizationProposals": [],
+  "authoredDecisions": {},
+  "rightsEvidence": {},
+  "queueMembership": ["identity"],
+  "dependencies": [
+    {
+      "role": "grow-run",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "contentSha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+}

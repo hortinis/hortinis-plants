@@ -70,6 +70,11 @@ export type {
   GrowWfoDraftOptions,
   GrowWfoDraftResult,
 } from "./curation/grow-wfo-drafts.js";
+export { generateIntegratedReviewPackets } from "./curation/integrated-review-packets.js";
+export type {
+  IntegratedReviewPacketOptions,
+  IntegratedReviewPacketResult,
+} from "./curation/integrated-review-packets.js";
 export {
   getGrowWfoStatus,
   readGrowWfoDrafts,

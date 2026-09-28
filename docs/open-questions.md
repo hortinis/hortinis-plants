@@ -101,3 +101,6 @@ implementation sequence. The previous two-backbone and schema-version questions 
 - **planned — CropGraph broader label and prose interpretation:** resolving cultivar names without explicit
   quoted epithets, crop-form equivalence, mixture components, alias languages and additional note patterns
   requires later curation. The T11 extractor does not establish these meanings.
+- **validated — Integrated packet grouping:** T15 groups packets by qualified source record as a provisional
+  review boundary. Shared WFO taxonomy is retained as a cross-packet reference; deciding whether records
+  share a horticultural subject remains an explicit T16/T18 review decision.

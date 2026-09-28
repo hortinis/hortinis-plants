@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:curation:v1:integrated-review-queue-item",
+  "title": "Integrated review packet queue item",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "packetId",
+    "reviewState",
+    "sourceKind",
+    "sourceRecordKey",
+    "reviewKinds",
+    "candidateCounts",
+    "taxonomyOutcomes",
+    "rightsStatus"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "packetId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "reviewState": { "const": "unreviewed" },
+    "sourceKind": { "enum": ["grow", "cropgraph"] },
+    "sourceRecordKey": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/qualifiedSourceRecordKey"
+    },
+    "reviewKinds": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "identity",
+          "subject",
+          "localization",
+          "cultivation",
+          "rights",
+          "issue"
+        ]
+      }
+    },
+    "candidateCounts": {
+      "type": "object",
+      "additionalProperties": { "type": "integer", "minimum": 0 }
+    },
+    "taxonomyOutcomes": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "rightsStatus": { "type": "string", "minLength": 1 }
+  }
+}
