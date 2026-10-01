@@ -20,6 +20,7 @@
     "authoredDecisions",
     "rightsEvidence",
     "queueMembership",
+    "comparisonIds",
     "dependencies",
     "contentSha256"
   ],
@@ -66,6 +67,13 @@
     "queueMembership": {
       "type": "array",
       "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "comparisonIds": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+      },
       "uniqueItems": true
     },
     "dependencies": {

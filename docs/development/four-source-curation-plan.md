@@ -273,7 +273,7 @@ the complete packet JSONL, queue JSONL, frozen scope and dependency descriptors.
 qualified source keys, source-level rights evidence and candidate-level rights states are preserved; no
 subject merge or editorial acceptance is performed.
 
-### T16 — Add comparisons to review packets
+### T16 — Add comparisons to review packets (`validated`)
 
 Compare GROW and CropGraph candidates by subject proposal, predicate, action, timing, geography and growing
 system. Preserve agreement, conflict and non-comparability, including possible shared upstream evidence.
@@ -281,6 +281,16 @@ system. Preserve agreement, conflict and non-comparability, including possible s
 Dependencies: T6 and T15.
 
 Acceptance: comparison output never discards either source claim or creates an implicit preference.
+
+Implemented in `curate:integrated-review`. A provisional packet pair requires one unambiguous WFO accepted
+identifier and equal common-name text after NFC normalization, English lowercasing and whitespace normalization.
+This is a review proposal, not a subject mapping; records with distinct crop-form labels remain separate.
+Only related calendar/window and harvest-duration claims are paired. Each generated comparison retains both
+complete candidate snapshots, qualified semantic claim keys, a reason, dimension results and a possible
+shared-upstream flag. The frozen comparison JSONL is linked from both source packets and counted in their
+queue items. Different timing bases, unanchored harvest durations, ambiguous actions and unresolved or
+different geography or growing system remain `not-comparable`; the job never chooses a claim. Claims without
+a proposal stay in their source packet.
 
 ### T17 — Generalize read-only curation commands
 

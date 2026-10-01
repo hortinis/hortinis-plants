@@ -21,6 +21,7 @@
   "authoredDecisions": {},
   "rightsEvidence": {},
   "queueMembership": ["identity"],
+  "comparisonIds": [],
   "dependencies": [
     {
       "role": "grow-run",

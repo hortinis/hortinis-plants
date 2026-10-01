@@ -104,3 +104,8 @@ implementation sequence. The previous two-backbone and schema-version questions 
 - **validated — Integrated packet grouping:** T15 groups packets by qualified source record as a provisional
   review boundary. Shared WFO taxonomy is retained as a cross-packet reference; deciding whether records
   share a horticultural subject remains an explicit T16/T18 review decision.
+- **validated — T16 comparison proposals:** a shared unambiguous WFO accepted identifier plus equal normalized
+  source common names nominates a GROW–CropGraph packet pair for comparison. It does not establish subject
+  equivalence or source independence. Different crop-form names are not paired automatically; unpaired claims
+  remain available for explicit review. GROW calendar dates and CropGraph frost-relative windows remain
+  non-comparable without an approved geographic and timing model.

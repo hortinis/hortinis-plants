@@ -19,9 +19,53 @@
       "maxItems": 2,
       "items": { "$ref": "#/$defs/candidate" }
     },
-    "reason": { "type": "string", "minLength": 1 }
+    "reason": { "type": "string", "minLength": 1 },
+    "matchEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "wfoIdentifier",
+        "normalizedCommonName",
+        "subjectReviewState"
+      ],
+      "properties": {
+        "kind": { "const": "shared-wfo-and-common-name-proposal" },
+        "wfoIdentifier": { "type": "string", "minLength": 1 },
+        "normalizedCommonName": { "type": "string", "minLength": 1 },
+        "subjectReviewState": { "const": "unreviewed" }
+      }
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "predicate",
+        "action",
+        "timing",
+        "geography",
+        "growingSystem"
+      ],
+      "properties": {
+        "predicate": { "$ref": "#/$defs/dimension" },
+        "action": { "$ref": "#/$defs/dimension" },
+        "timing": { "$ref": "#/$defs/dimension" },
+        "geography": { "$ref": "#/$defs/dimension" },
+        "growingSystem": { "$ref": "#/$defs/dimension" }
+      }
+    },
+    "sharedUpstreamEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "cropGraphCitation"],
+      "properties": {
+        "status": { "enum": ["possible", "unknown"] },
+        "cropGraphCitation": { "type": "string", "minLength": 1 }
+      }
+    }
   },
   "$defs": {
+    "dimension": { "enum": ["same", "different", "unresolved"] },
     "candidate": {
       "type": "object",
       "additionalProperties": false,

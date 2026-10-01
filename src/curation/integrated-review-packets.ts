@@ -24,6 +24,10 @@ import { GROW_SOURCE_ID } from "../adapters/grow/constants.js";
 import { CROPGRAPH_SOURCE_ID } from "../adapters/cropgraph/constants.js";
 import { WFO_SOURCE_ID } from "../adapters/wfo/constants.js";
 import { TAXREF_SOURCE_ID } from "../adapters/taxref/constants.js";
+import {
+  compareIntegratedPackets,
+  type ComparisonPacket,
+} from "./integrated-assertion-comparisons.js";
 
 type RecordValue = Readonly<Record<string, unknown>>;
 type MutableRecord = Record<string, unknown>;
@@ -40,6 +44,8 @@ const QUEUE_SCHEMA =
   "urn:hortinis:plants:schema:curation:v1:integrated-review-queue-item";
 const SCOPE_SCHEMA =
   "urn:hortinis:plants:schema:curation:v1:integrated-review-scope";
+const COMPARISON_SCHEMA =
+  "urn:hortinis:plants:schema:curation:v1:assertion-comparison";
 
 const repositoryRoot = resolve(
   fileURLToPath(new URL("../../", import.meta.url)),
@@ -309,11 +315,11 @@ export async function generateIntegratedReviewPackets(
         );
       const taxonomy = taxonomyMap.get(key) ?? [];
       const identities =
+        sourceKind === "grow" ? [] : (cropIdentityMap.get(key) ?? []);
+      const cultivation =
         sourceKind === "grow"
           ? (growCandidateMap.get(key) ?? [])
-          : (cropIdentityMap.get(key) ?? []);
-      const cultivation =
-        sourceKind === "grow" ? [] : (cropCultivationMap.get(key) ?? []);
+          : (cropCultivationMap.get(key) ?? []);
       const wfoIdentifiers = taxonomy.flatMap(wfoIdentifiersFromCandidate);
       const outcomes = uniqueRecords(
         wfoIdentifiers.flatMap(
@@ -347,6 +353,7 @@ export async function generateIntegratedReviewPackets(
         outcomes,
         identities,
         cultivation,
+        sourceKind,
       );
       const packetWithoutDigest: MutableRecord = {
         id: packetId,
@@ -364,8 +371,8 @@ export async function generateIntegratedReviewPackets(
         authoredDecisions,
         rightsEvidence,
         queueMembership,
+        comparisonIds: [],
         dependencies: packetDependencies(
-          sourceKind,
           growRun,
           cropGraphRun,
           wfoRun,
@@ -373,12 +380,7 @@ export async function generateIntegratedReviewPackets(
           datasetManifestBytes,
         ),
       };
-      const packet = {
-        ...packetWithoutDigest,
-        contentSha256: sha256(serializeCanonicalJson(packetWithoutDigest)),
-      };
-      assertSchema(validationApi, PACKET_SCHEMA, packet, `${packetId}`);
-      packets.push(packet);
+      packets.push(packetWithoutDigest);
       const taxonomyOutcomes = uniqueStrings(
         taxonomy
           .map((record) => stringField(record, "outcome"))
@@ -396,12 +398,51 @@ export async function generateIntegratedReviewPackets(
           cultivation: cultivation.length,
           taxonomy: taxonomy.length,
           localization: proposals.length,
+          comparison: 0,
         },
         taxonomyOutcomes,
         rightsStatus:
           stringField(rightsEvidence, "commercialDecision") ?? "unknown",
       });
     }
+  }
+  const { comparisons, idsByPacket } = compareIntegratedPackets(
+    packets as unknown as ComparisonPacket[],
+  );
+  for (const packet of packets) {
+    const packetId = requiredString(packet, "id");
+    const comparisonIds = idsByPacket.get(packetId) ?? [];
+    packet.comparisonIds = comparisonIds;
+    const comparisonDecisions = sortedRecords(
+      (authored.assertionComparisonDecisions ?? []).filter((record) =>
+        comparisonIds.includes(stringField(record, "comparisonId") ?? ""),
+      ),
+    );
+    if (comparisonDecisions.length > 0)
+      packet.authoredDecisions = {
+        ...(asRecord(packet.authoredDecisions) ?? {}),
+        assertionComparisonDecisions: comparisonDecisions,
+      };
+    if (comparisonIds.length > 0)
+      packet.queueMembership = uniqueStrings([
+        ...arrayField(packet, "queueMembership").map(String),
+        "comparison",
+      ]);
+    packet.contentSha256 = sha256(serializeCanonicalJson(packet));
+    assertSchema(validationApi, PACKET_SCHEMA, packet, packetId);
+  }
+  for (const item of queue) {
+    const packetId = requiredString(item, "packetId");
+    const comparisonCount = (idsByPacket.get(packetId) ?? []).length;
+    const counts = asRecord(item.candidateCounts);
+    if (counts === undefined) throw new Error("Queue has no candidate counts");
+    item.candidateCounts = { ...counts, comparison: comparisonCount };
+    if (comparisonCount > 0)
+      item.reviewKinds = uniqueStrings([
+        ...arrayField(item, "reviewKinds").map(String),
+        "comparison",
+      ]);
+    assertSchema(validationApi, QUEUE_SCHEMA, item, requiredString(item, "id"));
   }
   packets.sort((left, right) =>
     compareStrings(requiredString(left, "id"), requiredString(right, "id")),
@@ -455,6 +496,7 @@ export async function generateIntegratedReviewPackets(
       { role: "cropgraph-selected-records", count: cropRecords.length },
       { role: "integrated-packets", count: packets.length },
       { role: "integrated-queue-items", count: queue.length },
+      { role: "assertion-comparisons", count: comparisons.length },
       { role: "taxonomy-outcomes", count: taxonomyCandidates.length },
       { role: "localization-proposals", count: localizationProposals.length },
     ].sort((left, right) => compareStrings(left.role, right.role)),
@@ -475,6 +517,12 @@ export async function generateIntegratedReviewPackets(
       join(staging, "integrated-review-queue.jsonl"),
       queue,
       QUEUE_SCHEMA,
+      validationApi,
+    );
+    const comparisonStats = await writeJsonlArtifact(
+      join(staging, "assertion-comparisons.jsonl"),
+      comparisons,
+      COMPARISON_SCHEMA,
       validationApi,
     );
     const scopeBytes = Buffer.concat([
@@ -518,7 +566,14 @@ export async function generateIntegratedReviewPackets(
           packetStats,
         ),
       ],
-      outputs: [],
+      outputs: [
+        artifact(
+          "assertion-comparisons",
+          "assertion-comparisons.jsonl",
+          COMPARISON_SCHEMA,
+          comparisonStats,
+        ),
+      ],
       counts: scope.counts,
     };
     assertSchema(
@@ -684,7 +739,7 @@ async function fileStats(
 
 async function writeJsonlArtifact(
   path: string,
-  records: readonly RecordValue[],
+  records: readonly unknown[],
   schemaId: string,
   validationApi: ValidationApi,
 ): Promise<ArtifactStats> {
@@ -893,7 +948,6 @@ function collectAuthoredDecisions(
     "sourceAssertionDecisions",
     "assertions",
     "evidence",
-    "assertionComparisonDecisions",
     "curationIssues",
   ];
   for (const collection of sourceCollections) {
@@ -993,6 +1047,7 @@ function reviewKinds(
   outcomes: readonly RecordValue[],
   identities: readonly RecordValue[],
   cultivation: readonly RecordValue[],
+  sourceKind: SourceKind,
 ): string[] {
   const kinds = ["identity", "subject"];
   if (outcomes.length > 0 || taxonomy.length === 0) kinds.push("localization");
@@ -1006,35 +1061,32 @@ function reviewKinds(
           stringField(record, "outcome") ?? "",
         ),
     ) ||
-    identities.length === 0
+    (sourceKind === "cropgraph" && identities.length === 0)
   )
     kinds.push("issue");
   return uniqueStrings(kinds);
 }
 
 function packetDependencies(
-  sourceKind: SourceKind,
   growRun: RunInput,
   cropRun: RunInput,
   wfoRun: RunInput,
   taxrefRun: RunInput,
   datasetManifestBytes: Buffer,
 ): RecordValue[] {
-  const roles =
-    sourceKind === "grow"
-      ? ["source-records.jsonl", "candidates.jsonl"]
-      : [
-          "selected-records.jsonl",
-          "identity-candidates.jsonl",
-          "cultivation-candidates.jsonl",
-        ];
-  const selected = sourceKind === "grow" ? growRun : cropRun;
-  const dependencies: RecordValue[] = roles.map((path) => {
-    const output = selected.outputs.find((item) => item.path === path);
+  const roles: readonly (readonly [SourceKind, RunInput, string])[] = [
+    ["grow", growRun, "source-records.jsonl"],
+    ["grow", growRun, "candidates.jsonl"],
+    ["cropgraph", cropRun, "selected-records.jsonl"],
+    ["cropgraph", cropRun, "identity-candidates.jsonl"],
+    ["cropgraph", cropRun, "cultivation-candidates.jsonl"],
+  ];
+  const dependencies: RecordValue[] = roles.map(([kind, run, path]) => {
+    const output = run.outputs.find((item) => item.path === path);
     if (output === undefined)
       throw new Error(`Missing packet dependency ${path}`);
     return {
-      role: `${sourceKind}-${path.replaceAll(".jsonl", "")}`,
+      role: `${kind}-${path.replaceAll(".jsonl", "")}`,
       sha256: output.sha256,
       ...(output.recordCount === undefined
         ? {}
