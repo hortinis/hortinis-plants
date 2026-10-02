@@ -33,6 +33,7 @@ import {
   type RecordValue,
 } from "./curation-artifacts.js";
 import type { ValidationDataset } from "./validation-dataset.js";
+import { auditPacketDecisions } from "./integrated-decision-lineage.js";
 import {
   collectAuthoredDecisions,
   rightsForSource,
@@ -118,6 +119,7 @@ export async function validateCurationDataset(
         auditBaselines(structural.loaded, draft);
         auditAuthoredSnapshots(structural.loaded.dataset, draft);
         auditCurationDecisionLineage(structural.loaded.dataset, draft);
+        auditPacketDecisions(structural.loaded.dataset, draft);
       }
       sourceAudit = { status: "validated", valid: true, issues: [] };
     } catch (error) {
@@ -595,6 +597,22 @@ export function auditCurationDecisionLineage(
   const comparisons = uniqueBy(draft.comparisons, (comparison) =>
     field(comparison, "id"),
   );
+  const authoredSnapshot = (collection: string, decision: RecordValue) =>
+    draft.packets.some((packet) => {
+      const authored = object(packet.authoredDecisions);
+      return (
+        records(authored[collection] ?? []).some((row) =>
+          same(row, decision),
+        ) &&
+        records(authored.packetDecisions ?? []).some(
+          (receipt) =>
+            receipt.draftManifestSha256 === decision.draftManifestSha256 &&
+            records(receipt.records).some((entry) =>
+              same(entry.value, decision),
+            ),
+        )
+      );
+    });
   for (const decision of [
     ...currentRecords(dataset.sourceNameDecisions ?? []),
     ...currentRecords(
@@ -657,6 +675,11 @@ export function auditCurationDecisionLineage(
   for (const decision of currentRecords(
     dataset.sourceAssertionDecisions ?? [],
   )) {
+    if (
+      authoredSnapshot("sourceAssertionDecisions", decision) &&
+      decision.draftManifestSha256 !== draft.manifestSha256
+    )
+      continue;
     const candidate = candidates.get(field(decision, "sourceCandidateId"));
     if (
       candidate === undefined ||
@@ -736,6 +759,11 @@ export function auditCurationDecisionLineage(
   for (const decision of currentRecords(
     dataset.assertionComparisonDecisions ?? [],
   )) {
+    if (
+      authoredSnapshot("assertionComparisonDecisions", decision) &&
+      decision.draftManifestSha256 !== draft.manifestSha256
+    )
+      continue;
     const comparison = comparisons.get(field(decision, "comparisonId"));
     if (
       comparison === undefined ||
@@ -797,7 +825,7 @@ function auditAuthoredSnapshots(
   }
 }
 
-function auditBaselines(
+export function auditBaselines(
   loaded: LoadedCurationDataset,
   draft: IntegratedReviewDraft,
 ): void {

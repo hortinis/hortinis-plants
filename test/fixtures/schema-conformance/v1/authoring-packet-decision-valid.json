@@ -1,0 +1,36 @@
+{
+  "id": "packet-decision-fixture",
+  "transactionId": "transaction-fixture",
+  "draftManifestSha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "kind": "issue",
+  "source": {
+    "packetId": "packet-fixture",
+    "packetSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "sourceRecordKey": {
+      "source": {
+        "sourceId": "source_grow_edible_plant_database",
+        "sourceManifestId": "source_manifest_grow_epd_2020",
+        "sourceReleaseId": "doi:10.15132/10000157"
+      },
+      "recordId": "1"
+    }
+  },
+  "reviewId": "review-fixture",
+  "disposition": "defer",
+  "reason": "Explicit fixture issue",
+  "records": [],
+  "candidateSnapshots": [],
+  "comparisonSnapshots": [],
+  "sourceRecordSnapshot": {
+    "sourceRecordKey": {
+      "source": {
+        "sourceId": "source_grow_edible_plant_database",
+        "sourceManifestId": "source_manifest_grow_epd_2020",
+        "sourceReleaseId": "doi:10.15132/10000157"
+      },
+      "recordId": "1"
+    }
+  },
+  "dependencies": [],
+  "rightsEvidence": {}
+}

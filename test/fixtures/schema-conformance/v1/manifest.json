@@ -1212,6 +1212,50 @@
         "valid": false,
         "errors": [{ "instancePath": "/code", "keyword": "minLength" }]
       }
+    },
+    {
+      "id": "curation-integrated-decision-input-valid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:integrated-decision-input",
+      "fixture": "curation-integrated-decision-input-valid.json",
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "id": "curation-integrated-decision-input-invalid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:integrated-decision-input",
+      "fixture": "curation-integrated-decision-input-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [
+          {
+            "instancePath": "",
+            "keyword": "required"
+          }
+        ]
+      }
+    },
+    {
+      "id": "authoring-packet-decision-valid",
+      "schemaId": "urn:hortinis:plants:schema:authoring:v1:packet-decision",
+      "fixture": "authoring-packet-decision-valid.json",
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "id": "authoring-packet-decision-invalid",
+      "schemaId": "urn:hortinis:plants:schema:authoring:v1:packet-decision",
+      "fixture": "authoring-packet-decision-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [
+          {
+            "instancePath": "",
+            "keyword": "required"
+          }
+        ]
+      }
     }
   ]
 }

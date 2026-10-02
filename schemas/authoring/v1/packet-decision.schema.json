@@ -1,0 +1,134 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "transactionId",
+    "draftManifestSha256",
+    "kind",
+    "source",
+    "reviewId",
+    "disposition",
+    "reason",
+    "records",
+    "candidateSnapshots",
+    "comparisonSnapshots",
+    "sourceRecordSnapshot",
+    "dependencies",
+    "rightsEvidence"
+  ],
+  "properties": {
+    "kind": {
+      "enum": [
+        "identity",
+        "subject",
+        "localization",
+        "context",
+        "assertion",
+        "comparison",
+        "issue"
+      ]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["packetId", "packetSha256", "sourceRecordKey"],
+      "properties": {
+        "packetId": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+        },
+        "packetSha256": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/sha256"
+        },
+        "sourceRecordKey": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/qualifiedSourceRecordKey"
+        },
+        "candidateIds": {
+          "type": "array",
+          "items": {
+            "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+          },
+          "uniqueItems": true
+        },
+        "comparisonIds": {
+          "type": "array",
+          "items": {
+            "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "reviewId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "disposition": {
+      "enum": ["accept", "reject", "defer"]
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "supersedesDecisionId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "id": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "transactionId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "draftManifestSha256": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/sha256"
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["collection", "id", "value"],
+        "properties": {
+          "collection": {
+            "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+          },
+          "id": {
+            "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+          },
+          "value": {
+            "type": "object"
+          },
+          "previousValue": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "candidateSnapshots": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "comparisonSnapshots": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "sourceRecordSnapshot": {
+      "type": "object"
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "rightsEvidence": {
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:authoring:v1:packet-decision",
+  "title": "Immutable reviewed packet disposition and authored record history"
+}

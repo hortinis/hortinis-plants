@@ -1,0 +1,172 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "transactionId",
+    "draftManifestSha256",
+    "baseDatasetSha256",
+    "operations"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "transactionId": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+    },
+    "draftManifestSha256": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/sha256"
+    },
+    "baseDatasetSha256": {
+      "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/sha256"
+    },
+    "datasetManifest": {
+      "$ref": "urn:hortinis:plants:schema:authoring:v1:curation-dataset-manifest"
+    },
+    "operations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/operation"
+      }
+    },
+    "batches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "members"],
+        "properties": {
+          "id": {
+            "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+          },
+          "members": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/$defs/operation"
+            }
+          }
+        }
+      }
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:curation:v1:integrated-decision-input",
+  "title": "Explicit frozen packet authoring transaction",
+  "$defs": {
+    "operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "source",
+        "mintAlias",
+        "reviewId",
+        "disposition",
+        "reason",
+        "records"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "identity",
+            "subject",
+            "localization",
+            "context",
+            "assertion",
+            "comparison",
+            "issue"
+          ]
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["packetId", "packetSha256", "sourceRecordKey"],
+          "properties": {
+            "packetId": {
+              "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+            },
+            "packetSha256": {
+              "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/sha256"
+            },
+            "sourceRecordKey": {
+              "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/qualifiedSourceRecordKey"
+            },
+            "candidateIds": {
+              "type": "array",
+              "items": {
+                "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+              },
+              "uniqueItems": true
+            },
+            "comparisonIds": {
+              "type": "array",
+              "items": {
+                "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+              },
+              "uniqueItems": true
+            }
+          }
+        },
+        "mintAlias": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+        },
+        "reviewId": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+        },
+        "disposition": {
+          "enum": ["accept", "reject", "defer"]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "supersedesDecisionId": {
+          "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+        },
+        "records": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["collection", "value"],
+            "properties": {
+              "collection": {
+                "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+              },
+              "mintAlias": {
+                "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+              },
+              "previousValueSha256": {
+                "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/sha256"
+              },
+              "value": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "anyOf": [
+    {
+      "properties": {
+        "operations": {
+          "minItems": 1,
+          "type": "array"
+        }
+      }
+    },
+    {
+      "required": ["batches"],
+      "properties": {
+        "batches": {
+          "minItems": 1,
+          "type": "array"
+        }
+      }
+    }
+  ]
+}

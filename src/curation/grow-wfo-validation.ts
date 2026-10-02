@@ -121,7 +121,8 @@ export interface GrowWfoValidationResult {
 const manifestSchemaId =
   "urn:hortinis:plants:schema:authoring:v1:curation-dataset-manifest";
 
-const collectionSchemaIds: Readonly<Record<string, string>> = {
+export const collectionSchemaIds: Readonly<Record<string, string>> = {
+  "packet-decisions": "urn:hortinis:plants:schema:authoring:v1:packet-decision",
   taxa: "urn:hortinis:plants:schema:v1:taxon",
   "taxonomic-names": "urn:hortinis:plants:schema:v1:taxonomic-name",
   "plant-concepts": "urn:hortinis:plants:schema:v1:plant-concept",
@@ -183,7 +184,10 @@ const draftOutputPaths: Readonly<Record<string, string>> = {
   "curation-issues": "curation-issues.jsonl",
 };
 
-const roleToDatasetField: Readonly<Record<string, keyof ValidationDataset>> = {
+export const roleToDatasetField: Readonly<
+  Record<string, keyof ValidationDataset>
+> = {
+  "packet-decisions": "packetDecisions",
   taxa: "taxa",
   "taxonomic-names": "taxonomicNames",
   "plant-concepts": "plantConcepts",
@@ -373,6 +377,7 @@ export async function validateGrowWfoDataset(
   let loaded: LoadedCurationDataset | undefined;
   if (loadedAllCollections && dependencyRecords !== undefined) {
     const dataset: ValidationDataset = {
+      packetDecisions: recordsByField.get("packetDecisions") ?? [],
       taxa: recordsByField.get("taxa") ?? [],
       taxonomicNames: recordsByField.get("taxonomicNames") ?? [],
       plantConcepts: recordsByField.get("plantConcepts") ?? [],
@@ -402,6 +407,37 @@ export async function validateGrowWfoDataset(
       licences: dependencyRecords.licences,
       sourceManifestIds: dependencyRecords.sourceManifestIds,
     };
+    for (const decision of dataset.packetDecisions ?? []) {
+      for (const entry of arrayField(decision, "records").map(asRecord)) {
+        if (entry === undefined) continue;
+        const role = stringField(entry, "collection") ?? "";
+        const schema = collectionSchemaIds[role];
+        if (schema === undefined || role === "packet-decisions") {
+          addIssue(
+            issues,
+            "UNSUPPORTED_COLLECTION_ROLE",
+            "packet-decisions",
+            `Unsupported packet history collection ${role}`,
+          );
+          continue;
+        }
+        validateValue(
+          validationApi,
+          schema,
+          entry.value,
+          "packet-decisions",
+          issues,
+        );
+        if (entry.previousValue !== undefined)
+          validateValue(
+            validationApi,
+            schema,
+            entry.previousValue,
+            "packet-decisions",
+            issues,
+          );
+      }
+    }
     for (const issue of validateValidationDataset(dataset)) {
       addSemanticIssue(issues, issue, locations);
     }

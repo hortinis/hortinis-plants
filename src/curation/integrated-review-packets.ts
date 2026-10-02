@@ -1034,6 +1034,7 @@ export function collectAuthoredDecisions(
   const dataset = authoredIndexes(datasetValue);
   const result: MutableRecord = {};
   const sourceCollections = [
+    "packetDecisions",
     "sourceNameDecisions",
     "sourceSubjectMappings",
     "sourceGeographyDecisions",
@@ -1047,6 +1048,8 @@ export function collectAuthoredDecisions(
       (dataset[collection] ?? []).filter(
         (record) =>
           serializeRecordKey(record) === sourceKey ||
+          (collection === "packetDecisions" &&
+            serializeRecordKey(asRecord(record.source) ?? {}) === sourceKey) ||
           (collection === "sourceAssertionDecisions" &&
             candidateIds.includes(
               stringField(record, "sourceCandidateId") ?? "",
@@ -1090,7 +1093,7 @@ export function collectAuthoredDecisions(
     if (taxa.length > 0) result.taxa = taxa;
     const localized = sortedRecords(
       (dataset.localizedNames ?? []).filter((record) =>
-        taxonIds.has(stringField(record, "taxonId") ?? ""),
+        taxonIds.has(stringField(asRecord(record.subject), "id") ?? ""),
       ),
     );
     if (localized.length > 0) result.localizedNames = localized;

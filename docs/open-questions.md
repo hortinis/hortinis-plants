@@ -120,10 +120,19 @@ implementation sequence. The previous two-backbone and schema-version questions 
 - **validated — T17 localization denominator:** count unique current reviewed WFO crosswalks used by reviewed
   source-name decisions in the selected scope. Distinguish records not yet eligible, eligible identities
   not reconciled and actual TAXREF outcomes. Do not count generated proposals as accepted localized names.
-- **planned — T18 authoring transition:** explicitly admit CropGraph/TAXREF source dependencies and select
-  the tracked dataset's editorial scope when four-source decisions are first applied. Define prospective
-  dataset validation against the frozen pre-transaction authoring snapshot without circular hashes or
-  silently refreshing approvals. T17 generation and inspection do not mutate these declarations.
+- **validated — T18 authoring transition contract:** the first integrated transaction explicitly declares
+  CropGraph/TAXREF dependencies, editorial scope and the packet-decision collection. Audit original authoring
+  snapshots before staging and validate the prospective dataset against frozen candidates afterward. Keep
+  integrated draft/scope/authoring hashes out of manifest baselines. Replays and transaction ID reuse are
+  rejected; the consumed draft remains stale. See [the integrated workflow](development/integrated-curation.md).
+- **validated — T18 decision history:** immutable packet decisions preserve accepted, rejected and deferred
+  dispositions, candidate/comparison snapshots, rights evidence and review lineage. Domain decisions retain
+  explicit supersession. Issue-state and localized-name preference replacements require an exact previous
+  content digest and preserve the previous value. Historical approvals retain their original hashes and do
+  not automatically qualify for completion accounting against a newer draft.
+- **planned — Tracked four-source editorial admission:** select the actual dataset scope and supply the
+  reviewed first manifest transition when applying four-source curation. T18 tooling and fixture validation
+  do not admit real source dependencies, merge subjects or accept source candidates by themselves.
 - **planned — T19 completion policy:** define aggregate C4 readiness, required localization and how reviewed
   deferrals or accepted limitations affect delivery coverage. T17 reports reviewed dispositions separately
   from accepted facts and leaves unresolved identity decisions pending.

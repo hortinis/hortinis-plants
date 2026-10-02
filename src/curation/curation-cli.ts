@@ -1,3 +1,9 @@
+import { readFile } from "node:fs/promises";
+import { parseJsonStrict } from "../serialization/canonical-json.js";
+import {
+  applyCurationDecision,
+  type IntegratedDecisionInput,
+} from "./curation-apply.js";
 import { resolve, join } from "node:path";
 import { WFO_SNAPSHOT_FILENAME } from "../adapters/wfo/constants.js";
 import { generateIntegratedReviewPackets } from "./integrated-review-packets.js";
@@ -13,12 +19,13 @@ import {
 } from "./curation-validation.js";
 import { field, records, readObject } from "./curation-artifacts.js";
 
-const commands = ["drafts", "lookup", "show", "status", "validate"];
+const commands = ["drafts", "lookup", "show", "status", "validate", "apply"];
 const command = process.argv[2];
 const args = process.argv.slice(3).filter((argument) => argument !== "--");
 const common = ["dataset", "drafts", "scope", "json", "help"];
 const audit = ["deep", "run", "input", "source-directory", "cohort"];
 const allowed: Readonly<Record<string, readonly string[]>> = {
+  apply: [...common, "input", "run", "resource", "source-directory", "cohort"],
   drafts: [...common, "run", "cohort", "output", "source-manifest"],
   lookup: [...common, "name", "id", "snapshot", "source-manifest"],
   show: [
@@ -69,7 +76,13 @@ function parseOptions(
       throw new Error(`${argument} requires a value`);
     if (
       values.has(name) &&
-      !["run", "input", "source-directory", "source-manifest"].includes(name)
+      ![
+        "run",
+        "input",
+        "source-directory",
+        "source-manifest",
+        "resource",
+      ].includes(name)
     )
       throw new Error(`Duplicate option ${argument}`);
     values.set(name, [...(values.get(name) ?? []), value]);
@@ -111,7 +124,7 @@ async function run(command: string, values: Map<string, string[]>) {
       : { cohortPath: resolve(one("cohort")!) }),
     deep: values.has("deep"),
     runDirectories: mappings(values, "run"),
-    inputPaths: mappings(values, "input"),
+    inputPaths: mappings(values, command === "apply" ? "resource" : "input"),
     sourceDirectories: mappings(values, "source-directory"),
   };
   for (const role of Object.keys(options.runDirectories!))
@@ -128,6 +141,16 @@ async function run(command: string, values: Map<string, string[]>) {
     if (!["grow", "cropgraph", "taxref"].includes(kind))
       throw new Error(`Unknown source-directory kind ${kind}`);
   const paths = curationPaths(options);
+  if (command === "apply") {
+    if (one("input") === undefined || values.get("input")!.length !== 1)
+      throw new Error("Exactly one --input decision file is required");
+    return applyCurationDecision(
+      parseJsonStrict(
+        await readFile(resolve(one("input")!)),
+      ) as IntegratedDecisionInput,
+      options,
+    );
+  }
   if (command === "validate") {
     const result = await validateCurationDataset(options);
     return {
@@ -233,7 +256,18 @@ async function run(command: string, values: Map<string, string[]>) {
 }
 
 function print(command: string, result: Awaited<ReturnType<typeof run>>): void {
-  if (command === "validate" || command === "status" || command === "show") {
+  if (command === "apply") {
+    const value = result as Awaited<ReturnType<typeof applyCurationDecision>>;
+    console.log(
+      `Applied ${value.transactionId}: ${value.created} created, ${value.unchanged} unchanged, ${value.replaced} replaced; ${value.decisions} reviewed dispositions.`,
+    );
+    if (value.retainedBackup !== undefined)
+      console.log(`Committed; retained backup: ${value.retainedBackup}`);
+  } else if (
+    command === "validate" ||
+    command === "status" ||
+    command === "show"
+  ) {
     const value = result as Awaited<ReturnType<typeof getCurationStatus>>;
     console.log(`Structural validation: ${value.structural.status}`);
     console.log(`Source audit: ${value.sourceAudit.status}`);
@@ -248,6 +282,9 @@ function print(command: string, result: Awaited<ReturnType<typeof run>>): void {
         console.log(`${issue.path}: ${issue.code}: ${issue.message}`);
     }
     if (command === "status") {
+      console.log(
+        `Authoring dataset fingerprint: ${value.baseDatasetSha256 ?? "unavailable"}`,
+      );
       for (const [kind, gate] of Object.entries(value.editorial))
         console.log(
           `${kind}: ${gate.status} (${gate.available ? `${gate.accounted}/${gate.total} accounted; ${gate.deferred} deferred` : "coverage unavailable"})`,

@@ -47,6 +47,7 @@ export interface ValidationDataset {
    * `sourceManifestId`, which retains the V1 single-source evidence check.
    */
   readonly sourceManifestIds?: readonly string[];
+  readonly packetDecisions?: readonly DatasetRecord[];
   readonly taxa: readonly DatasetRecord[];
   readonly taxonomicNames?: readonly DatasetRecord[];
   readonly plantConcepts: readonly DatasetRecord[];
@@ -79,6 +80,7 @@ export function validateValidationDataset(
 ): DatasetValidationIssue[] {
   const issues: DatasetValidationIssue[] = [];
   const collections: Readonly<Record<string, Collection>> = {
+    packetDecisions: dataset.packetDecisions ?? [],
     taxa: dataset.taxa,
     taxonomicNames: dataset.taxonomicNames ?? [],
     plantConcepts: dataset.plantConcepts,
@@ -293,6 +295,71 @@ export function validateValidationDataset(
     }
     checkIdReferences(record, "evidenceReferenceIds", "evidence", missing, id);
     checkReplacement(record, "replacementCultivarId", "cultivars", missing, id);
+  }
+
+  const currentPacketDecisions = currentRecords(
+    dataset.packetDecisions ?? [],
+    "packetDecisions",
+    "supersedesDecisionId",
+    (row) =>
+      JSON.stringify([
+        row.kind,
+        asRecord(row.source)?.packetId,
+        stringArray(asRecord(row.source)?.candidateIds).sort(),
+        stringArray(asRecord(row.source)?.comparisonIds).sort(),
+        row.kind === "issue" && Array.isArray(row.records)
+          ? row.records
+              .filter(
+                (entry) => asRecord(entry)?.collection === "curation-issues",
+              )
+              .map((entry) => asRecord(entry)?.id)
+              .sort()
+          : [],
+      ]),
+    get,
+    missing,
+    issues,
+  );
+  for (const record of dataset.packetDecisions ?? []) {
+    const id = recordId(record);
+    checkAllowedSourceManifest(asRecord(record.source) ?? {}, id);
+    checkReview(stringField(record, "reviewId"), "content", id, get, issues);
+    for (const entryValue of Array.isArray(record.records)
+      ? record.records
+      : []) {
+      const entry = asRecord(entryValue);
+      const targetId = stringField(entry, "id");
+      const value = asRecord(entry?.value);
+      const kind = targetId === undefined ? undefined : globalIds.get(targetId);
+      if (kind === undefined || targetId === undefined) {
+        issues.push({
+          code: "MISSING_REFERENCE",
+          recordId: id,
+          message: `Packet history references missing record ${targetId ?? "<missing>"}`,
+        });
+        continue;
+      }
+      const target = get(kind, targetId);
+      if (
+        value?.id !== targetId ||
+        (currentPacketDecisions.currentIds.has(id) &&
+          !Buffer.from(serializeCanonicalJson(target)).equals(
+            Buffer.from(serializeCanonicalJson(value)),
+          ))
+      )
+        issues.push({
+          code: "INVALID_SOURCE_DECISION",
+          recordId: id,
+          message: `Current packet history differs from authored record ${targetId}`,
+        });
+    }
+    const review = get("reviews", stringField(record, "reviewId") ?? "");
+    if (review?.status !== "accepted")
+      issues.push({
+        code: "INVALID_REVIEW_REFERENCE",
+        recordId: id,
+        message: `Packet disposition ${id} requires an accepted content review`,
+      });
   }
 
   for (const record of dataset.localizedNames ?? []) {

@@ -7,8 +7,8 @@
 > reference for the validated GROW/WFO workflow and is not a separate roadmap.
 
 The source-neutral T17 commands and their audit modes are documented in the
-[integrated read-only workflow](integrated-curation.md). Use them for four-source packets. The commands
-below remain the historical regression and transactional baseline until T18.
+[integrated workflow](integrated-curation.md). Use them for four-source packets. The commands
+below remain historical regression adapters; use `curate:apply` for integrated transactions.
 
 The first broad catalog curation set uses every record from the pinned GROW 2020 import and the pinned WFO
 2026-06 reconciliation. It is source-location-qualified and is not a France-specific release profile.

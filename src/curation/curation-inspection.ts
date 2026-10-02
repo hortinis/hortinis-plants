@@ -1,3 +1,4 @@
+import { authoringFingerprint } from "./decision-transaction.js";
 import { access } from "node:fs/promises";
 import { join } from "node:path";
 import {
@@ -46,6 +47,7 @@ export interface CurationStatusResult {
   readonly sourceAudit: ValidationDimension;
   readonly draftIntegrity: ValidationDimension;
   readonly draftManifestSha256?: string;
+  readonly baseDatasetSha256: string | null;
   readonly scopeCounts: readonly RecordValue[] | null;
   readonly editorial: Readonly<
     Record<
@@ -268,6 +270,13 @@ export async function getCurationStatus(
   }
   return {
     valid,
+    baseDatasetSha256:
+      validation.structural.valid && validation.loaded !== undefined
+        ? await authoringFingerprint(
+            curationPaths(options).dataset,
+            validation.loaded.manifest.collections,
+          )
+        : null,
     structural: validation.structural,
     sourceAudit: validation.sourceAudit,
     draftIntegrity: integrity,
@@ -342,6 +351,9 @@ export async function showCurationRecord(
     }),
   );
   const decisions = {
+    packet: (dataset.packetDecisions ?? []).filter(
+      (row) => sourceRecordKey(object(row.source)) === key,
+    ),
     name: (dataset.sourceNameDecisions ?? []).filter(
       (row) => sourceRecordKey(row) === key,
     ),

@@ -1,7 +1,7 @@
-# Integrated read-only curation
+# Integrated curation
 
 - Status: validated
-- Scope: T17 inspection and audit of the generalized V1 dataset and T15/T16 frozen packets
+- Scope: T17 inspection and audit, T18 transactional application, and T15/T16 frozen packets
 
 The authoring dataset is selected explicitly with `--dataset`; the default remains
 `data/curation/grow-wfo-initial`. Its name does not determine its collection layout. Collections,
@@ -111,7 +111,117 @@ must therefore not be written back into that manifest as a baseline. Existing co
 and scope baselines remain independent pins; assertion and comparison decisions retain their exact draft
 hash. The historical `draft-manifest` baseline applies only to the historical GROW/WFO workflow.
 
-The existing GROW/WFO commands and transactional application remain operational until T18. They reuse
-the same V1 structural validator; there is no new schema version or migrated copy of authored records.
+The historical GROW/WFO commands remain regression adapters. Application shares the directory transaction
+engine and writer lock with `curate:apply`; integrated decisions use the generalized V1 validator. There
+is no new schema version or migrated copy of authored records.
 Changing the tracked dataset's editorial scope and admitting new source dependencies is explicit curator
 work, not a side effect of generating or inspecting integrated packets.
+
+## Apply an explicit integrated transaction
+
+```sh
+pnpm curate:status -- --dataset data/curation/grow-wfo-initial --json
+pnpm curate:show -- --packet <packet-id> --json
+pnpm curate:apply -- --input decision.json \
+  --dataset data/curation/grow-wfo-initial \
+  --drafts .cache/curation-drafts/integrated/latest \
+  --scope .cache/curation-drafts/integrated/latest/review-scope.json --json
+```
+
+`apply` always performs a local deep audit. The decision file must conform to
+`urn:hortinis:plants:schema:curation:v1:integrated-decision-input`. Use `baseDatasetSha256` and
+`draftManifestSha256` from `status --json`. The base fingerprint includes the exact dataset manifest
+and every declared collection. Source/run overrides use the existing `--run`, `--source-directory`
+and `--cohort` options. For relocated source resources, use repeatable `--resource <locator-or-role>=<path>`;
+`--input` names the transaction file only. No network acquisition occurs.
+
+Each operation declares `kind`, `mintAlias`, `reviewId`, `disposition` (`accept`, `reject` or `defer`),
+`reason`, `source` and `records`. The source contains `packetId`, its exact `packetSha256`
+(from `packet.contentSha256`), and the complete `sourceRecordKey`. Assertion and context operations
+also enumerate cultivation `candidateIds`; localization operations enumerate proposal IDs in that
+field. Comparison operations enumerate `comparisonIds`. Identity and subject operations may enumerate
+identity or taxonomy candidate IDs. A context decision with an unknown source context must preserve
+that uncertainty; it does not calculate French dates or transfer US zones.
+
+Records declare the collection and a complete authored value. A missing value ID can be minted with
+an explicit record `mintAlias`. IDs retain the existing `hortinis:c4:<transactionId>:<collection>:<alias>`
+SHA-256 namespace; paths and member positions never determine them. Cross-record references use explicit
+IDs, which can be computed with the exported `mintStableId` helper. Operation aliases are unique within
+the transaction. `batches` contain named, explicitly enumerated `members`, each a complete operation;
+they expand to ordinary individual decisions before validation. Batch names are labels, not selectors.
+Use one member per reviewed candidate when making batch dispositions.
+
+Content reviews must be accepted, even when their reviewed disposition rejects or defers a proposal.
+Domain decisions remain explicit: identity needs a source-name decision, subject needs a source-subject
+mapping, assertion needs an individual source-assertion decision for every selected candidate, comparison
+needs an individual comparison decision, and issue needs a related issue record. Localization acceptance
+requires the exact TAXREF proposal string, language, reviewed WFO taxon and candidate evidence. The engine
+never maps a localized name to a crop form automatically. Rejection and deferral create no accepted names.
+Dynamic `plant_now` assertions remain rejected or deferred. Accepted assertions retain the candidate raw
+value in evidence normalization, alongside source locators and explicit rights reviews.
+
+## Explicit manifest transition
+
+The first integrated transaction supplies a complete prospective `datasetManifest`. It preserves the
+existing dataset ID, collection declarations and pinned dependencies, while explicitly:
+
+- Selecting its editorial `scope` and setting `reviewDraftCommand` to `pnpm curate:drafts`.
+- Admitting all four pinned source manifests and the required source/licence metadata.
+- Declaring `packet-decisions.jsonl` with role `packet-decisions`, format `jsonl`, schema
+  `urn:hortinis:plants:schema:authoring:v1:packet-decision` and authority `curator-authored`.
+- Removing the historical `draft-manifest` baseline. Keeping independent configuration, source/run and
+  cohort pins only when they match the frozen inputs.
+
+The integrated draft, integrated review scope and authoring snapshots contain authoring hashes. Their
+hashes cannot become manifest baselines. Transaction and packet-decision records carry those pins instead.
+An existing source dependency cannot be repinned by an apply transaction; source-release migration is a
+separate editorial change. Later transactions may omit `datasetManifest` when its declarations are sufficient.
+The checked-in dataset remains in its existing scope until a curator supplies this explicit transition.
+
+## History, supersession and validation
+
+Every operation materializes one immutable packet decision containing its original draft pin, source
+record, selected candidate/comparison snapshots, dependencies, rights evidence, review, disposition and
+authored record snapshots. These tracked records preserve rejected and deferred claims when generated
+review material is replaced. `show` exposes them under `decisions.packet`. Unrelated authored records,
+conflicting writes and unsupported collections reject the whole transaction.
+
+Domain decisions retain their existing supersession fields. An operation replacing a current packet
+disposition uses `supersedesDecisionId`; it must replace the same packet/kind/selection (or issue target).
+Existing records cannot be overwritten with different content, except for explicitly reviewed issue state
+and localized-name preference changes. Those require `previousValueSha256`, the canonical content digest
+of the existing value. Localized-name replacement changes only `preferred`; changed names require new IDs.
+The packet decision records the previous value, preserving the history of these replacements.
+
+The original authoring snapshot and all source inputs are validated before staging. The complete prospective
+dataset receives structural, baseline, reference, review, supersession and frozen-candidate lineage checks,
+without comparing the new authoring bytes to the original authoring hashes. Immediately before publication,
+the engine verifies the original dataset and frozen inputs again. Untouched collection bytes are preserved;
+changed collections are canonical JSONL sorted by opaque ID. Repeating a transaction or reusing its ID is
+clearly rejected. No approvals or manifest hashes are silently refreshed.
+
+After application, the consumed draft still describes the previous authoring snapshot. Structural validation
+continues to pass; deep validation against that consumed draft reports stale inputs. Refresh affected
+reconciliation jobs and generate a new draft for further work. Historical decisions keep their original
+hashes and immutable snapshots. A regenerated packet may carry that exact history, allowing deep audit to
+recognize it without treating it as a new approval. Assertion/comparison completion accounting still requires
+the selected draft hash; new review decisions must explicitly supersede history when reviewing a new draft.
+Aggregate completion policy remains T19 work.
+
+## Failure and recovery
+
+Both apply entry points acquire a sibling `<dataset>.apply-lock` directory before application. A competing
+writer fails without removing that lock. Staging uses a sibling `.curation-apply-*` directory. Validation,
+materialization and stale-input failures leave every tracked dataset byte unchanged.
+
+Publication moves the original dataset to `.curation-backup-*/dataset`, then moves the validated stage into
+place. A caught failure between these moves restores the original directory. Output fingerprints are computed
+before publication. A cleanup failure after publication is reported as `retainedBackup` in a successful
+result; it does not turn a committed transaction into a reported failure.
+
+A process termination or machine failure between the two directory moves requires manual recovery. Stop all
+writers first. If the dataset is absent, restore the saved `dataset` directory from the matching backup root
+to its original path. If the dataset exists, validate it structurally and compare its fingerprint before
+choosing whether to keep it or restore the backup. Preserve the backup until the choice is verified. Remove
+a stale apply lock and abandoned stage only after confirming no writer is active. Publication does not claim
+power-loss durability or a filesystem-wide atomic exchange.

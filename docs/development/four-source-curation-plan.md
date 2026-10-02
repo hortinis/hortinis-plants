@@ -310,7 +310,7 @@ source-audit validity, localization coverage and editorial accounting have separ
 coverage has null denominators, and missing TAXREF localization never changes reviewed WFO identity.
 The [integrated workflow](integrated-curation.md) defines explicit inputs, baseline semantics and the T18 boundary.
 
-### T18 — Generalize transactional decision application
+### T18 — Generalize transactional decision application (`validated`)
 
 Apply identity, subject, localization, context, assertion, comparison and issue decisions atomically. Pin the
 draft, scope, dependencies, packets and candidate sets. Validate the complete prospective dataset, preserve
@@ -320,6 +320,13 @@ Dependencies: T17.
 
 Acceptance: stale or corrupt input changes no tracked bytes; repeat application is idempotent or clearly
 rejected; rejected and deferred candidates remain inspectable.
+
+Implemented by `curate:apply`, with shared directory transactions and writer locks for the historical adapter.
+The complete original dataset, scope, runs, packets and candidate sets are pinned before prospective validation.
+Explicit manifest transitions admit new dependencies and scope; immutable packet decisions preserve all
+review dispositions, candidate evidence and replacement history. Batch members materialize individual records;
+publication failure restores original bytes. The [integrated workflow](integrated-curation.md) documents the
+contract, consumed-draft semantics, replay rejection and process-termination recovery boundary.
 
 ### T19 — Add coverage, integration verification and handoff
 

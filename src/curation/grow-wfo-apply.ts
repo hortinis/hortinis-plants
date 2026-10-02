@@ -1,19 +1,16 @@
 import { createHash } from "node:crypto";
-import {
-  cp,
-  mkdtemp,
-  readdir,
-  readFile,
-  rename,
-  rm,
-  writeFile,
-} from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { createReadStream } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { join, resolve } from "node:path";
 import { serializeCanonicalJson } from "../serialization/canonical-json.js";
 import { readJsonLines } from "../serialization/json-lines.js";
 import { validate, type ValidationApi } from "../schema/validation-api.js";
 import { validateGrowWfoDataset } from "./grow-wfo-validation.js";
+import {
+  readCollections,
+  runDecisionTransaction,
+  acquireDatasetLock,
+} from "./decision-transaction.js";
 
 type RecordValue = Readonly<Record<string, unknown>>;
 type CollectionRole =
@@ -66,6 +63,7 @@ export interface ApplyResult {
   readonly unchanged: number;
   readonly outputCollections: readonly CollectionRole[];
   readonly datasetSha256: string;
+  readonly retainedBackup?: string;
 }
 
 const inputSchemaId = "urn:hortinis:plants:schema:curation:v1:decision-input";
@@ -102,8 +100,27 @@ const schemaIds: Readonly<Record<CollectionRole, string>> = {
   "curation-issues": "urn:hortinis:plants:schema:authoring:v1:curation-issue",
 };
 
-/** Apply one explicit, draft-pinned transaction to the tracked authoring dataset. */
+/** Historical input adapter sharing the directory transaction and writer lock. */
 export async function applyGrowWfoDecision(
+  input: DecisionInput,
+  options: ApplyOptions = {},
+): Promise<ApplyResult> {
+  const root = resolve(
+    options.repositoryRoot ?? resolve(import.meta.dirname, "../.."),
+  );
+  const directory = resolve(
+    options.datasetDirectory ?? join(root, "data/curation/grow-wfo-initial"),
+  );
+  const release = await acquireDatasetLock(directory);
+  try {
+    return await applyHistoricalDecision(input, options);
+  } finally {
+    await release();
+  }
+}
+
+/** Apply one explicit, draft-pinned transaction to the tracked authoring dataset. */
+async function applyHistoricalDecision(
   input: DecisionInput,
   options: ApplyOptions = {},
 ): Promise<ApplyResult> {
@@ -220,50 +237,45 @@ export async function applyGrowWfoDecision(
     }
   }
 
-  let stage: string | undefined;
-  try {
-    stage = await stageDataset(
-      datasetDirectory,
-      collections,
-      current.loaded.manifest.collections,
-    );
-    const stagedValidation = await validateGrowWfoDataset({
-      repositoryRoot,
-      datasetDirectory: stage,
-      draftsDirectory,
-      againstDrafts: true,
-      validationApi,
-    });
-    if (!stagedValidation.valid)
-      throw new Error(
-        `Transaction would produce an invalid C4 dataset: ${stagedValidation.issues.map((issue) => `${issue.code}: ${issue.message}`).join("; ")}`,
-      );
-    const outputCollections = input.operations.flatMap((operation) =>
-      operation.records.map((record) => record.collection),
-    );
-    const uniqueCollections = [...new Set(outputCollections)].sort();
-    await publishDirectory(stage, datasetDirectory);
-    const outputSha = await datasetFingerprint(
-      datasetDirectory,
-      current.loaded.manifest.collections,
-    );
-    return {
-      transactionId: input.transactionId,
-      created,
-      unchanged,
-      outputCollections: uniqueCollections,
-      datasetSha256: outputSha,
-    };
-  } catch (error) {
-    if (stage !== undefined) await rm(stage, { recursive: true, force: true });
-    throw error;
-  }
+  const descriptors = current.loaded.manifest.collections;
+  const result = await runDecisionTransaction({
+    directory: datasetDirectory,
+    collections,
+    descriptors,
+    fingerprint: (directory) => datasetFingerprint(directory, descriptors),
+    validateStage: async (stage) => {
+      const stagedValidation = await validateGrowWfoDataset({
+        repositoryRoot,
+        datasetDirectory: stage,
+        draftsDirectory,
+        againstDrafts: true,
+        validationApi,
+      });
+      if (!stagedValidation.valid)
+        throw new Error(
+          `Transaction would produce an invalid C4 dataset: ${stagedValidation.issues.map((issue) => `${issue.code}: ${issue.message}`).join("; ")}`,
+        );
+    },
+  });
+  return {
+    ...result,
+    transactionId: input.transactionId,
+    created,
+    unchanged,
+    outputCollections: [
+      ...new Set(
+        input.operations.flatMap((operation) =>
+          operation.records.map((record) => record.collection),
+        ),
+      ),
+    ].sort(),
+  };
 }
 
 /** Deterministically mint an opaque ID without depending on paths or array order. */
 export function mintStableId(
   transactionId: string,
-  collection: CollectionRole,
+  collection: string,
   alias: string,
 ): string {
   const digest = createHash("sha256")
@@ -301,25 +313,6 @@ export async function datasetFingerprint(
   return hash.digest("hex");
 }
 
-async function readCollections(
-  directory: string,
-  descriptors: readonly {
-    readonly role: string;
-    readonly path: string;
-  }[],
-): Promise<Map<string, RecordValue[]>> {
-  const result = new Map<string, RecordValue[]>();
-  for (const descriptor of descriptors) {
-    const records: RecordValue[] = [];
-    for await (const entry of readJsonLines(
-      createReadStream(join(directory, descriptor.path)),
-    ))
-      records.push(entry.value as RecordValue);
-    result.set(descriptor.role, records);
-  }
-  return result;
-}
-
 async function readQueue(
   path: string,
 ): Promise<ReadonlyMap<string, RecordValue>> {
@@ -329,53 +322,6 @@ async function readQueue(
     if (typeof value.id === "string") records.set(value.id, value);
   }
   return records;
-}
-
-async function stageDataset(
-  source: string,
-  collections: ReadonlyMap<string, readonly RecordValue[]>,
-  descriptors: readonly {
-    readonly role: string;
-    readonly path: string;
-  }[],
-): Promise<string> {
-  const stage = await mkdtemp(join(dirname(source), ".grow-wfo-apply-"));
-  for (const entry of await readdir(source))
-    await cp(join(source, entry), join(stage, entry), {
-      recursive: true,
-      force: true,
-    });
-  for (const descriptor of descriptors) {
-    const records = [...(collections.get(descriptor.role) ?? [])].sort(
-      (left, right) => String(left.id).localeCompare(String(right.id)),
-    );
-    const bytes = records.map((record) =>
-      Buffer.concat([
-        Buffer.from(serializeCanonicalJson(record)),
-        Buffer.from("\n"),
-      ]),
-    );
-    await writeFile(join(stage, descriptor.path), Buffer.concat(bytes), {
-      flag: "w",
-    });
-  }
-  return stage;
-}
-
-async function publishDirectory(
-  stage: string,
-  destination: string,
-): Promise<void> {
-  const backup = `${destination}.backup-apply`;
-  await rm(backup, { recursive: true, force: true });
-  await rename(destination, backup);
-  try {
-    await rename(stage, destination);
-  } catch (error) {
-    await rename(backup, destination);
-    throw error;
-  }
-  await rm(backup, { recursive: true, force: true });
 }
 
 function sha256(bytes: Uint8Array): string {

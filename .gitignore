@@ -6,3 +6,8 @@ coverage/
 *.tsbuildinfo
 .cache/import-runs/
 .cache/curation-drafts/
+
+# Transient authoring transaction state; preserve backups during manual recovery.
+.curation-apply-*/
+.curation-backup-*/
+*.apply-lock/
