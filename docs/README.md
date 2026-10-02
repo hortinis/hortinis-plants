@@ -16,6 +16,7 @@ Use the charter for scope, the model and provenance pages for data rules, the co
 - [Validation and release](quality/validation-and-release.md)
 - [Implementation plan](development/implementation-plan.md)
 - [Four-source curation main track](development/four-source-curation-plan.md)
+- [Integrated read-only curation commands](development/integrated-curation.md)
 - [GROW/WFO C4 curation workflow](development/grow-wfo-curation.md)
 - [GROW/WFO C4 authoring workflow implementation plan](development/grow-wfo-authoring-workflow-plan.md)
 - [Schema compilation](development/schema-compilation.md)

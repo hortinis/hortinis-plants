@@ -4,11 +4,19 @@ import {
   mkdir,
   mkdtemp,
   readFile,
+  realpath,
   rename,
   rm,
   writeFile,
 } from "node:fs/promises";
-import { dirname, isAbsolute, join, relative, resolve } from "node:path";
+import {
+  basename,
+  dirname,
+  isAbsolute,
+  join,
+  relative,
+  resolve,
+} from "node:path";
 import { fileURLToPath } from "node:url";
 import { pipeline } from "node:stream/promises";
 import { Readable } from "node:stream";
@@ -47,11 +55,8 @@ const SCOPE_SCHEMA =
 const COMPARISON_SCHEMA =
   "urn:hortinis:plants:schema:curation:v1:assertion-comparison";
 
-const repositoryRoot = resolve(
-  fileURLToPath(new URL("../../", import.meta.url)),
-);
-
 export interface IntegratedReviewPacketOptions {
+  readonly repositoryRoot?: string;
   readonly growRunDirectory: string;
   readonly cropGraphRunDirectory: string;
   readonly wfoRunDirectory: string;
@@ -62,6 +67,8 @@ export interface IntegratedReviewPacketOptions {
     Readonly<Record<"grow" | "cropgraph" | "wfo" | "taxref", string>>
   >;
   readonly cohortPath?: string;
+  /** An existing frozen scope must agree exactly; it cannot silently narrow inputs. */
+  readonly scopePath?: string;
   readonly validationApi?: ValidationApi;
 }
 
@@ -99,6 +106,10 @@ interface ArtifactStats {
 export async function generateIntegratedReviewPackets(
   options: IntegratedReviewPacketOptions,
 ): Promise<IntegratedReviewPacketResult> {
+  const repositoryRoot = resolve(
+    options.repositoryRoot ??
+      resolve(fileURLToPath(new URL("../../", import.meta.url))),
+  );
   const validationApi = options.validationApi ?? { validate };
   const outputDirectory = resolve(options.outputDirectory);
   const datasetDirectory = resolve(
@@ -127,6 +138,43 @@ export async function generateIntegratedReviewPackets(
     options.cohortPath ??
       join(repositoryRoot, "data/sources/cropgraph/cohort.json"),
   );
+  const protectedDirectories = [
+    datasetDirectory,
+    resolve(options.growRunDirectory),
+    resolve(options.cropGraphRunDirectory),
+    resolve(options.wfoRunDirectory),
+    resolve(options.taxrefWfoRunDirectory),
+    ...Object.values(sourceManifestPaths).map(dirname),
+  ];
+  const outputPhysicalPath = await physicalPath(outputDirectory);
+  for (const directory of protectedDirectories) {
+    const within = (parent: string, child: string) => {
+      const suffix = relative(parent, child);
+      return (
+        suffix === "" ||
+        (!suffix.startsWith("../") && suffix !== ".." && !isAbsolute(suffix))
+      );
+    };
+    const inputPhysicalPath = await physicalPath(directory);
+    if (
+      within(inputPhysicalPath, outputPhysicalPath) ||
+      within(outputPhysicalPath, inputPhysicalPath)
+    )
+      throw new Error(
+        `Generated output overlaps protected input directory ${directory}`,
+      );
+  }
+  const cohortSuffix = relative(
+    outputPhysicalPath,
+    await physicalPath(cohortPath),
+  );
+  if (
+    cohortSuffix === "" ||
+    (cohortSuffix !== ".." &&
+      !cohortSuffix.startsWith("../") &&
+      !isAbsolute(cohortSuffix))
+  )
+    throw new Error("Generated output overlaps the cohort input");
 
   const datasetResult = await validateGrowWfoDataset({
     repositoryRoot,
@@ -194,7 +242,7 @@ export async function generateIntegratedReviewPackets(
     sourceManifestPaths,
     "TAXREF localization",
   );
-  await readJsonObject(cohortPath);
+  const cohort = await readJsonObject(cohortPath);
   const cohortBytes = await readFile(cohortPath);
   const cropConfiguration = asRecord(cropGraphRun.value.configuration);
   const declaredCohortSha256 = stringField(cropConfiguration, "cohortSha256");
@@ -233,6 +281,21 @@ export async function generateIntegratedReviewPackets(
     "selected-records.jsonl",
     validationApi,
   );
+  const included = arrayField(cohort, "include");
+  const selectedIds = cropRecords.map(
+    (record) => qualifiedSourceRecordKey(record)?.recordId,
+  );
+  if (
+    included.some((id) => typeof id !== "string") ||
+    new Set(included).size !== included.length ||
+    cohort.sourceReleaseId !==
+      asRecord(sourceManifests.cropgraph.release)?.identifier ||
+    JSON.stringify([...included].sort()) !==
+      JSON.stringify([...selectedIds].sort())
+  )
+    throw new Error(
+      "Selected CropGraph records differ from the explicit cohort",
+    );
   const cropIdentityCandidates = await readOutputRecords(
     cropGraphRun,
     "identity-candidates.jsonl",
@@ -340,6 +403,9 @@ export async function generateIntegratedReviewPackets(
         wfoIdentifiers,
         outcomes,
         proposals,
+        [...identities, ...cultivation].map((candidate) =>
+          requiredString(candidate, "id"),
+        ),
       );
       const rightsEvidence = rightsForSource(sourceKind, sourceManifests, [
         ...identities,
@@ -463,6 +529,8 @@ export async function generateIntegratedReviewPackets(
     datasetManifestPath,
     datasetManifestBytes,
     repositoryRoot,
+    cohortPath,
+    cohortBytes,
   );
   const scope = {
     schemaVersion: "1.0.0",
@@ -483,11 +551,6 @@ export async function generateIntegratedReviewPackets(
           ? {}
           : { recordCount: input.recordCount }),
       })),
-      {
-        role: "cropgraph-cohort",
-        sha256: sha256(cohortBytes),
-        byteSize: cohortBytes.byteLength,
-      },
     ].sort((left, right) =>
       compareStrings(String(left.role), String(right.role)),
     ),
@@ -502,6 +565,16 @@ export async function generateIntegratedReviewPackets(
     ].sort((left, right) => compareStrings(left.role, right.role)),
   };
   assertSchema(validationApi, SCOPE_SCHEMA, scope, "integrated review scope");
+  if (options.scopePath !== undefined) {
+    const expectedScope = await readJsonObject(resolve(options.scopePath));
+    if (
+      sha256(serializeCanonicalJson(expectedScope)) !==
+      sha256(serializeCanonicalJson(scope))
+    )
+      throw new Error(
+        "Explicit frozen scope differs from the generated review scope",
+      );
+  }
 
   const parent = dirname(outputDirectory);
   await mkdir(parent, { recursive: true });
@@ -595,6 +668,15 @@ export async function generateIntegratedReviewPackets(
   } catch (error) {
     await rm(staging, { recursive: true, force: true });
     throw error;
+  }
+}
+
+async function physicalPath(path: string): Promise<string> {
+  try {
+    return await realpath(path);
+  } catch (error) {
+    if (!isMissingFile(error) || dirname(path) === path) throw error;
+    return join(await physicalPath(dirname(path)), basename(path));
   }
 }
 
@@ -775,6 +857,8 @@ async function buildInputDescriptors(
   datasetManifestPath: string,
   datasetManifestBytes: Buffer,
   root: string,
+  cohortPath: string,
+  cohortBytes: Buffer,
 ): Promise<RecordValue[]> {
   const descriptors: RecordValue[] = [];
   for (const [role, run] of runs) {
@@ -782,7 +866,7 @@ async function buildInputDescriptors(
       role,
       locator: stableLocator(run.manifestPath, root),
       schemaId:
-        stringField(run.value, "job") === undefined
+        run.value.job === undefined
           ? IMPORTER_RUN_SCHEMA
           : RECONCILIATION_RUN_SCHEMA,
       sha256: sha256(run.bytes),
@@ -818,6 +902,12 @@ async function buildInputDescriptors(
       byteSize: bytes.byteLength,
     });
   }
+  descriptors.push({
+    role: "cropgraph-cohort",
+    locator: stableLocator(cohortPath, root),
+    sha256: sha256(cohortBytes),
+    byteSize: cohortBytes.byteLength,
+  });
   descriptors.push({
     role: "authoring-dataset-manifest",
     locator: stableLocator(datasetManifestPath, root),
@@ -933,13 +1023,15 @@ function authoredIndexes(
   return dataset as Readonly<Record<string, readonly RecordValue[]>>;
 }
 
-function collectAuthoredDecisions(
-  dataset: Readonly<Record<string, readonly RecordValue[]>>,
+export function collectAuthoredDecisions(
+  datasetValue: unknown,
   sourceKey: string,
   wfoIdentifiers: readonly string[],
   outcomes: readonly RecordValue[],
   proposals: readonly RecordValue[],
+  candidateIds: readonly string[],
 ): MutableRecord {
+  const dataset = authoredIndexes(datasetValue);
   const result: MutableRecord = {};
   const sourceCollections = [
     "sourceNameDecisions",
@@ -953,7 +1045,12 @@ function collectAuthoredDecisions(
   for (const collection of sourceCollections) {
     const records = sortedRecords(
       (dataset[collection] ?? []).filter(
-        (record) => serializeRecordKey(record) === sourceKey,
+        (record) =>
+          serializeRecordKey(record) === sourceKey ||
+          (collection === "sourceAssertionDecisions" &&
+            candidateIds.includes(
+              stringField(record, "sourceCandidateId") ?? "",
+            )),
       ),
     );
     if (records.length > 0) result[collection] = records;
@@ -1001,7 +1098,7 @@ function collectAuthoredDecisions(
   return result;
 }
 
-function rightsForSource(
+export function rightsForSource(
   sourceKind: SourceKind,
   manifests: Readonly<
     Record<"grow" | "cropgraph" | "wfo" | "taxref", RecordValue>
@@ -1190,7 +1287,7 @@ function assertTaxonomyCoverage(
       throw new Error(`WFO reconciliation has an unknown source record ${key}`);
 }
 
-function wfoIdentifiersFromCandidate(candidate: RecordValue): string[] {
+export function wfoIdentifiersFromCandidate(candidate: RecordValue): string[] {
   const alternatives = arrayField(candidate, "alternatives");
   const values: string[] = [];
   for (const value of alternatives) {

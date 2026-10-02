@@ -109,3 +109,21 @@ implementation sequence. The previous two-backbone and schema-version questions 
   equivalence or source independence. Different crop-form names are not paired automatically; unpaired claims
   remain available for explicit review. GROW calendar dates and CropGraph frost-relative windows remain
   non-comparable without an approved geographic and timing model.
+- **validated — T17 scope inputs:** the authored CropGraph cohort selects importer records; the frozen
+  integrated review scope describes the resulting packets and input fingerprints. An explicit frozen scope
+  must match, and cannot silently narrow a run. Structural validation remains independent of both cached
+  packets and source archives.
+- **validated — T17 baseline hashing:** integrated drafts hash authoring manifests and collections; their
+  hash is not inserted back into the manifest. Configuration, source/run and scope pins stay independent,
+  while assertion/comparison decisions retain exact draft hashes. The historical GROW/WFO draft baseline
+  remains limited to that workflow until T18 replaces transactional application.
+- **validated — T17 localization denominator:** count unique current reviewed WFO crosswalks used by reviewed
+  source-name decisions in the selected scope. Distinguish records not yet eligible, eligible identities
+  not reconciled and actual TAXREF outcomes. Do not count generated proposals as accepted localized names.
+- **planned — T18 authoring transition:** explicitly admit CropGraph/TAXREF source dependencies and select
+  the tracked dataset's editorial scope when four-source decisions are first applied. Define prospective
+  dataset validation against the frozen pre-transaction authoring snapshot without circular hashes or
+  silently refreshing approvals. T17 generation and inspection do not mutate these declarations.
+- **planned — T19 completion policy:** define aggregate C4 readiness, required localization and how reviewed
+  deferrals or accepted limitations affect delivery coverage. T17 reports reviewed dispositions separately
+  from accepted facts and leaves unresolved identity decisions pending.

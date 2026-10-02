@@ -6,6 +6,10 @@
 > [four-source curation main track](four-source-curation-plan.md). This page remains as an operational
 > reference for the validated GROW/WFO workflow and is not a separate roadmap.
 
+The source-neutral T17 commands and their audit modes are documented in the
+[integrated read-only workflow](integrated-curation.md). Use them for four-source packets. The commands
+below remain the historical regression and transactional baseline until T18.
+
 The first broad catalog curation set uses every record from the pinned GROW 2020 import and the pinned WFO
 2026-06 reconciliation. It is source-location-qualified and is not a France-specific release profile.
 

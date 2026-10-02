@@ -43,6 +43,26 @@ export type {
   ValidationDataset,
 } from "./curation/validation-dataset.js";
 export { validateGrowWfoDataset } from "./curation/grow-wfo-validation.js";
+export {
+  validateCurationDataset,
+  auditCurationDecisionLineage,
+} from "./curation/curation-validation.js";
+export type {
+  CurationOptions,
+  CurationValidationResult,
+  ValidationDimension,
+} from "./curation/curation-validation.js";
+export {
+  getCurationStatus,
+  showCurationRecord,
+} from "./curation/curation-inspection.js";
+export type {
+  CurationStatusResult,
+  CurationRecordSelector,
+  EditorialGate,
+} from "./curation/curation-inspection.js";
+export { readIntegratedReviewDraft } from "./curation/integrated-review-reader.js";
+export type { IntegratedReviewDraft } from "./curation/integrated-review-reader.js";
 export type {
   CurationValidationIssue,
   GrowWfoValidationOptions,

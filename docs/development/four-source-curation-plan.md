@@ -292,7 +292,7 @@ queue items. Different timing bases, unanchored harvest durations, ambiguous act
 different geography or growing system remain `not-comparable`; the job never chooses a claim. Claims without
 a proposal stay in their source packet.
 
-### T17 — Generalize read-only curation commands
+### T17 — Generalize read-only curation commands (`validated`)
 
 Update draft generation, lookup, show, status and validation for the generalized V1 dataset and packet model.
 Support explicit dataset and scope inputs, human-readable output and JSON output. Distinguish structural
@@ -302,6 +302,13 @@ Dependencies: T7 and T15–T16.
 
 Acceptance: clean-checkout structural validation needs no ignored archives; deep validation detects stale runs,
 scopes, queues and packets; missing TAXREF localization does not appear as failed WFO identity.
+
+Implemented by `curate:drafts`, `curate:lookup`, `curate:show`, `curate:status` and `curate:validate`.
+The shared reader checks frozen artifact integrity and qualified membership; explicit deep validation audits
+declared runs, resources, scopes, packet snapshots and current decision lineage. Structural validity,
+source-audit validity, localization coverage and editorial accounting have separate results. Missing local
+coverage has null denominators, and missing TAXREF localization never changes reviewed WFO identity.
+The [integrated workflow](integrated-curation.md) defines explicit inputs, baseline semantics and the T18 boundary.
 
 ### T18 — Generalize transactional decision application
 
