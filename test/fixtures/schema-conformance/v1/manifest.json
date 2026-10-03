@@ -1256,6 +1256,23 @@
           }
         ]
       }
+    },
+    {
+      "id": "curation-delivery-targets-valid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:delivery-targets",
+      "fixture": "curation-delivery-targets-valid.json",
+      "expected": { "valid": true }
+    },
+    {
+      "id": "curation-delivery-targets-invalid",
+      "schemaId": "urn:hortinis:plants:schema:curation:v1:delivery-targets",
+      "fixture": "curation-delivery-targets-invalid.json",
+      "expected": {
+        "valid": false,
+        "errors": [
+          { "instancePath": "/targets/0", "keyword": "dependentRequired" }
+        ]
+      }
     }
   ]
 }

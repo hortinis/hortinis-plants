@@ -1,6 +1,6 @@
 # Four-source curation main track
 
-- Status: planned
+- Status: in progress
 - Planning date: 2026-09-17
 - Scope: reproducible staging, WFO-first identity review, French localization and source-backed cultivation curation
 - Main track: this document replaces the former broad four-source implementation sequence
@@ -328,7 +328,7 @@ review dispositions, candidate evidence and replacement history. Batch members m
 publication failure restores original bytes. The [integrated workflow](integrated-curation.md) documents the
 contract, consumed-draft semantics, replay rejection and process-termination recovery boundary.
 
-### T19 — Add coverage, integration verification and handoff
+### T19 — Add coverage, integration verification and handoff (`validated`)
 
 Report separate denominators for all 140 GROW records, the selected CropGraph cohort, MVP concepts and cultivar
 exemplars. Account for WFO identity, subject scope, TAXREF localization, actions, contexts, rights, conflicts
@@ -342,6 +342,15 @@ Dependencies: T18.
 
 Acceptance: every selected source record and candidate is accounted for; repeated runs are byte-identical;
 failed runs preserve the previous successful output; C5 receives only explicit reviewed authoring records.
+
+Implementation adds separate cohort/candidate coverage and explicit delivery-target bindings to
+`curate:status`, with `c4-readiness-v1` recorded in the open questions register. `verify:curation`
+rehearses repeated pinned local stages, failed-input preservation, memory bounds and isolated
+clean-checkout/deep-audit behavior. The [runbook](curation-runbook.md) defines acquisition, review,
+recovery and the C5 boundary. Actual four-source editorial admission and target binding remain pending;
+verification tooling does not accept source candidates.
+The [verification record](../quality/t19-verification.md) documents passing fixture checks,
+deterministic pinned reruns, failure preservation, memory bounds and clean/deep rehearsals.
 
 ## Explicit exclusions from this track
 

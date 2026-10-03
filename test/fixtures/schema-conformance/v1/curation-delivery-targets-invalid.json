@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "1.0.0",
+  "policy": "c4-readiness-v1",
+  "targets": [
+    {
+      "id": "delivery_target_fixture",
+      "kind": "plant-concept",
+      "label": "Tomato",
+      "subjectId": "plant_tomato"
+    }
+  ]
+}

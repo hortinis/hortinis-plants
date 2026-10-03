@@ -90,7 +90,7 @@ implementation sequence. The previous two-backbone and schema-version questions 
   preserve source-relative rules and require explicit review for applicability and base/modifier selection.
 - **validated — Comparison contract:** preserve agreement, conflict and non-comparability; require an explicit
   preferred assertion, retain-both decision or deferral; do not average values or apply source priority
-  implicitly. Packet matching and completion coverage remain planned for T16 and T19.
+  implicitly. T16 packet proposals and T19 completion accounting preserve this boundary.
 
 - **validated — CropGraph candidate identity:** use qualified semantic content keys, collapse exact nested
   duplicates into one candidate with every occurrence locator, and keep differing notes as distinct claims.
@@ -133,6 +133,16 @@ implementation sequence. The previous two-backbone and schema-version questions 
 - **planned — Tracked four-source editorial admission:** select the actual dataset scope and supply the
   reviewed first manifest transition when applying four-source curation. T18 tooling and fixture validation
   do not admit real source dependencies, merge subjects or accept source candidates by themselves.
-- **planned — T19 completion policy:** define aggregate C4 readiness, required localization and how reviewed
-  deferrals or accepted limitations affect delivery coverage. T17 reports reviewed dispositions separately
-  from accepted facts and leaves unresolved identity decisions pending.
+- **validated — T19 completion policy:** `c4-readiness-v1` requires complete pinned-source and candidate
+  accounting, explicitly reviewed delivery-target bindings, commercial assertion rights, audited contexts
+  and no open issues. Deferrals and unresolved identities require reviewed accepted limitations. Generic
+  MVP cold-sensitivity and planting coverage requires facts or explicit limitations. French/English names
+  remain independent coverage following ADR-0005 fallback. Unchanged historical approvals qualify for
+  accounting only after deep audit and exact source, rights, input and selected-evidence checks; their hashes
+  are never refreshed. See [the runbook](development/curation-runbook.md).
+- **planned — T19 delivery-target admission:** bind the 33 concepts and two cultivar exemplars to exact
+  authored subject IDs with accepted content reviews in `data/curation/delivery-targets.json`. Labels are
+  not automatic source-name selectors. Tooling validation does not perform these editorial decisions.
+- **planned — Larger-cohort memory policy:** T19 verifies the pinned workload with a 1,024 MiB Node heap
+  and 1,536 MiB Linux peak RSS ceiling. Streaming archives does not establish constant memory for packet
+  aggregation at arbitrary cohort sizes; increasing those limits requires a recorded policy change.

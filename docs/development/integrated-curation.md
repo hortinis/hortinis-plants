@@ -1,7 +1,7 @@
 # Integrated curation
 
 - Status: validated
-- Scope: T17 inspection and audit, T18 transactional application, and T15/T16 frozen packets
+- Scope: T17 inspection and audit, T18 transactional application, T19 coverage, and T15/T16 frozen packets
 
 The authoring dataset is selected explicitly with `--dataset`; the default remains
 `data/curation/grow-wfo-initial`. Its name does not determine its collection layout. Collections,
@@ -95,7 +95,7 @@ remain inspectable but are not counted. Assertions and comparisons also require 
 fingerprint. Rejection and deferral are reported separately. A `validated` accounting gate means every
 item has a reviewed disposition; it does not mean every item became an accepted catalog fact. Unresolved
 identity decisions remain pending. Aggregate C4/publication readiness and accepted-limitation policy
-remain T19 work in the open questions register.
+are defined by `c4-readiness-v1` in the [T19 runbook](curation-runbook.md).
 
 Localization is reported independently. Its denominator is the unique current reviewed WFO crosswalks
 used by reviewed source-name decisions in scope. Source records without that reviewed identity are
@@ -206,7 +206,9 @@ reconciliation jobs and generate a new draft for further work. Historical decisi
 hashes and immutable snapshots. A regenerated packet may carry that exact history, allowing deep audit to
 recognize it without treating it as a new approval. Assertion/comparison completion accounting still requires
 the selected draft hash; new review decisions must explicitly supersede history when reviewing a new draft.
-Aggregate completion policy remains T19 work.
+T19 coverage can account for unchanged historical evidence after a successful deep audit without
+repinning approval hashes. The T17 gates above retain their original exact-draft semantics. See the
+[completion policy and handoff runbook](curation-runbook.md).
 
 ## Failure and recovery
 

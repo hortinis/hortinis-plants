@@ -1,0 +1,181 @@
+{
+  "schemaVersion": "1.0.0",
+  "policy": "c4-readiness-v1",
+  "targets": [
+    {
+      "id": "delivery_target_9e8b5158eadd42a2baf3701a1da5c839",
+      "kind": "plant-concept",
+      "label": "tomato"
+    },
+    {
+      "id": "delivery_target_069e4508f832469193a49b2f5dd5a120",
+      "kind": "plant-concept",
+      "label": "sweet pepper"
+    },
+    {
+      "id": "delivery_target_a92d938a20544b95a82b741751ec6d9b",
+      "kind": "plant-concept",
+      "label": "aubergine"
+    },
+    {
+      "id": "delivery_target_a8a727ad8b1740bc8d83f65c98faedc9",
+      "kind": "plant-concept",
+      "label": "cucumber"
+    },
+    {
+      "id": "delivery_target_79779a7bae4f4a40a4bc215d86347ac7",
+      "kind": "plant-concept",
+      "label": "courgette"
+    },
+    {
+      "id": "delivery_target_3995e3c47566491ab8a3a9e3c6d8b41e",
+      "kind": "plant-concept",
+      "label": "winter squash or pumpkin"
+    },
+    {
+      "id": "delivery_target_26f91ebe8b844226b979ee9f0755c69a",
+      "kind": "plant-concept",
+      "label": "melon"
+    },
+    {
+      "id": "delivery_target_1deba00cc091422490987d2e933f2fde",
+      "kind": "plant-concept",
+      "label": "potato"
+    },
+    {
+      "id": "delivery_target_68e49a335b1b495cb9e148f7bb06054b",
+      "kind": "plant-concept",
+      "label": "carrot"
+    },
+    {
+      "id": "delivery_target_e6eb1b41c7c249d88bae7e77834dcfe3",
+      "kind": "plant-concept",
+      "label": "radish"
+    },
+    {
+      "id": "delivery_target_7b80d3b34c7647e383ca16e69b5de179",
+      "kind": "plant-concept",
+      "label": "beetroot"
+    },
+    {
+      "id": "delivery_target_e2eecb70f56b49a697230e0b5ad7b86d",
+      "kind": "plant-concept",
+      "label": "turnip"
+    },
+    {
+      "id": "delivery_target_58cc85a288364cedbd676862b2d4c359",
+      "kind": "plant-concept",
+      "label": "parsnip"
+    },
+    {
+      "id": "delivery_target_60dad3556db64d79a44e2cce4fcbac8d",
+      "kind": "plant-concept",
+      "label": "onion"
+    },
+    {
+      "id": "delivery_target_3706e62e512a429bbd72924a54140e46",
+      "kind": "plant-concept",
+      "label": "garlic"
+    },
+    {
+      "id": "delivery_target_fbda95dbb45f450f93be7e7fe572bd8c",
+      "kind": "plant-concept",
+      "label": "shallot"
+    },
+    {
+      "id": "delivery_target_db06af95bff1473cb5e16b94a5aba3e3",
+      "kind": "plant-concept",
+      "label": "leek"
+    },
+    {
+      "id": "delivery_target_e085a1af90e24029b415ddf093c9ce66",
+      "kind": "plant-concept",
+      "label": "lettuce"
+    },
+    {
+      "id": "delivery_target_fd91ab3b7ebe4f2fbd3ce7c14c4cf7c9",
+      "kind": "plant-concept",
+      "label": "spinach"
+    },
+    {
+      "id": "delivery_target_a6d6df5f3be54a5dbf645d58bf00e189",
+      "kind": "plant-concept",
+      "label": "chard"
+    },
+    {
+      "id": "delivery_target_accee19a495a40d885a44328749c0d94",
+      "kind": "plant-concept",
+      "label": "pea"
+    },
+    {
+      "id": "delivery_target_1963451eca284a4f8ae808a88a951b48",
+      "kind": "plant-concept",
+      "label": "French bean"
+    },
+    {
+      "id": "delivery_target_7b0b532705194ddea67fa6da7aaba6df",
+      "kind": "plant-concept",
+      "label": "broad bean"
+    },
+    {
+      "id": "delivery_target_d48b498613cc42119e9245dddaad3e4d",
+      "kind": "plant-concept",
+      "label": "cabbage"
+    },
+    {
+      "id": "delivery_target_1f6f176a2d9c4fd7a72332d2cb9f0f89",
+      "kind": "plant-concept",
+      "label": "broccoli"
+    },
+    {
+      "id": "delivery_target_db42cc2da0ae45efb8f0f19557b31595",
+      "kind": "plant-concept",
+      "label": "cauliflower"
+    },
+    {
+      "id": "delivery_target_b9b2e65be99d41489f0eb92285e9d2ac",
+      "kind": "plant-concept",
+      "label": "kale"
+    },
+    {
+      "id": "delivery_target_ea99bdcd562c4534ba309fe097141cf1",
+      "kind": "plant-concept",
+      "label": "basil"
+    },
+    {
+      "id": "delivery_target_5e1910b016cd4e9f8c2b3e4a7bed4439",
+      "kind": "plant-concept",
+      "label": "parsley"
+    },
+    {
+      "id": "delivery_target_4430371d8bf84a148456a9127492b360",
+      "kind": "plant-concept",
+      "label": "coriander"
+    },
+    {
+      "id": "delivery_target_59f1cbde93424783be314ffc51dc9dc8",
+      "kind": "plant-concept",
+      "label": "chives"
+    },
+    {
+      "id": "delivery_target_654a55aa4b63469f8e3b120b7e5aa587",
+      "kind": "plant-concept",
+      "label": "thyme"
+    },
+    {
+      "id": "delivery_target_fedd2486d7bb4fa19b68efa715923e8b",
+      "kind": "plant-concept",
+      "label": "rosemary"
+    },
+    {
+      "id": "delivery_target_e1da2aeca16d4e9ab155d1345063a987",
+      "kind": "cultivar",
+      "label": "Marmande"
+    },
+    {
+      "id": "delivery_target_f86839a34bb849c4b76dd498ed5ba307",
+      "kind": "cultivar",
+      "label": "Montfavet H 63-5 F1"
+    }
+  ]
+}

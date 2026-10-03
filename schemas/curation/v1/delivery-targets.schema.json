@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hortinis:plants:schema:curation:v1:delivery-targets",
+  "title": "Explicit C4 delivery targets and reviewed subject bindings",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "policy", "targets"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "policy": { "const": "c4-readiness-v1" },
+    "targets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "kind", "label"],
+        "properties": {
+          "id": {
+            "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+          },
+          "kind": { "enum": ["plant-concept", "cultivar"] },
+          "label": { "type": "string", "minLength": 1 },
+          "subjectId": {
+            "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+          },
+          "reviewId": {
+            "$ref": "urn:hortinis:plants:schema:v1:common#/$defs/stableIdentifier"
+          }
+        },
+        "dependentRequired": {
+          "subjectId": ["reviewId"],
+          "reviewId": ["subjectId"]
+        }
+      }
+    }
+  }
+}

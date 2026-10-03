@@ -3,6 +3,7 @@ dist/
 .cache/source-inputs/
 artifacts/releases/
 coverage/
+.cache/verification/
 *.tsbuildinfo
 .cache/import-runs/
 .cache/curation-drafts/

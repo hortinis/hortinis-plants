@@ -19,6 +19,7 @@
     "typecheck": "tsc --project tsconfig.json",
     "test": "vitest run",
     "coverage": "vitest run --coverage",
+    "verify:curation": "pnpm build && node dist/verification/curation-rehearsal.js",
     "import:grow": "pnpm build && node dist/adapters/grow/cli.js",
     "import:cropgraph": "pnpm build && node dist/adapters/cropgraph/cli.js",
     "import:taxref": "pnpm build && node dist/adapters/taxref/cli.js",

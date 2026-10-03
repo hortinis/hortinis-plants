@@ -29,6 +29,10 @@ import {
   type IntegratedReviewDraft,
 } from "./integrated-review-reader.js";
 import type { ValidationDataset } from "./validation-dataset.js";
+import {
+  buildCurationCoverage,
+  type CoverageOptions,
+} from "./curation-coverage.js";
 
 export interface EditorialGate {
   readonly status: ValidationDimension["status"];
@@ -42,6 +46,7 @@ export interface EditorialGate {
 }
 
 export interface CurationStatusResult {
+  readonly coverage: Awaited<ReturnType<typeof buildCurationCoverage>>;
   readonly valid: boolean;
   readonly structural: ValidationDimension;
   readonly sourceAudit: ValidationDimension;
@@ -117,7 +122,7 @@ async function inspect(options: CurationOptions): Promise<{
 }
 
 export async function getCurationStatus(
-  options: CurationOptions = {},
+  options: CoverageOptions = {},
 ): Promise<CurationStatusResult> {
   const { validation, draft, integrity } = await inspect(options);
   const dataset = validation.loaded?.dataset;
@@ -269,6 +274,11 @@ export async function getCurationStatus(
     };
   }
   return {
+    coverage: await buildCurationCoverage(options, dataset, draft, {
+      structural: validation.structural,
+      sourceAudit: validation.sourceAudit,
+      draftIntegrity: integrity,
+    }),
     valid,
     baseDatasetSha256:
       validation.structural.valid && validation.loaded !== undefined

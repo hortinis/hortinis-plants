@@ -31,7 +31,11 @@ import {
 } from "../../src/curation/curation-artifacts.js";
 import { generateIntegratedReviewPackets } from "../../src/curation/integrated-review-packets.js";
 import { validateCurationDataset } from "../../src/curation/curation-validation.js";
-import { showCurationRecord } from "../../src/curation/curation-inspection.js";
+import {
+  getCurationStatus,
+  showCurationRecord,
+} from "../../src/curation/curation-inspection.js";
+import { buildCurationCoverage } from "../../src/curation/curation-coverage.js";
 
 const roots: string[] = [];
 afterEach(async () => {
@@ -230,6 +234,91 @@ async function bytes(directory: string): Promise<Record<string, string>> {
 }
 
 describe("integrated transactional decision application", () => {
+  it("accounts for an applied disposition after regenerated deep audit without repinning its approval", async () => {
+    const value = await fixture();
+    const candidate = records(value.packet.cultivationCandidates)[0]!;
+    const decision = {
+      id: "coverage-rejection",
+      sourceCandidateId: candidate.id,
+      draftManifestSha256: value.draft.manifestSha256,
+      decision: "reject",
+      reason: "Explicit reviewed exclusion",
+      reviewId: value.review.id,
+    };
+    await applyCurationDecision(
+      {
+        ...value.input,
+        operations: [
+          {
+            ...value.operation,
+            kind: "assertion",
+            disposition: "reject",
+            source: source(value.packet, { candidateIds: [candidate.id] }),
+            records: [
+              { collection: "reviews", value: value.review },
+              { collection: "source-assertion-decisions", value: decision },
+            ],
+          },
+        ],
+      },
+      value.options,
+    );
+    expect(
+      (await getCurationStatus({ ...value.options, deep: true })).coverage
+        .available,
+    ).toBe(false);
+    await generateIntegratedReviewPackets(value.generatorOptions);
+    const status = await getCurationStatus({ ...value.options, deep: true });
+    expect(status.sourceAudit.issues).toEqual([]);
+    expect(
+      status.coverage.cohorts.grow.candidates.cultivationCandidates,
+    ).toMatchObject({ total: 1, rejected: 1, pending: 0 });
+    const noAudit = await getCurationStatus(value.options);
+    expect(
+      noAudit.coverage.cohorts.grow.candidates.cultivationCandidates!.pending,
+    ).toBe(1);
+    const validation = await validateCurationDataset({
+      ...value.options,
+      deep: true,
+    });
+    const draft = validation.draft!;
+    const changed = {
+      ...draft,
+      packets: draft.packets.map((packet) =>
+        packet.id !== value.packet.id
+          ? packet
+          : {
+              ...packet,
+              cultivationCandidates: records(packet.cultivationCandidates).map(
+                (row) => ({ ...row, rawValue: "Changed claim" }),
+              ),
+            },
+      ),
+    };
+    const report = await buildCurationCoverage(
+      value.options,
+      validation.loaded!.dataset,
+      changed,
+      {
+        structural: validation.structural,
+        sourceAudit: validation.sourceAudit,
+        draftIntegrity: status.draftIntegrity,
+      },
+    );
+    expect(report.cohorts.grow.candidates.cultivationCandidates).toMatchObject({
+      rejected: 0,
+      pending: 1,
+    });
+    const saved = JSON.parse(
+      (
+        await readFile(
+          join(value.dataset, "source-assertion-decisions.jsonl"),
+          "utf8",
+        )
+      ).trim(),
+    ) as Record<string, unknown>;
+    expect(saved.draftManifestSha256).toBe(value.draft.manifestSha256);
+  });
   it("publishes an explicit manifest transition and preserves untouched bytes and frozen drafts", async () => {
     const value = await fixture();
     const original = await bytes(value.dataset);

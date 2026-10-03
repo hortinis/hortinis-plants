@@ -37,7 +37,7 @@ const allowed: Readonly<Record<string, readonly string[]>> = {
     "source-release",
     "source-manifest-id",
   ],
-  status: [...common, ...audit],
+  status: [...common, ...audit, "targets"],
   validate: [...common, ...audit],
 };
 
@@ -159,7 +159,13 @@ async function run(command: string, values: Map<string, string[]>) {
       sourceAudit: result.sourceAudit,
     };
   }
-  if (command === "status") return getCurationStatus(options);
+  if (command === "status")
+    return getCurationStatus({
+      ...options,
+      ...(one("targets") === undefined
+        ? {}
+        : { targetsPath: resolve(one("targets")!) }),
+    });
   if (command === "show") {
     if ((one("packet") === undefined) === (one("source-record") === undefined))
       throw new Error("Choose exactly one of --packet or --source-record");
@@ -295,6 +301,19 @@ function print(command: string, result: Awaited<ReturnType<typeof run>>): void {
       console.log(
         `TAXREF outcomes: ${JSON.stringify(value.localization.outcomes)}`,
       );
+      for (const [kind, cohort] of Object.entries(value.coverage.cohorts)) {
+        console.log(`${kind} records: ${cohort.records ?? "unavailable"}`);
+        for (const [family, count] of Object.entries(cohort.candidates))
+          console.log(
+            `${kind}/${family}: ${count.total ?? "unavailable"} total; ${count.accepted} accepted; ${count.rejected} rejected; ${count.deferred} deferred; ${count.pending ?? "unavailable"} pending`,
+          );
+      }
+      console.log(
+        `Delivery targets: ${value.coverage.delivery.concepts} MVP concepts; ${value.coverage.delivery.cultivarExemplars} cultivar exemplars`,
+      );
+      console.log(`C4 readiness: ${value.coverage.readiness.status}`);
+      for (const reason of value.coverage.readiness.reasons)
+        console.log(`  ${reason}`);
     } else if (command === "show") {
       const view = result as Awaited<ReturnType<typeof showCurationRecord>>;
       console.log(
